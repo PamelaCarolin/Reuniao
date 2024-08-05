@@ -1,5 +1,6 @@
 const express = require('express');
 const { Pool } = require('pg');
+const path = require('path');
 const app = express();
 
 app.use(express.json());
@@ -46,7 +47,7 @@ app.post('/agendar', (req, res) => {
 });
 
 // Rota para servir arquivos estáticos
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
