@@ -66,8 +66,8 @@ function loadMeetings() {
         const meetingList = document.getElementById('meeting-list');
         meetingList.innerHTML = '';
         meetings.forEach(meeting => {
+            const formattedDate = new Date(meeting.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
             const li = document.createElement('li');
-            const formattedDate = new Date(meeting.date).toLocaleDateString('pt-BR');
             li.textContent = `${formattedDate} - ${meeting.time} - ${meeting.speaker} - ${meeting.room}`;
             li.setAttribute('data-id', meeting.id);
             li.addEventListener('click', function() {
@@ -126,8 +126,8 @@ function consultMeetings() {
         const results = document.getElementById('consult-results');
         results.innerHTML = '';
         meetings.forEach(meeting => {
+            const formattedDate = new Date(meeting.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
             const li = document.createElement('li');
-            const formattedDate = new Date(meeting.date).toLocaleDateString('pt-BR');
             li.textContent = `${formattedDate} - ${meeting.time} - ${meeting.duration} minutos - ${meeting.sector} - ${meeting.room} - ${meeting.client}`;
             results.appendChild(li);
         });
@@ -156,7 +156,7 @@ function downloadPDF() {
         const tableRows = [];
 
         meetings.forEach(meeting => {
-            const formattedDate = new Date(meeting.date).toLocaleDateString('pt-BR');
+            const formattedDate = new Date(meeting.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
             const meetingData = [
                 formattedDate,
                 meeting.time,
@@ -193,10 +193,4 @@ var btnYes = dialog.querySelector('.yes');
 var btnNo = dialog.querySelector('.no');
 
 btnYes.addEventListener('click', function(event) {
-    var logoutHref = document.getElementById('logout-button').getAttribute('href');
-    window.location.href = logoutHref;
-});
-
-btnNo.addEventListener('click', function(event) {
-    dialog.classList.remove('open');
-});
+    var logoutH
