@@ -193,4 +193,10 @@ var btnYes = dialog.querySelector('.yes');
 var btnNo = dialog.querySelector('.no');
 
 btnYes.addEventListener('click', function(event) {
-    var logoutH
+    var logoutHref = document.getElementById('logout-button').getAttribute('href');
+    window.location.href = logoutHref;
+});
+
+btnNo.addEventListener('click', function(event) {
+    dialog.classList.remove('open');
+});
