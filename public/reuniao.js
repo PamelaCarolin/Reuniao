@@ -7,14 +7,18 @@ document.getElementById('meeting-form').addEventListener('submit', function(even
     const sector = document.getElementById('setor').value;
     const speaker = document.getElementById('nome-orador').value;
     const room = document.getElementById('sala').value;
-    const client = document.getElementById('cliente').value;
+    const tipoReuniao = document.getElementById('tipo-reuniao').value;
+    const cliente = document.getElementById('cliente').value;
+    const funcionario = document.getElementById('funcionario').value;
+
+    const clientOrEmployee = tipoReuniao === 'externa' ? cliente : funcionario;
 
     if (isPastTime(date, time)) {
         alert("Não é possível agendar uma reunião para um horário que já passou.");
         return;
     }
 
-    if (!validateInput(date, time, duration, sector, speaker, room, client)) {
+    if (!validateInput(date, time, duration, sector, speaker, room, clientOrEmployee)) {
         alert("Por favor, preencha todos os campos corretamente.");
         return;
     }
@@ -24,7 +28,7 @@ document.getElementById('meeting-form').addEventListener('submit', function(even
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ date, time, duration, sector, speaker, room, client })
+        body: JSON.stringify({ date, time, duration, sector, speaker, room, client: clientOrEmployee })
     })
     .then(response => response.json())
     .then(result => {
@@ -42,8 +46,25 @@ function isPastTime(date, time) {
     return meetingTime < now;
 }
 
-function validateInput(date, time, duration, sector, speaker, room, client) {
-    return date && time && duration && sector && speaker && room && client;
+function validateInput(date, time, duration, sector, speaker, room, clientOrEmployee) {
+    return date && time && duration && sector && speaker && room && clientOrEmployee;
+}
+
+function toggleReuniaoTipo() {
+    const tipoReuniao = document.getElementById('tipo-reuniao').value;
+    const clienteGroup = document.getElementById('cliente-group');
+    const funcionarioGroup = document.getElementById('funcionario-group');
+
+    if (tipoReuniao === 'externa') {
+        clienteGroup.style.display = 'block';
+        funcionarioGroup.style.display = 'none';
+    } else if (tipoReuniao === 'interna') {
+        clienteGroup.style.display = 'none';
+        funcionarioGroup.style.display = 'block';
+    } else {
+        clienteGroup.style.display = 'none';
+        funcionarioGroup.style.display = 'none';
+    }
 }
 
 function toggleCancelForm() {
