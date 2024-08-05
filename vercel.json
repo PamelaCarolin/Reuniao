@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "api/**/*.js", "use": "@vercel/node" },
+    { "src": "public/**/*", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/agendar", "dest": "/api/agendar.js" },
+    { "src": "/cancelar", "dest": "/api/cancelar.js" },
+    { "src": "/consultar", "dest": "/api/consultar.js" },
+    { "src": "/api/products", "dest": "/api/products.js" },
+    { "src": "/(.*)", "dest": "/public/$1" }
+  ]
+}
