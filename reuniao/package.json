@@ -1,9 +1,9 @@
 {
-  "name": "meu-projeto",
+  "name": "reuniao",
   "version": "1.0.0",
-  "main": "src/app.js",
   "scripts": {
-    "start": "node src/app.js"
+    "start": "node app.js",
+    "build": "echo 'Netlify build step'"
   },
   "dependencies": {
     "express": "^4.17.1",
