@@ -1,37 +1,35 @@
-
-const sqlite3 = require('sqlite3').verbose();
 const db = require('./database');
 
-module.exports = (req, res) => {
+module.exports = async (req, res) => {
     const { date, client, room, sector } = req.query;
-    let query = "SELECT id, date, time, duration, sector, speaker, room, client FROM meetings WHERE 1=1";
-    let queryParams = [];
+    let query = `SELECT id, date, time, duration, sector, speaker, room, client FROM meetings WHERE 1=1`;
+    const queryParams = [];
 
     if (date) {
-        query += " AND date = ?";
+        query += ` AND date = $${queryParams.length + 1}`;
         queryParams.push(date);
     }
 
     if (client) {
-        query += " AND client LIKE ?";
+        query += ` AND client LIKE $${queryParams.length + 1}`;
         queryParams.push(`%${client}%`);
     }
 
     if (room) {
-        query += " AND room = ?";
+        query += ` AND room = $${queryParams.length + 1}`;
         queryParams.push(room);
     }
 
     if (sector) {
-        query += " AND sector LIKE ?";
+        query += ` AND sector LIKE $${queryParams.length + 1}`;
         queryParams.push(`%${sector}%`);
     }
 
-    db.all(query, queryParams, (err, rows) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
-        }
+    try {
+        const { rows } = await db.query(query, queryParams);
         res.json(rows);
-    });
+    } catch (err) {
+        console.error('Erro ao consultar reuniões:', err);
+        res.status(500).json({ error: 'Erro ao consultar reuniões' });
+    }
 };
