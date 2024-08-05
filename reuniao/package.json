@@ -1,15 +1,12 @@
 {
   "name": "reuniao",
   "version": "1.0.0",
+  "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "build": "echo 'Netlify build step'"
+    "start": "node app.js"
   },
   "dependencies": {
     "express": "^4.17.1",
-    "sqlite3": "^5.0.0",
-    "morgan": "^1.10.0",
-    "socket.io": "^4.0.0",
-    "bcryptjs": "^2.4.3"
+    "sqlite3": "^5.0.0"
   }
 }
