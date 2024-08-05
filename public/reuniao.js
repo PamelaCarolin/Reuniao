@@ -67,7 +67,8 @@ function loadMeetings() {
         meetingList.innerHTML = '';
         meetings.forEach(meeting => {
             const li = document.createElement('li');
-            li.textContent = `${meeting.date} - ${meeting.time} - ${meeting.speaker} - ${meeting.room}`;
+            const formattedDate = new Date(meeting.date).toLocaleDateString('pt-BR');
+            li.textContent = `${formattedDate} - ${meeting.time} - ${meeting.speaker} - ${meeting.room}`;
             li.setAttribute('data-id', meeting.id);
             li.addEventListener('click', function() {
                 if (confirm('Você tem certeza que deseja cancelar esta reunião?')) {
@@ -126,7 +127,8 @@ function consultMeetings() {
         results.innerHTML = '';
         meetings.forEach(meeting => {
             const li = document.createElement('li');
-            li.textContent = `${meeting.date} - ${meeting.time} - ${meeting.duration} minutos - ${meeting.sector} - ${meeting.room} - ${meeting.client}`;
+            const formattedDate = new Date(meeting.date).toLocaleDateString('pt-BR');
+            li.textContent = `${formattedDate} - ${meeting.time} - ${meeting.duration} minutos - ${meeting.sector} - ${meeting.room} - ${meeting.client}`;
             results.appendChild(li);
         });
     })
@@ -154,8 +156,9 @@ function downloadPDF() {
         const tableRows = [];
 
         meetings.forEach(meeting => {
+            const formattedDate = new Date(meeting.date).toLocaleDateString('pt-BR');
             const meetingData = [
-                meeting.date,
+                formattedDate,
                 meeting.time,
                 `${meeting.duration} minutos`,
                 meeting.sector,
