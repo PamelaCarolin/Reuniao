@@ -34,8 +34,7 @@
                     <select id="setor" required>
                         <option value="TI">TI</option>
                         <option value="Legalização">Legalização</option>
-                        <option value="Diretoria">Diretoria</option>
-                        <option value="Gerencia">Gerencia</option>
+                        <option value="Diretores">Diretores</option>
                         <option value="Financeiro">Financeiro</option>
                         <option value="Fiscal">Fiscal</option>
                         <option value="RH">RH</option>
@@ -52,8 +51,20 @@
                     </select>
                 </div>
                 <div class="input-group">
+                    <label for="tipo-reuniao">Tipo de Reunião</label>
+                    <select id="tipo-reuniao" required onchange="toggleReuniaoTipo()">
+                        <option value="">Selecione...</option>
+                        <option value="externa">Externa</option>
+                        <option value="interna">Interna</option>
+                    </select>
+                </div>
+                <div class="input-group" id="cliente-group" style="display:none;">
                     <label for="cliente">Cliente</label>
-                    <input type="text" id="cliente" required>
+                    <input type="text" id="cliente">
+                </div>
+                <div class="input-group" id="funcionario-group" style="display:none;">
+                    <label for="funcionario">Funcionário</label>
+                    <input type="text" id="funcionario">
                 </div>
                 <button type="submit" class="button">Agendar Reunião</button>
             </form>
