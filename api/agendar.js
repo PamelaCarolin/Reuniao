@@ -3,7 +3,11 @@ const db = require('./database');
 module.exports = async (req, res) => {
     const { date, time, duration, sector, speaker, room, client } = req.body;
 
+    const clientDB = await db.connect();
+
     try {
+        await clientDB.query('BEGIN');
+
         const conflictQuery = `
             SELECT * FROM meetings 
             WHERE date = $1 AND room = $2 AND 
@@ -13,9 +17,10 @@ module.exports = async (req, res) => {
             )
         `;
         const conflictValues = [date, room, time, duration];
-        const { rows } = await db.query(conflictQuery, conflictValues);
+        const { rows } = await clientDB.query(conflictQuery, conflictValues);
 
         if (rows.length > 0) {
+            await clientDB.query('ROLLBACK');
             return res.status(400).json({ success: false, message: 'Horário de reunião conflita com uma existente.' });
         }
 
@@ -24,11 +29,16 @@ module.exports = async (req, res) => {
             VALUES ($1, $2, $3, $4, $5, $6, $7)
         `;
         const insertValues = [date, time, duration, sector, speaker, room, client];
-        await db.query(insertQuery, insertValues);
+        await clientDB.query(insertQuery, insertValues);
+
+        await clientDB.query('COMMIT');
 
         res.json({ success: true, message: 'Reunião agendada com sucesso!' });
     } catch (err) {
+        await clientDB.query('ROLLBACK');
         console.error('Erro ao agendar reunião:', err);
         res.status(500).json({ error: 'Erro ao agendar reunião' });
+    } finally {
+        clientDB.release();
     }
 };
