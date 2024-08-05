@@ -1,8 +1,8 @@
 [build]
   publish = "public"
-  command = "echo 'Netlify build step'"
+  command = "npm run build"
 
 [[redirects]]
   from = "/*"
-  to = "/reuniao.html"
+  to = "/index.html"
   status = 200
