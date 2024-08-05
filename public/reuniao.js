@@ -89,7 +89,7 @@ function loadMeetings() {
         meetings.forEach(meeting => {
             const formattedDate = new Date(meeting.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
             const li = document.createElement('li');
-            li.textContent = `${formattedDate} - ${meeting.time} - ${meeting.speaker} - ${meeting.room}`;
+            li.textContent = `${formattedDate} - ${meeting.time} - ${meeting.speaker} - ${meeting.room} - ${meeting.client}`;
             li.setAttribute('data-id', meeting.id);
             li.addEventListener('click', function() {
                 if (confirm('Você tem certeza que deseja cancelar esta reunião?')) {
@@ -149,7 +149,7 @@ function consultMeetings() {
         meetings.forEach(meeting => {
             const formattedDate = new Date(meeting.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
             const li = document.createElement('li');
-            li.textContent = `${formattedDate} - ${meeting.time} - ${meeting.duration} minutos - ${meeting.sector} - ${meeting.room} - ${meeting.client}`;
+            li.textContent = `${formattedDate} - ${meeting.time} - ${meeting.speaker} - ${meeting.room} - ${meeting.client}`;
             results.appendChild(li);
         });
     })
@@ -173,7 +173,7 @@ function downloadPDF() {
     fetch(`/consultar?${params.toString()}`)
     .then(response => response.json())
     .then(meetings => {
-        const tableColumn = ["DATA", "HORÁRIO", "TEMPO DE DURAÇÃO", "SETOR", "SALA", "CLIENTE"];
+        const tableColumn = ["DATA", "HORÁRIO", "ORADOR", "SALA", "CLIENTE/FUNCIONÁRIO"];
         const tableRows = [];
 
         meetings.forEach(meeting => {
@@ -181,8 +181,7 @@ function downloadPDF() {
             const meetingData = [
                 formattedDate,
                 meeting.time,
-                `${meeting.duration} minutos`,
-                meeting.sector,
+                meeting.speaker,
                 meeting.room,
                 meeting.client
             ];
@@ -209,15 +208,4 @@ document.getElementById('logout-button').addEventListener('click', function(even
     document.getElementById('confirm-logout').classList.add('open');
 });
 
-var dialog = document.getElementById('confirm-logout');
-var btnYes = dialog.querySelector('.yes');
-var btnNo = dialog.querySelector('.no');
-
-btnYes.addEventListener('click', function(event) {
-    var logoutHref = document.getElementById('logout-button').getAttribute('href');
-    window.location.href = logoutHref;
-});
-
-btnNo.addEventListener('click', function(event) {
-    dialog.classList.remove('open');
-});
+va
