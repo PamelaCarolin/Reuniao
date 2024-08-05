@@ -19,7 +19,7 @@ document.getElementById('meeting-form').addEventListener('submit', function(even
         return;
     }
 
-    fetch('https://SEU_BACKEND.vercel.app/agendar', { // Substitua pela URL do seu backend no Vercel
+    fetch('https://seu-backend.vercel.app/agendar', { // Substitua pela URL do seu backend no Vercel
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -46,3 +46,4 @@ function validateInput(date, time, duration, sector, speaker, room, client) {
     return date && time && duration && sector && speaker && room && client;
 }
 
+// Funções adicionais...
