@@ -35,7 +35,7 @@ pool.query(`CREATE TABLE IF NOT EXISTS meetings (
 });
 
 // Rota para agendar reuniões
-app.post('/agendar', (req, res) => {
+app.post('/api/agendar', (req, res) => {
     const { date, time, duration, sector, speaker, room, client } = req.body;
     const query = 'INSERT INTO meetings (date, time, duration, sector, speaker, room, client) VALUES ($1, $2, $3, $4, $5, $6, $7)';
     pool.query(query, [date, time, duration, sector, speaker, room, client], (err) => {
@@ -43,6 +43,49 @@ app.post('/agendar', (req, res) => {
             return res.status(500).json({ error: err.message });
         }
         res.json({ success: true, message: 'Reunião agendada com sucesso!' });
+    });
+});
+
+// Rota para consultar reuniões
+app.get('/api/consultar', (req, res) => {
+    const { date, client, room, sector } = req.query;
+    let query = 'SELECT * FROM meetings WHERE 1=1';
+    const queryParams = [];
+
+    if (date) {
+        query += ' AND date = $1';
+        queryParams.push(date);
+    }
+    if (client) {
+        query += ' AND client LIKE $2';
+        queryParams.push(`%${client}%`);
+    }
+    if (room) {
+        query += ' AND room = $3';
+        queryParams.push(room);
+    }
+    if (sector) {
+        query += ' AND sector LIKE $4';
+        queryParams.push(`%${sector}%`);
+    }
+
+    pool.query(query, queryParams, (err, result) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(result.rows);
+    });
+});
+
+// Rota para cancelar reuniões
+app.post('/api/cancelar', (req, res) => {
+    const { id } = req.body;
+    const query = 'DELETE FROM meetings WHERE id = $1';
+    pool.query(query, [id], (err) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json({ success: true, message: 'Reunião cancelada com sucesso!' });
     });
 });
 
