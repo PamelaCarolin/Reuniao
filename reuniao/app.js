@@ -34,14 +34,6 @@ const db = new sqlite3.Database(dbPath, (err) => {
 // Middleware para analisar JSON
 app.use(express.json());
 
-// Middleware para servir arquivos estáticos
-app.use(express.static(path.join(__dirname)));
-
-// Rota principal para servir o HTML
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'reuniao.html'));
-});
-
 // Rota para agendar reunião
 app.post('/agendar', (req, res) => {
     const { date, time, duration, sector, speaker, room, client } = req.body;
