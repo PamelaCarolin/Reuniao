@@ -1,14 +1,15 @@
-
-const sqlite3 = require('sqlite3').verbose();
 const db = require('./database');
 
-module.exports = (req, res) => {
+module.exports = async (req, res) => {
     const { id } = req.body;
-    const query = `DELETE FROM meetings WHERE id = ?`;
-    db.run(query, [id], function(err) {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
+
+    try {
+        const deleteQuery = `DELETE FROM meetings WHERE id = $1`;
+        await db.query(deleteQuery, [id]);
+
         res.json({ success: true, message: 'Reunião cancelada com sucesso!' });
-    });
+    } catch (err) {
+        console.error('Erro ao cancelar reunião:', err);
+        res.status(500).json({ error: 'Erro ao cancelar reunião' });
+    }
 };
