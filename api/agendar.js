@@ -1,31 +1,34 @@
-
-const sqlite3 = require('sqlite3').verbose();
 const db = require('./database');
 
-module.exports = (req, res) => {
+module.exports = async (req, res) => {
     const { date, time, duration, sector, speaker, room, client } = req.body;
-    const query = `
-        SELECT * FROM meetings 
-        WHERE date = ? AND room = ? AND 
-        (
-            (? BETWEEN time AND time + duration) OR 
-            (? + ?) BETWEEN time AND time + duration
-        )
-    `;
-    db.all(query, [date, room, time, time, duration], (err, rows) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
+
+    try {
+        const conflictQuery = `
+            SELECT * FROM meetings 
+            WHERE date = $1 AND room = $2 AND 
+            (
+                ($3::time BETWEEN time AND time + interval '1 minute' * duration) OR 
+                ($3::time + interval '1 minute' * $4 BETWEEN time AND time + interval '1 minute' * duration)
+            )
+        `;
+        const conflictValues = [date, room, time, duration];
+        const { rows } = await db.query(conflictQuery, conflictValues);
+
         if (rows.length > 0) {
             return res.status(400).json({ success: false, message: 'Horário de reunião conflita com uma existente.' });
         }
 
-        const insert = `INSERT INTO meetings (date, time, duration, sector, speaker, room, client) VALUES (?, ?, ?, ?, ?, ?, ?)`;
-        db.run(insert, [date, time, duration, sector, speaker, room, client], function(err) {
-            if (err) {
-                return res.status(500).json({ error: err.message });
-            }
-            res.json({ success: true, message: 'Reunião agendada com sucesso!' });
-        });
-    });
+        const insertQuery = `
+            INSERT INTO meetings (date, time, duration, sector, speaker, room, client) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+        `;
+        const insertValues = [date, time, duration, sector, speaker, room, client];
+        await db.query(insertQuery, insertValues);
+
+        res.json({ success: true, message: 'Reunião agendada com sucesso!' });
+    } catch (err) {
+        console.error('Erro ao agendar reunião:', err);
+        res.status(500).json({ error: 'Erro ao agendar reunião' });
+    }
 };
