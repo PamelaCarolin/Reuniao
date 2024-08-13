@@ -3,9 +3,9 @@ body {
     font-family: "Fredoka One", cursive;
     overflow-x: hidden;
     margin: 0;
-  }
-  
-  .navbar {
+}
+
+.navbar {
     background-color: #1e3a8a;
     overflow: hidden;
     display: flex;
@@ -16,7 +16,7 @@ body {
     width: 100%;
     top: 0;
     z-index: 1000;
-  }
+}
 
 .logo {
     color: white;
