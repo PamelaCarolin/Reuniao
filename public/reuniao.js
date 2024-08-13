@@ -92,7 +92,7 @@ function filterMeetings() {
         meetings.sort((a, b) => {
             const dateA = new Date(`${a.date}T${a.time}`);
             const dateB = new Date(`${b.date}T${b.time}`);
-            return dateB - dateA; // Ordem decrescente
+            return dateA - dateB; // Ordem crescente (mais antiga para mais recente)
         });
 
         const meetingList = document.getElementById('meeting-list');
@@ -158,11 +158,16 @@ function consultMeetings() {
     fetch(`/consultar?${params.toString()}`)
     .then(response => response.json())
     .then(meetings => {
+        // Filtra pelo nome do funcionário, se necessário
+        if (funcionario) {
+            meetings = meetings.filter(meeting => meeting.client.toLowerCase().includes(funcionario.toLowerCase()));
+        }
+
         // Ordena as reuniões por data e horário (mais recente primeiro)
         meetings.sort((a, b) => {
             const dateA = new Date(`${a.date}T${a.time}`);
             const dateB = new Date(`${b.date}T${b.time}`);
-            return dateB - dateA; // Ordem decrescente
+            return dateA - dateB; // Ordem crescente (mais antiga para mais recente)
         });
 
         const results = document.getElementById('consult-results');
@@ -197,6 +202,11 @@ function downloadPDF() {
     fetch(`/consultar?${params.toString()}`)
     .then(response => response.json())
     .then(meetings => {
+        // Filtra pelo nome do funcionário, se necessário
+        if (funcionario) {
+            meetings = meetings.filter(meeting => meeting.client.toLowerCase().includes(funcionario.toLowerCase()));
+        }
+
         const tableColumn = ["DATA", "HORÁRIO", "ORADOR", "SALA", "CLIENTE/FUNCIONÁRIO"];
         const tableRows = [];
 
