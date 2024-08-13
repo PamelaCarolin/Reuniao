@@ -146,6 +146,8 @@ function toggleConsultForm() {
     consultForm.style.display = consultForm.style.display === 'block' ? 'none' : 'block';
 }
 
+let sortOrder = 'desc';
+
 function consultMeetings() {
     const date = document.getElementById('consulta-data').value;
     const client = document.getElementById('consulta-cliente').value;
@@ -163,11 +165,11 @@ function consultMeetings() {
             meetings = meetings.filter(meeting => meeting.client.toLowerCase().includes(funcionario.toLowerCase()));
         }
 
-        // Ordena as reuniões por data e horário (mais recente primeiro)
+        // Ordena as reuniões conforme o sortOrder
         meetings.sort((a, b) => {
             const dateA = new Date(`${a.date.split('/').reverse().join('-')}T${a.time}`);
             const dateB = new Date(`${b.date.split('/').reverse().join('-')}T${b.time}`);
-            return dateB - dateA; // Ordem decrescente (mais recente para mais antiga)
+            return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
         });
 
         const results = document.getElementById('consult-results');
@@ -182,12 +184,22 @@ function consultMeetings() {
         const headerRow = document.createElement('tr');
 
         const headers = ['Data', 'Horário', 'Orador', 'Sala', 'Cliente/Funcionário'];
-        headers.forEach(headerText => {
+        headers.forEach((headerText, index) => {
             const th = document.createElement('th');
             th.textContent = headerText;
             th.style.border = '1px solid black';
             th.style.padding = '8px';
             th.style.textAlign = 'left';
+            th.style.cursor = 'pointer';
+
+            // Adiciona setinha para ordenar por data
+            if (index === 0) {
+                const arrow = document.createElement('span');
+                arrow.textContent = sortOrder === 'desc' ? ' ▼' : ' ▲';
+                th.appendChild(arrow);
+                th.addEventListener('click', () => toggleSortOrder());
+            }
+
             headerRow.appendChild(th);
         });
         thead.appendChild(headerRow);
@@ -227,6 +239,11 @@ function consultMeetings() {
         console.error('Error:', error);
         alert('Ocorreu um erro ao consultar as reuniões. Por favor, tente novamente.');
     });
+}
+
+function toggleSortOrder() {
+    sortOrder = sortOrder === 'desc' ? 'asc' : 'desc';
+    consultMeetings();
 }
 
 function downloadPDF() {
