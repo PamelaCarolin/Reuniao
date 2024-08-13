@@ -172,14 +172,56 @@ function consultMeetings() {
 
         const results = document.getElementById('consult-results');
         results.innerHTML = '';
+
+        // Cria a tabela e cabeçalhos
+        const table = document.createElement('table');
+        table.style.width = '100%';
+        table.style.borderCollapse = 'collapse';
+
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+
+        const headers = ['Data', 'Horário', 'Orador', 'Sala', 'Cliente/Funcionário'];
+        headers.forEach(headerText => {
+            const th = document.createElement('th');
+            th.textContent = headerText;
+            th.style.border = '1px solid black';
+            th.style.padding = '8px';
+            th.style.textAlign = 'left';
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+
         meetings.forEach(meeting => {
+            const row = document.createElement('tr');
+
             const formattedDate = new Date(meeting.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
             const formattedTime = meeting.time.slice(0, 5); // Formata para HH:MM
 
-            const li = document.createElement('li');
-            li.textContent = `${formattedDate} - ${formattedTime} - ${meeting.speaker} - ${meeting.room} - ${meeting.client}`;
-            results.appendChild(li);
+            const cells = [
+                formattedDate,
+                formattedTime,
+                meeting.speaker,
+                meeting.room,
+                meeting.client
+            ];
+
+            cells.forEach(cellText => {
+                const td = document.createElement('td');
+                td.textContent = cellText;
+                td.style.border = '1px solid black';
+                td.style.padding = '8px';
+                row.appendChild(td);
+            });
+
+            tbody.appendChild(row);
         });
+
+        table.appendChild(tbody);
+        results.appendChild(table);
     })
     .catch(error => {
         console.error('Error:', error);
