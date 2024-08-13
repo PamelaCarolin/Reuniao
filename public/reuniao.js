@@ -90,15 +90,15 @@ function filterMeetings() {
     .then(meetings => {
         // Ordena as reuniões por data e horário (mais recente primeiro)
         meetings.sort((a, b) => {
-            const dateA = new Date(`${a.date}T${a.time}`);
-            const dateB = new Date(`${b.date}T${b.time}`);
+            const dateA = new Date(`${a.date.split('/').reverse().join('-')}T${a.time}`);
+            const dateB = new Date(`${b.date.split('/').reverse().join('-')}T${b.time}`);
             return dateB - dateA; // Ordem decrescente (mais recente para mais antiga)
         });
 
         const meetingList = document.getElementById('meeting-list');
         meetingList.innerHTML = '';
         meetings.forEach(meeting => {
-            const formattedDate = new Date(meeting.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+            const formattedDate = new Date(meeting.date.split('/').reverse().join('-')).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
             const formattedTime = meeting.time.slice(0, 5); // Formata para HH:MM
 
             const li = document.createElement('li');
@@ -165,8 +165,8 @@ function consultMeetings() {
 
         // Ordena as reuniões por data e horário (mais recente primeiro)
         meetings.sort((a, b) => {
-            const dateA = new Date(`${a.date}T${a.time}`);
-            const dateB = new Date(`${b.date}T${b.time}`);
+            const dateA = new Date(`${a.date.split('/').reverse().join('-')}T${a.time}`);
+            const dateB = new Date(`${b.date.split('/').reverse().join('-')}T${b.time}`);
             return dateB - dateA; // Ordem decrescente (mais recente para mais antiga)
         });
 
@@ -198,7 +198,7 @@ function consultMeetings() {
         meetings.forEach(meeting => {
             const row = document.createElement('tr');
 
-            const formattedDate = new Date(meeting.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+            const formattedDate = new Date(meeting.date.split('/').reverse().join('-')).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
             const formattedTime = meeting.time.slice(0, 5); // Formata para HH:MM
 
             const cells = [
@@ -253,7 +253,7 @@ function downloadPDF() {
         const tableRows = [];
 
         meetings.forEach(meeting => {
-            const formattedDate = new Date(meeting.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+            const formattedDate = new Date(meeting.date.split('/').reverse().join('-')).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
             const formattedTime = meeting.time.slice(0, 5); // Formata para HH:MM
             const meetingData = [
                 formattedDate,
