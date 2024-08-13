@@ -146,7 +146,7 @@ function toggleConsultForm() {
     consultForm.style.display = consultForm.style.display === 'block' ? 'none' : 'block';
 }
 
-let sortOrder = 'desc';
+let sortOrder = 'asc'; // Default order is ascending
 
 function consultMeetings() {
     const date = document.getElementById('consulta-data').value;
