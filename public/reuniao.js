@@ -89,7 +89,7 @@ function loadMeetings() {
         meetings.forEach(meeting => {
             const formattedDate = new Date(meeting.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
             const li = document.createElement('li');
-            li.textContent = `${formattedDate} - ${meeting.time} - ${meeting.speaker} - ${meeting.room} - ${meeting.client}`;
+            li.textContent = `${formattedDate} - ${meeting.time.slice(0, 5)} - ${meeting.speaker} - ${meeting.room} - ${meeting.client}`;
             li.setAttribute('data-id', meeting.id);
             li.addEventListener('click', function() {
                 if (confirm('Você tem certeza que deseja cancelar esta reunião?')) {
@@ -144,12 +144,21 @@ function consultMeetings() {
     fetch(`/consultar?${params.toString()}`)
     .then(response => response.json())
     .then(meetings => {
+        // Ordena as reuniões por data e horário (mais recente primeiro)
+        meetings.sort((a, b) => {
+            const dateA = new Date(`${a.date}T${a.time}`);
+            const dateB = new Date(`${b.date}T${b.time}`);
+            return dateB - dateA; // Ordem decrescente
+        });
+
         const results = document.getElementById('consult-results');
         results.innerHTML = '';
         meetings.forEach(meeting => {
             const formattedDate = new Date(meeting.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+            const formattedTime = meeting.time.slice(0, 5); // Formata para HH:MM
+
             const li = document.createElement('li');
-            li.textContent = `${formattedDate} - ${meeting.time} - ${meeting.speaker} - ${meeting.room} - ${meeting.client}`;
+            li.textContent = `${formattedDate} - ${formattedTime} - ${meeting.speaker} - ${meeting.room} - ${meeting.client}`;
             results.appendChild(li);
         });
     })
@@ -178,9 +187,10 @@ function downloadPDF() {
 
         meetings.forEach(meeting => {
             const formattedDate = new Date(meeting.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+            const formattedTime = meeting.time.slice(0, 5); // Formata para HH:MM
             const meetingData = [
                 formattedDate,
-                meeting.time,
+                formattedTime,
                 meeting.speaker,
                 meeting.room,
                 meeting.client
@@ -207,5 +217,3 @@ document.getElementById('logout-button').addEventListener('click', function(even
     event.preventDefault();
     document.getElementById('confirm-logout').classList.add('open');
 });
-
-va
