@@ -76,6 +76,10 @@ function toggleCancelForm() {
 }
 
 function loadMeetings() {
+    filterMeetings();
+}
+
+function filterMeetings() {
     const filterDate = document.getElementById('filtro-data').value;
     const filterClient = document.getElementById('filtro-cliente').value;
 
@@ -84,12 +88,21 @@ function loadMeetings() {
     fetch(`/consultar?${params.toString()}`)
     .then(response => response.json())
     .then(meetings => {
+        // Ordena as reuniões por data e horário (mais recente primeiro)
+        meetings.sort((a, b) => {
+            const dateA = new Date(`${a.date}T${a.time}`);
+            const dateB = new Date(`${b.date}T${b.time}`);
+            return dateB - dateA; // Ordem decrescente
+        });
+
         const meetingList = document.getElementById('meeting-list');
         meetingList.innerHTML = '';
         meetings.forEach(meeting => {
             const formattedDate = new Date(meeting.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+            const formattedTime = meeting.time.slice(0, 5); // Formata para HH:MM
+
             const li = document.createElement('li');
-            li.textContent = `${formattedDate} - ${meeting.time.slice(0, 5)} - ${meeting.speaker} - ${meeting.room} - ${meeting.client}`;
+            li.textContent = `${formattedDate} - ${formattedTime} - ${meeting.speaker} - ${meeting.room} - ${meeting.client}`;
             li.setAttribute('data-id', meeting.id);
             li.addEventListener('click', function() {
                 if (confirm('Você tem certeza que deseja cancelar esta reunião?')) {
@@ -136,10 +149,11 @@ function toggleConsultForm() {
 function consultMeetings() {
     const date = document.getElementById('consulta-data').value;
     const client = document.getElementById('consulta-cliente').value;
+    const funcionario = document.getElementById('consulta-funcionario').value;
     const room = document.getElementById('consulta-sala').value;
     const sector = document.getElementById('consulta-setor').value;
 
-    const params = new URLSearchParams({ date, client, room, sector });
+    const params = new URLSearchParams({ date, client, funcionario, room, sector });
 
     fetch(`/consultar?${params.toString()}`)
     .then(response => response.json())
@@ -174,10 +188,11 @@ function downloadPDF() {
 
     const date = document.getElementById('consulta-data').value;
     const client = document.getElementById('consulta-cliente').value;
+    const funcionario = document.getElementById('consulta-funcionario').value;
     const room = document.getElementById('consulta-sala').value;
     const sector = document.getElementById('consulta-setor').value;
 
-    const params = new URLSearchParams({ date, client, room, sector });
+    const params = new URLSearchParams({ date, client, funcionario, room, sector });
 
     fetch(`/consultar?${params.toString()}`)
     .then(response => response.json())
