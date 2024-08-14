@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agendamento de Reunião</title>
     <link rel="stylesheet" href="reuniao.css">
-    <link rel="icon" type="image/x-icon" href="logo.ico">
+    <link rel="icon" type="image/x-icon" href="logo.ico"> <!-- Favicon atualizado -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
 </head>
@@ -41,8 +41,8 @@
                         <option value="RH">RH</option>
                         <option value="Departamento Pessoal">Departamento Pessoal</option>
                         <option value="Coordenadores">Coordenadores</option>
-                        <option value="Gerencia">Gerência</option> 
-                        <option value="Contabil">Contabil</option>
+                        <option value="Gerencia">Gerencia</option> <!-- Setor Gerencia adicionado -->
+                        <option value="Contabul">Contabil</option>
                     </select>
                 </div>
                 <div class="input-group">
@@ -88,8 +88,8 @@
             </div>
             <button type="button" class="button" onclick="filterMeetings()">Filtrar</button>
             <ul id="meeting-list"></ul>
-            <button type="button" class="button" onclick="cancelSelectedMeetings()">Cancelar Selecionados</button>
-            <button type="button" onclick="closeCancelForm()" class="button">Fechar</button>
+            <button onclick="cancelSelectedMeetings()" class="button">Cancelar Selecionados</button>
+            <button onclick="closeCancelForm()" class="button">Fechar</button>
         </div>
         <div id="consult-form" class="form-container" style="display: none;">
             <h2>Consultar Reunião</h2>
@@ -103,8 +103,8 @@
                     <input type="text" id="consulta-cliente">
                 </div>
                 <div class="input-group">
-                    <label for="consulta-orador">Orador</label> <!-- Alterado -->
-                    <input type="text" id="consulta-orador"> <!-- Alterado -->
+                    <label for="consulta-orador">Orador</label> <!-- Funcionario trocado para Orador -->
+                    <input type="text" id="consulta-orador">
                 </div>
                 <div class="input-group">
                     <label for="consulta-sala">Sala</label>
@@ -123,7 +123,7 @@
                 <button type="button" onclick="downloadPDF()" class="button">Baixar PDF</button>
             </form>
             <ul id="consult-results"></ul>
-            <button type="button" onclick="toggleConsultForm()" class="button">Fechar</button>
+            <button onclick="toggleConsultForm()" class="button">Fechar</button>
         </div>
     </div>
     <script src="reuniao.js"></script>
