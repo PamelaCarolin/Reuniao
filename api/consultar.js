@@ -1,7 +1,5 @@
-const db = require('./database');
-
 module.exports = async (req, res) => {
-    const { date, client, room, sector, speaker } = req.query;
+    const { date, client, room, sector } = req.query;
     let query = `SELECT id, date, time, duration, sector, speaker, room, client FROM meetings WHERE 1=1`;
     const queryParams = [];
 
@@ -25,28 +23,12 @@ module.exports = async (req, res) => {
         queryParams.push(`%${sector}%`);
     }
 
-    if (speaker) {
-        query += ` AND speaker LIKE $${queryParams.length + 1}`;
-        queryParams.push(`%${speaker}%`);
-    }
-
     try {
         const { rows } = await db.query(query, queryParams);
-        
-        if (!Array.isArray(rows)) {
-            return res.status(500).json({ error: 'Erro ao consultar reuniões: resultado inesperado' });
-        }
 
-        // Certifica-se que as datas sejam formatadas corretamente no formato ISO antes da ordenação
+        // Aqui transformamos a data em string
         rows.forEach(meeting => {
-            meeting.date = new Date(meeting.date.split('/').reverse().join('-')).toISOString().split('T')[0];
-        });
-
-        // Ordena as reuniões por data e horário
-        rows.sort((a, b) => {
-            const dateA = new Date(`${a.date}T${a.time}`);
-            const dateB = new Date(`${b.date}T${b.time}`);
-            return dateA - dateB;
+            meeting.date = new Date(meeting.date).toISOString().split('T')[0]; // Converte para string no formato ISO
         });
 
         res.json(rows);
