@@ -269,6 +269,24 @@ function downloadPDF() {
     });
 }
 
+// Função para alternar a visibilidade dos campos "Cliente" e "Funcionário"
+function toggleReuniaoTipo() {
+    const tipoReuniao = document.getElementById('tipo-reuniao').value;
+    const clienteGroup = document.getElementById('cliente-group');
+    const funcionarioGroup = document.getElementById('funcionario-group');
+
+    if (tipoReuniao === 'externa') {
+        clienteGroup.style.display = 'block';
+        funcionarioGroup.style.display = 'none';
+    } else if (tipoReuniao === 'interna') {
+        clienteGroup.style.display = 'none';
+        funcionarioGroup.style.display = 'block';
+    } else {
+        clienteGroup.style.display = 'none';
+        funcionarioGroup.style.display = 'none';
+    }
+}
+
 function toggleCancelForm() {
     const cancelForm = document.getElementById('cancel-form');
     cancelForm.style.display = cancelForm.style.display === 'block' ? 'none' : 'block';
@@ -322,6 +340,12 @@ function closeCancelForm() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Chama a função toggleReuniaoTipo ao carregar a página
+    toggleReuniaoTipo();
+
+    // Adiciona o event listener para o campo de seleção "Tipo de Reunião"
+    document.getElementById('tipo-reuniao').addEventListener('change', toggleReuniaoTipo);
+
     const toggleCancelFormBtn = document.getElementById('toggle-cancel-form');
     if (toggleCancelFormBtn) {
         toggleCancelFormBtn.addEventListener('click', toggleCancelForm);
