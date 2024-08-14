@@ -33,10 +33,15 @@ module.exports = async (req, res) => {
     try {
         const { rows } = await db.query(query, queryParams);
         
-        // Ordenação correta das reuniões por data e horário
+        // Certifica-se que as datas sejam formatadas corretamente no formato ISO antes da ordenação
+        rows.forEach(meeting => {
+            meeting.date = new Date(meeting.date.split('/').reverse().join('-')).toISOString().split('T')[0];
+        });
+
+        // Ordena as reuniões por data e horário
         rows.sort((a, b) => {
-            const dateA = new Date(`${a.date.split('/').reverse().join('-')}T${a.time}`);
-            const dateB = new Date(`${b.date.split('/').reverse().join('-')}T${b.time}`);
+            const dateA = new Date(`${a.date}T${a.time}`);
+            const dateB = new Date(`${b.date}T${b.time}`);
             return dateA - dateB;
         });
 
