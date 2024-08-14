@@ -33,6 +33,10 @@ module.exports = async (req, res) => {
     try {
         const { rows } = await db.query(query, queryParams);
         
+        if (!Array.isArray(rows)) {
+            return res.status(500).json({ error: 'Erro ao consultar reuniões: resultado inesperado' });
+        }
+
         // Certifica-se que as datas sejam formatadas corretamente no formato ISO antes da ordenação
         rows.forEach(meeting => {
             meeting.date = new Date(meeting.date.split('/').reverse().join('-')).toISOString().split('T')[0];
