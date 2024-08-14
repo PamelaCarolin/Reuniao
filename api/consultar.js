@@ -1,3 +1,5 @@
+const db = require('./database');
+
 module.exports = async (req, res) => {
     const { date, client, room, sector } = req.query;
     let query = `SELECT id, date, time, duration, sector, speaker, room, client FROM meetings WHERE 1=1`;
@@ -26,10 +28,18 @@ module.exports = async (req, res) => {
     try {
         const { rows } = await db.query(query, queryParams);
 
-        // Abaixo corrigimos a manipulação do campo de data para trabalhar diretamente com objetos Date
+        // Converte o campo `date` para uma string formatada `YYYY-MM-DD`
         const formattedRows = rows.map(meeting => {
-            const meetingDate = new Date(meeting.date); // Converte o campo `date` para um objeto Date se não for
-            meeting.date = meetingDate.toISOString().split('T')[0]; // Converte para o formato ISO (YYYY-MM-DD)
+            if (!(meeting.date instanceof Date)) {
+                meeting.date = new Date(meeting.date);
+            }
+
+            // Formata a data para YYYY-MM-DD
+            const year = meeting.date.getFullYear();
+            const month = String(meeting.date.getMonth() + 1).padStart(2, '0');
+            const day = String(meeting.date.getDate()).padStart(2, '0');
+            meeting.date = `${year}-${month}-${day}`;
+
             return meeting;
         });
 
