@@ -1,7 +1,7 @@
 const db = require('./database');
 
 module.exports = async (req, res) => {
-    const { date, client, room, sector } = req.query;
+    const { date, client, room, sector, speaker } = req.query;
     let query = `SELECT id, date, time, duration, sector, speaker, room, client FROM meetings WHERE 1=1`;
     const queryParams = [];
 
@@ -23,6 +23,11 @@ module.exports = async (req, res) => {
     if (sector) {
         query += ` AND sector LIKE $${queryParams.length + 1}`;
         queryParams.push(`%${sector}%`);
+    }
+
+    if (speaker) {
+        query += ` AND speaker LIKE $${queryParams.length + 1}`;
+        queryParams.push(`%${speaker}%`);
     }
 
     try {
