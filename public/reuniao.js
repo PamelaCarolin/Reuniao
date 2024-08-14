@@ -9,9 +9,8 @@ document.getElementById('meeting-form').addEventListener('submit', function(even
     const room = document.getElementById('sala').value;
     const tipoReuniao = document.getElementById('tipo-reuniao').value;
     const cliente = document.getElementById('cliente').value;
-    const funcionario = document.getElementById('funcionario').value;
 
-    const clientOrEmployee = tipoReuniao === 'externa' ? cliente : funcionario;
+    const clientOrEmployee = tipoReuniao === 'externa' ? cliente : speaker;
 
     if (isPastTime(date, time)) {
         alert("Não é possível agendar uma reunião para um horário que já passou.");
@@ -229,18 +228,18 @@ let sortOrder = 'asc'; // Default order is ascending
 function consultMeetings() {
     const date = document.getElementById('consulta-data').value;
     const client = document.getElementById('consulta-cliente').value;
-    const funcionario = document.getElementById('consulta-funcionario').value;
+    const speaker = document.getElementById('consulta-orador').value;
     const room = document.getElementById('consulta-sala').value;
     const sector = document.getElementById('consulta-setor').value;
 
-    const params = new URLSearchParams({ date, client, funcionario, room, sector });
+    const params = new URLSearchParams({ date, client, speaker, room, sector });
 
     fetch(`/consultar?${params.toString()}`)
     .then(response => response.json())
     .then(meetings => {
-        // Filtra pelo nome do funcionário, se necessário
-        if (funcionario) {
-            meetings = meetings.filter(meeting => meeting.client.toLowerCase().includes(funcionario.toLowerCase()));
+        // Filtra pelo nome do orador, se necessário
+        if (speaker) {
+            meetings = meetings.filter(meeting => meeting.speaker.toLowerCase().includes(speaker.toLowerCase()));
         }
 
         // Ordena as reuniões conforme o sortOrder
@@ -330,18 +329,18 @@ function downloadPDF() {
 
     const date = document.getElementById('consulta-data').value;
     const client = document.getElementById('consulta-cliente').value;
-    const funcionario = document.getElementById('consulta-funcionario').value;
+    const speaker = document.getElementById('consulta-orador').value;
     const room = document.getElementById('consulta-sala').value;
     const sector = document.getElementById('consulta-setor').value;
 
-    const params = new URLSearchParams({ date, client, funcionario, room, sector });
+    const params = new URLSearchParams({ date, client, speaker, room, sector });
 
     fetch(`/consultar?${params.toString()}`)
     .then(response => response.json())
     .then(meetings => {
-        // Filtra pelo nome do funcionário, se necessário
-        if (funcionario) {
-            meetings = meetings.filter(meeting => meeting.client.toLowerCase().includes(funcionario.toLowerCase()));
+        // Filtra pelo nome do orador, se necessário
+        if (speaker) {
+            meetings = meetings.filter(meeting => meeting.speaker.toLowerCase().includes(speaker.toLowerCase()));
         }
 
         const tableColumn = ["DATA", "HORÁRIO", "ORADOR", "SALA", "CLIENTE/FUNCIONÁRIO"];
