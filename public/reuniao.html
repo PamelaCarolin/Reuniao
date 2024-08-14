@@ -40,7 +40,7 @@
                         <option value="RH">RH</option>
                         <option value="Departamento Pessoal">Departamento Pessoal</option>
                         <option value="Coordenadores">Coordenadores</option>
-                        <option value="Gerência"</option>
+                        <option value="Gerencia">Gerência</option> <!-- Adicionado -->
                     </select>
                 </div>
                 <div class="input-group">
@@ -87,8 +87,7 @@
             <button type="button" class="button" onclick="filterMeetings()">Filtrar</button>
             <ul id="meeting-list"></ul>
             <button type="button" class="button" onclick="cancelSelectedMeetings()">Cancelar Selecionados</button>
-<button type="button" onclick="closeCancelForm()" class="button">Fechar</button>
-            <button onclick="closeCancelForm()" class="button">Fechar</button>
+            <button type="button" onclick="closeCancelForm()" class="button">Fechar</button>
         </div>
         <div id="consult-form" class="form-container" style="display: none;">
             <h2>Consultar Reunião</h2>
@@ -102,8 +101,8 @@
                     <input type="text" id="consulta-cliente">
                 </div>
                 <div class="input-group">
-                    <label for="consulta-orador">Orador</label>
-                    <input type="text" id="consulta-orador">
+                    <label for="consulta-orador">Orador</label> <!-- Alterado -->
+                    <input type="text" id="consulta-orador"> <!-- Alterado -->
                 </div>
                 <div class="input-group">
                     <label for="consulta-sala">Sala</label>
@@ -122,7 +121,7 @@
                 <button type="button" onclick="downloadPDF()" class="button">Baixar PDF</button>
             </form>
             <ul id="consult-results"></ul>
-            <button onclick="toggleConsultForm()" class="button">Fechar</button>
+            <button type="button" onclick="toggleConsultForm()" class="button">Fechar</button>
         </div>
     </div>
     <script src="reuniao.js"></script>
