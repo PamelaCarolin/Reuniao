@@ -1,6 +1,114 @@
-// Define as variáveis globais para ordenação
-let cancelSortOrder = 'asc'; // Padrão para o cancelamento
-let sortOrder = 'asc'; // Padrão para a consulta
+let cancelSortOrder = 'asc'; // Definindo a ordem de classificação inicial para cancelamento
+let sortOrder = 'asc'; // Definindo a ordem de classificação inicial para consulta
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Função para alternar a visibilidade dos campos "Cliente" e "Funcionário"
+    function toggleReuniaoTipo() {
+        const tipoReuniao = document.getElementById('tipo-reuniao').value;
+        const clienteGroup = document.getElementById('cliente-group');
+        const funcionarioGroup = document.getElementById('funcionario-group');
+
+        if (tipoReuniao === 'externa') {
+            clienteGroup.style.display = 'block';
+            funcionarioGroup.style.display = 'none';
+        } else if (tipoReuniao === 'interna') {
+            clienteGroup.style.display = 'none';
+            funcionarioGroup.style.display = 'block';
+        } else {
+            clienteGroup.style.display = 'none';
+            funcionarioGroup.style.display = 'none';
+        }
+    }
+
+    // Função para verificar se o horário da reunião já passou
+    function isPastTime(date, time) {
+        const now = new Date();
+        const meetingTime = new Date(`${date}T${time}`);
+        return meetingTime < now;
+    }
+
+    // Função para validar a entrada de dados no formulário
+    function validateInput(date, time, duration, sector, speaker, room, clientOrEmployee) {
+        return date && time && duration && sector && speaker && room && clientOrEmployee;
+    }
+
+    // Função de agendamento de reunião
+    document.getElementById('meeting-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const date = document.getElementById('data').value;
+        const time = document.getElementById('horario').value;
+        const duration = document.getElementById('duracao').value;
+        const sector = document.getElementById('setor').value;
+        const speaker = document.getElementById('nome-orador').value;
+        const room = document.getElementById('sala').value;
+        const tipoReuniao = document.getElementById('tipo-reuniao').value;
+        const cliente = document.getElementById('cliente').value;
+        const funcionario = document.getElementById('funcionario').value;
+
+        const clientOrEmployee = tipoReuniao === 'externa' ? cliente : funcionario;
+
+        if (isPastTime(date, time)) {
+            alert("Não é possível agendar uma reunião para um horário que já passou.");
+            return;
+        }
+
+        if (!validateInput(date, time, duration, sector, speaker, room, clientOrEmployee)) {
+            alert("Por favor, preencha todos os campos corretamente.");
+            return;
+        }
+
+        fetch('/agendar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ date, time, duration, sector, speaker, room, client: clientOrEmployee })
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                alert(result.message);
+                document.getElementById('meeting-form').reset(); // Redefine o formulário
+                toggleReuniaoTipo(); // Atualiza a visibilidade dos campos
+            } else {
+                alert(result.message || 'Erro ao agendar a reunião. Por favor, tente novamente.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Ocorreu um erro ao agendar a reunião. Por favor, tente novamente.');
+        });
+    });
+
+    // Outras funcionalidades para cancelar e consultar reuniões...
+
+    // Adiciona o event listener para o campo de seleção "Tipo de Reunião"
+    document.getElementById('tipo-reuniao').addEventListener('change', toggleReuniaoTipo);
+
+    const toggleCancelFormBtn = document.getElementById('toggle-cancel-form');
+    if (toggleCancelFormBtn) {
+        toggleCancelFormBtn.addEventListener('click', toggleCancelForm);
+    }
+
+    const toggleConsultFormBtn = document.getElementById('toggle-consult-form');
+    if (toggleConsultFormBtn) {
+        toggleConsultFormBtn.addEventListener('click', toggleConsultForm);
+    }
+
+    const cancelSelectedBtn = document.getElementById('cancel-selected');
+    if (cancelSelectedBtn) {
+        cancelSelectedBtn.addEventListener('click', cancelSelectedMeetings);
+    }
+
+    const downloadPdfBtn = document.getElementById('download-pdf');
+    if (downloadPdfBtn) {
+        downloadPdfBtn.addEventListener('click', downloadPDF);
+    }
+
+    // Inicializa a página definindo o estado inicial dos campos
+    toggleReuniaoTipo();
+});
 
 function loadMeetings() {
     filterMeetings();
@@ -20,7 +128,6 @@ function filterMeetings() {
             return;
         }
 
-        // Ordena as reuniões conforme o cancelSortOrder
         meetings.sort((a, b) => {
             const dateA = new Date(`${a.date}T${a.time}`);
             const dateB = new Date(`${b.date}T${b.time}`);
@@ -30,7 +137,6 @@ function filterMeetings() {
         const meetingList = document.getElementById('meeting-list');
         meetingList.innerHTML = '';
 
-        // Cria a tabela e cabeçalhos
         const table = document.createElement('table');
         table.style.width = '100%';
         table.style.borderCollapse = 'collapse';
@@ -65,7 +171,7 @@ function filterMeetings() {
             const row = document.createElement('tr');
 
             const formattedDate = new Date(meeting.date.split('/').reverse().join('-')).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-            const formattedTime = meeting.time.slice(0, 5); // Formata para HH:MM
+            const formattedTime = meeting.time.slice(0, 5);
 
             const cells = [
                 formattedDate,
@@ -83,7 +189,6 @@ function filterMeetings() {
                 row.appendChild(td);
             });
 
-            // Adiciona checkbox para seleção
             const selectTd = document.createElement('td');
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
@@ -132,12 +237,10 @@ function consultMeetings() {
             return;
         }
 
-        // Certifica-se que as datas sejam formatadas corretamente no formato ISO antes da ordenação
         meetings.forEach(meeting => {
             meeting.date = new Date(meeting.date.split('/').reverse().join('-')).toISOString().split('T')[0];
         });
 
-        // Ordena as reuniões por data e horário
         meetings.sort((a, b) => {
             const dateA = new Date(`${a.date}T${a.time}`);
             const dateB = new Date(`${b.date}T${b.time}`);
@@ -147,7 +250,6 @@ function consultMeetings() {
         const results = document.getElementById('consult-results');
         results.innerHTML = '';
 
-        // Cria a tabela e cabeçalhos
         const table = document.createElement('table');
         table.style.width = '100%';
         table.style.borderCollapse = 'collapse';
@@ -164,7 +266,6 @@ function consultMeetings() {
             th.style.textAlign = 'left';
             th.style.cursor = 'pointer';
 
-            // Adiciona setinha para ordenar por data
             if (index === 0) {
                 const arrow = document.createElement('span');
                 arrow.textContent = sortOrder === 'desc' ? ' ▼' : ' ▲';
@@ -183,7 +284,7 @@ function consultMeetings() {
             const row = document.createElement('tr');
 
             const formattedDate = new Date(meeting.date.split('/').reverse().join('-')).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-            const formattedTime = meeting.time.slice(0, 5); // Formata para HH:MM
+            const formattedTime = meeting.time.slice(0, 5);
 
             const cells = [
                 formattedDate,
@@ -233,7 +334,6 @@ function downloadPDF() {
             return;
         }
 
-        // Filtra pelo nome do orador, se necessário
         if (speaker) {
             meetings = meetings.filter(meeting => meeting.speaker.toLowerCase().includes(speaker.toLowerCase()));
         }
@@ -243,7 +343,7 @@ function downloadPDF() {
 
         meetings.forEach(meeting => {
             const formattedDate = new Date(meeting.date.split('/').reverse().join('-')).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-            const formattedTime = meeting.time.slice(0, 5); // Formata para HH:MM
+            const formattedTime = meeting.time.slice(0, 5);
             const meetingData = [
                 formattedDate,
                 formattedTime,
@@ -267,24 +367,6 @@ function downloadPDF() {
         console.error('Error:', error);
         alert('Ocorreu um erro ao gerar o PDF. Por favor, tente novamente.');
     });
-}
-
-// Função para alternar a visibilidade dos campos "Cliente" e "Funcionário"
-function toggleReuniaoTipo() {
-    const tipoReuniao = document.getElementById('tipo-reuniao').value;
-    const clienteGroup = document.getElementById('cliente-group');
-    const funcionarioGroup = document.getElementById('funcionario-group');
-
-    if (tipoReuniao === 'externa') {
-        clienteGroup.style.display = 'block';
-        funcionarioGroup.style.display = 'none';
-    } else if (tipoReuniao === 'interna') {
-        clienteGroup.style.display = 'none';
-        funcionarioGroup.style.display = 'block';
-    } else {
-        clienteGroup.style.display = 'none';
-        funcionarioGroup.style.display = 'none';
-    }
 }
 
 function toggleCancelForm() {
@@ -338,32 +420,3 @@ function cancelMeeting(id) {
 function closeCancelForm() {
     document.getElementById('cancel-form').style.display = 'none';
 }
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Chama a função toggleReuniaoTipo ao carregar a página
-    toggleReuniaoTipo();
-
-    // Adiciona o event listener para o campo de seleção "Tipo de Reunião"
-    document.getElementById('tipo-reuniao').addEventListener('change', toggleReuniaoTipo);
-
-    const toggleCancelFormBtn = document.getElementById('toggle-cancel-form');
-    if (toggleCancelFormBtn) {
-        toggleCancelFormBtn.addEventListener('click', toggleCancelForm);
-    }
-
-    const toggleConsultFormBtn = document.getElementById('toggle-consult-form');
-    if (toggleConsultFormBtn) {
-        toggleConsultFormBtn.addEventListener('click', toggleConsultForm);
-    }
-
-    const cancelSelectedBtn = document.getElementById('cancel-selected');
-    if (cancelSelectedBtn) {
-        cancelSelectedBtn.addEventListener('click', cancelSelectedMeetings);
-    }
-
-    const downloadPdfBtn = document.getElementById('download-pdf');
-    if (downloadPdfBtn) {
-        downloadPdfBtn.addEventListener('click', downloadPDF);
-    }
-
-});
