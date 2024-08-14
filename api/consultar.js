@@ -26,12 +26,14 @@ module.exports = async (req, res) => {
     try {
         const { rows } = await db.query(query, queryParams);
 
-        // Aqui transformamos a data em string
-        rows.forEach(meeting => {
-            meeting.date = new Date(meeting.date).toISOString().split('T')[0]; // Converte para string no formato ISO
+        // Abaixo corrigimos a manipulação do campo de data para trabalhar diretamente com objetos Date
+        const formattedRows = rows.map(meeting => {
+            const meetingDate = new Date(meeting.date); // Converte o campo `date` para um objeto Date se não for
+            meeting.date = meetingDate.toISOString().split('T')[0]; // Converte para o formato ISO (YYYY-MM-DD)
+            return meeting;
         });
 
-        res.json(rows);
+        res.json(formattedRows);
     } catch (err) {
         console.error('Erro ao consultar reuniões:', err);
         res.status(500).json({ error: 'Erro ao consultar reuniões' });
