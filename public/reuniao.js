@@ -1,14 +1,19 @@
-document.addEventListener('DOMContentLoaded', function() {
-
-    // Verifica se o elemento existe antes de adicionar o event listener
-    const logoutButton = document.getElementById('logout-button');
-    if (logoutButton) {
-        logoutButton.addEventListener('click', function(event) {
-            event.preventDefault();
-            document.getElementById('confirm-logout').classList.add('open');
-        });
+function toggleCancelForm() {
+    const cancelForm = document.getElementById('cancel-form');
+    cancelForm.style.display = cancelForm.style.display === 'block' ? 'none' : 'block';
+    if (cancelForm.style.display === 'block') {
+        loadMeetings();
     }
+}
 
+function toggleConsultForm() {
+    const consultForm = document.getElementById('consult-form');
+    consultForm.style.display = consultForm.style.display === 'block' ? 'none' : 'block';
+}
+
+// As funções devem estar no escopo global, então elas devem ser definidas fora de `DOMContentLoaded`
+
+document.addEventListener('DOMContentLoaded', function() {
     // Event listener para o formulário de agendamento
     const meetingForm = document.getElementById('meeting-form');
     if (meetingForm) {
@@ -78,14 +83,6 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             clienteGroup.style.display = 'none';
             funcionarioGroup.style.display = 'none';
-        }
-    }
-
-    function toggleCancelForm() {
-        const cancelForm = document.getElementById('cancel-form');
-        cancelForm.style.display = cancelForm.style.display === 'block' ? 'none' : 'block';
-        if (cancelForm.style.display === 'block') {
-            loadMeetings();
         }
     }
 
@@ -236,11 +233,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         ids.forEach(id => cancelMeeting(id));
-    }
-
-    function toggleConsultForm() {
-        const consultForm = document.getElementById('consult-form');
-        consultForm.style.display = consultForm.style.display === 'block' ? 'none' : 'block';
     }
 
     let sortOrder = 'asc'; // Default order is ascending
