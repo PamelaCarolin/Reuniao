@@ -1,46 +1,58 @@
 document.addEventListener('DOMContentLoaded', function() {
 
-    // Event listener para o formulário de agendamento
-    document.getElementById('meeting-form').addEventListener('submit', function(event) {
-        event.preventDefault();
-
-        const date = document.getElementById('data').value;
-        const time = document.getElementById('horario').value;
-        const duration = document.getElementById('duracao').value;
-        const sector = document.getElementById('setor').value;
-        const speaker = document.getElementById('nome-orador').value;
-        const room = document.getElementById('sala').value;
-        const tipoReuniao = document.getElementById('tipo-reuniao').value;
-        const cliente = document.getElementById('cliente').value;
-
-        const clientOrEmployee = tipoReuniao === 'externa' ? cliente : speaker;
-
-        if (isPastTime(date, time)) {
-            alert("Não é possível agendar uma reunião para um horário que já passou.");
-            return;
-        }
-
-        if (!validateInput(date, time, duration, sector, speaker, room, clientOrEmployee)) {
-            alert("Por favor, preencha todos os campos corretamente.");
-            return;
-        }
-
-        fetch('/agendar', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ date, time, duration, sector, speaker, room, client: clientOrEmployee })
-        })
-        .then(response => response.json())
-        .then(result => {
-            alert(result.message);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Ocorreu um erro ao agendar a reunião. Por favor, tente novamente.');
+    // Verifica se o elemento existe antes de adicionar o event listener
+    const logoutButton = document.getElementById('logout-button');
+    if (logoutButton) {
+        logoutButton.addEventListener('click', function(event) {
+            event.preventDefault();
+            document.getElementById('confirm-logout').classList.add('open');
         });
-    });
+    }
+
+    // Event listener para o formulário de agendamento
+    const meetingForm = document.getElementById('meeting-form');
+    if (meetingForm) {
+        meetingForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const date = document.getElementById('data').value;
+            const time = document.getElementById('horario').value;
+            const duration = document.getElementById('duracao').value;
+            const sector = document.getElementById('setor').value;
+            const speaker = document.getElementById('nome-orador').value;
+            const room = document.getElementById('sala').value;
+            const tipoReuniao = document.getElementById('tipo-reuniao').value;
+            const cliente = document.getElementById('cliente').value;
+
+            const clientOrEmployee = tipoReuniao === 'externa' ? cliente : speaker;
+
+            if (isPastTime(date, time)) {
+                alert("Não é possível agendar uma reunião para um horário que já passou.");
+                return;
+            }
+
+            if (!validateInput(date, time, duration, sector, speaker, room, clientOrEmployee)) {
+                alert("Por favor, preencha todos os campos corretamente.");
+                return;
+            }
+
+            fetch('/agendar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ date, time, duration, sector, speaker, room, client: clientOrEmployee })
+            })
+            .then(response => response.json())
+            .then(result => {
+                alert(result.message);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Ocorreu um erro ao agendar a reunião. Por favor, tente novamente.');
+            });
+        });
+    }
 
     function isPastTime(date, time) {
         const now = new Date();
@@ -391,10 +403,5 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Ocorreu um erro ao gerar o PDF. Por favor, tente novamente.');
         });
     }
-
-    document.getElementById('logout-button').addEventListener('click', function(event) {
-        event.preventDefault();
-        document.getElementById('confirm-logout').classList.add('open');
-    });
 
 });
