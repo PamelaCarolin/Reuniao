@@ -1,70 +1,60 @@
-document.getElementById('meeting-form').addEventListener('submit', function(event) {
-    event.preventDefault();
+const db = require('./database');
+const ics = require('ics');
 
-    const date = document.getElementById('data').value;
-    const time = document.getElementById('horario').value;
-    const duration = document.getElementById('duracao').value;
-    const sector = document.getElementById('setor').value;
-    const speaker = document.getElementById('nome-orador').value;
-    const room = document.getElementById('sala').value;
-    const tipoReuniao = document.getElementById('tipo-reuniao').value;
-    const cliente = document.getElementById('cliente').value;
-    const funcionario = document.getElementById('funcionario').value;
+module.exports = async (req, res) => {
+    const { date, time, duration, sector, speaker, room, client } = req.body;
 
-    const clientOrEmployee = tipoReuniao === 'externa' ? cliente : funcionario;
+    const clientDB = await db.connect();
 
-    if (isPastTime(date, time)) {
-        alert("Não é possível agendar uma reunião para um horário que já passou.");
-        return;
-    }
+    try {
+        await clientDB.query('BEGIN');
 
-    if (!validateInput(date, time, duration, sector, speaker, room, clientOrEmployee)) {
-        alert("Por favor, preencha todos os campos corretamente.");
-        return;
-    }
+        // Verificar se há conflito de horário para a sala selecionada
+        const conflictQuery = `
+            SELECT *, (time + INTERVAL '1 minute' * duration) AS end_time 
+            FROM meetings 
+            WHERE date = $1 AND room = $2 AND 
+            (
+                ($3::time BETWEEN time AND time + interval '1 minute' * duration) OR 
+                ($3::time + interval '1 minute' * $4 BETWEEN time AND time + interval '1 minute' * duration)
+            )
+        `;
+        const conflictValues = [date, room, time, duration];
+        const { rows } = await clientDB.query(conflictQuery, conflictValues);
 
-    // Requisição para o backend
-    fetch('/agendar', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ date, time, duration, sector, speaker, room, client: clientOrEmployee })
-    })
-    .then(response => response.json())
-    .then(result => {
-        if (result.success) {
-            alert(result.message);
-            document.getElementById('meeting-form').reset(); // Redefine o formulário
-            toggleReuniaoTipo(); // Atualiza a visibilidade dos campos
-
-            // Perguntar se deseja baixar o arquivo .ics
-            if (confirm('Deseja adicionar esta reunião ao seu calendário?')) {
-                criarICSArquivo(date, time, duration, speaker, clientOrEmployee, room);
-            }
-        } else if (result.conflict) {
-            const conflict = result.conflict;
-
-            // Hora de início da reunião conflitante
-            const conflictStartTime = new Date(`${conflict.date}T${conflict.time}`);
-
-            // Calcula o horário de término da reunião conflitante (adicionando a duração da reunião conflitante)
-            const conflictDuration = conflict.duration; // Duração da reunião conflitante (em minutos)
-            const conflictEndTime = new Date(conflictStartTime.getTime() + conflictDuration * 60000);
-
-            // Formatação da data e hora
-            const formattedConflictDate = conflictStartTime.toLocaleDateString('pt-BR');
-            const formattedStartTime = conflictStartTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            const formattedEndTime = conflictEndTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-
-            // Mostra a mensagem de conflito com horário de início, término e duração
-            alert(`Conflito detectado com a seguinte reunião:\nData: ${formattedConflictDate}\nHorário de início: ${formattedStartTime}\nTérmino: ${formattedEndTime}\nDuração: ${conflict.duration} minutos\nOrador: ${conflict.speaker}\nSala: ${conflict.room}\nCliente/Funcionário: ${conflict.client}`);
-        } else {
-            alert(result.message || 'Erro ao agendar a reunião. Por favor, tente novamente.');
+        if (rows.length > 0) {
+            const conflictingMeeting = rows[0];
+            await clientDB.query('ROLLBACK');
+            return res.status(400).json({
+                success: false,
+                conflict: {
+                    date: conflictingMeeting.date,
+                    time: conflictingMeeting.time,
+                    duration: conflictingMeeting.duration,
+                    speaker: conflictingMeeting.speaker,
+                    room: conflictingMeeting.room,
+                    client: conflictingMeeting.client
+                },
+                message: 'Horário de reunião conflita com uma existente.'
+            });
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Ocorreu um erro ao agendar a reunião. Por favor, tente novamente.');
-    });
-});
+
+        // Inserir a nova reunião
+        const insertQuery = `
+            INSERT INTO meetings (date, time, duration, sector, speaker, room, client) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+        `;
+        const insertValues = [date, time, duration, sector, speaker, room, client];
+        await clientDB.query(insertQuery, insertValues);
+
+        await clientDB.query('COMMIT');
+
+        res.json({ success: true, message: 'Reunião agendada com sucesso!' });
+    } catch (err) {
+        await clientDB.query('ROLLBACK');
+        console.error('Erro ao agendar reunião:', err);
+        res.status(500).json({ error: 'Erro ao agendar reunião' });
+    } finally {
+        clientDB.release();
+    }
+};
