@@ -58,6 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // Requisição para o backend
         fetch('/agendar', {
             method: 'POST',
             headers: {
@@ -71,6 +72,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert(result.message);
                 document.getElementById('meeting-form').reset(); // Redefine o formulário
                 toggleReuniaoTipo(); // Atualiza a visibilidade dos campos
+
+                // Perguntar se deseja agendar no Outlook
+                if (confirm('Deseja agendar esta reunião no Outlook?')) {
+                    agendarNoOutlook(date, time, duration, speaker, clientOrEmployee, room);
+                }
+            } else if (result.conflict) {
+                const conflict = result.conflict;
+                alert(`Conflito detectado com a seguinte reunião:\nData: ${conflict.date}\nHorário: ${conflict.time}\nOrador: ${conflict.speaker}\nSala: ${conflict.room}\nCliente/Funcionário: ${conflict.client}`);
             } else {
                 alert(result.message || 'Erro ao agendar a reunião. Por favor, tente novamente.');
             }
@@ -81,7 +90,27 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Outras funcionalidades para cancelar e consultar reuniões...
+    // Função para agendar a reunião no Outlook
+    function agendarNoOutlook(date, time, duration, speaker, clientOrEmployee, room) {
+        // Convertendo data e hora para o formato de convite do Outlook
+        const startDate = new Date(`${date}T${time}`);
+        const endDate = new Date(startDate.getTime() + duration * 60000);
+
+        // Formatação da data no formato YYYYMMDDTHHMMSSZ para o Outlook
+        const formattedStartDate = startDate.toISOString().replace(/-|:|\.\d+/g, '');
+        const formattedEndDate = endDate.toISOString().replace(/-|:|\.\d+/g, '');
+
+        // Criação do link "mailto:" para o Outlook com os parâmetros corretos
+        const subject = encodeURIComponent(`Reunião com ${clientOrEmployee}`);
+        const body = encodeURIComponent(`Detalhes da reunião:\nOrador: ${speaker}\nSala: ${room}\nData: ${date}\nHorário: ${time}\nDuração: ${duration} minutos`);
+        const location = encodeURIComponent(room);
+
+        // Link de convite para o Outlook
+        const mailtoLink = `mailto:?subject=${subject}&body=${body}&startdt=${formattedStartDate}&enddt=${formattedEndDate}&location=${location}`;
+
+        // Abrir o Outlook
+        window.location.href = mailtoLink;
+    }
 
     // Adiciona o event listener para o campo de seleção "Tipo de Reunião"
     document.getElementById('tipo-reuniao').addEventListener('change', toggleReuniaoTipo);
@@ -109,6 +138,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inicializa a página definindo o estado inicial dos campos
     toggleReuniaoTipo();
 });
+
+// Outras funcionalidades para cancelar e consultar reuniões...
 
 function loadMeetings() {
     filterMeetings();
