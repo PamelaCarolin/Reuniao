@@ -79,7 +79,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } else if (result.conflict) {
                 const conflict = result.conflict;
-                alert(`Conflito detectado com a seguinte reunião:\nData: ${conflict.date}\nHorário: ${conflict.time}\nOrador: ${conflict.speaker}\nSala: ${conflict.room}\nCliente/Funcionário: ${conflict.client}`);
+
+                // Calcula o horário final da reunião conflitante
+                const conflictStartTime = new Date(`1970-01-01T${conflict.time}`);
+                const conflictEndTime = new Date(conflictStartTime.getTime() + conflict.duration * 60000).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+                // Exibir o conflito com o horário final
+                alert(`Conflito detectado com a seguinte reunião:\nData: ${conflict.date}\nHorário de início: ${conflict.time}\nTérmino: ${conflictEndTime}\nOrador: ${conflict.speaker}\nSala: ${conflict.room}\nCliente/Funcionário: ${conflict.client}`);
             } else {
                 alert(result.message || 'Erro ao agendar a reunião. Por favor, tente novamente.');
             }
