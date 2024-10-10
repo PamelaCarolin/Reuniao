@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "pg": "^8.7.1",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "ics": "^2.35.0"  // Adiciona a dependência do ICS
   }
 }
