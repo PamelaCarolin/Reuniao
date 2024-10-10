@@ -1,5 +1,4 @@
 const db = require('./database');
-const ics = require('ics');
 
 module.exports = async (req, res) => {
     const { date, time, duration, sector, speaker, room, client } = req.body;
@@ -9,39 +8,38 @@ module.exports = async (req, res) => {
     try {
         await clientDB.query('BEGIN');
 
-        // Verificar se há conflito de horário para a sala selecionada
+        // Verifica se há um conflito de reunião com base na data, sala e horário
         const conflictQuery = `
-            SELECT *, (time + INTERVAL '1 minute' * duration) AS end_time 
-            FROM meetings 
-            WHERE date = $1 AND room = $2 AND 
-            (
-                ($3::time BETWEEN time AND time + interval '1 minute' * duration) OR 
-                ($3::time + interval '1 minute' * $4 BETWEEN time AND time + interval '1 minute' * duration)
+            SELECT *, (time + INTERVAL '1 minute' * duration) AS end_time
+            FROM meetings
+            WHERE date = $1 AND room = $2 AND (
+                ($3::time BETWEEN time AND (time + INTERVAL '1 minute' * duration))
+                OR
+                (($3::time + INTERVAL '1 minute' * $4) BETWEEN time AND (time + INTERVAL '1 minute' * duration))
             )
         `;
         const conflictValues = [date, room, time, duration];
         const { rows } = await clientDB.query(conflictQuery, conflictValues);
 
         if (rows.length > 0) {
-            const conflictingMeeting = rows[0];
             await clientDB.query('ROLLBACK');
+            const conflict = rows[0];
             return res.status(400).json({
                 success: false,
                 conflict: {
-                    date: conflictingMeeting.date,
-                    time: conflictingMeeting.time,
-                    duration: conflictingMeeting.duration,
-                    speaker: conflictingMeeting.speaker,
-                    room: conflictingMeeting.room,
-                    client: conflictingMeeting.client
-                },
-                message: 'Horário de reunião conflita com uma existente.'
+                    date: conflict.date,
+                    time: conflict.time,
+                    endTime: conflict.end_time,  // Envia o horário final calculado da reunião conflitante
+                    speaker: conflict.speaker,
+                    room: conflict.room,
+                    client: conflict.client
+                }
             });
         }
 
-        // Inserir a nova reunião
+        // Se não houver conflito, insere a nova reunião
         const insertQuery = `
-            INSERT INTO meetings (date, time, duration, sector, speaker, room, client) 
+            INSERT INTO meetings (date, time, duration, sector, speaker, room, client)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
         `;
         const insertValues = [date, time, duration, sector, speaker, room, client];
@@ -49,6 +47,7 @@ module.exports = async (req, res) => {
 
         await clientDB.query('COMMIT');
 
+        // Enviar uma resposta de sucesso
         res.json({ success: true, message: 'Reunião agendada com sucesso!' });
     } catch (err) {
         await clientDB.query('ROLLBACK');
