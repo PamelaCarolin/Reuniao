@@ -8,22 +8,30 @@ module.exports = async (req, res) => {
     try {
         await clientDB.query('BEGIN');
 
-        const conflictQuery = `
-            SELECT * FROM meetings 
-            WHERE date = $1 AND room = $2 AND 
-            (
-                ($3::time BETWEEN time AND time + interval '1 minute' * duration) OR 
-                ($3::time + interval '1 minute' * $4 BETWEEN time AND time + interval '1 minute' * duration)
-            )
-        `;
-        const conflictValues = [date, room, time, duration];
-        const { rows } = await clientDB.query(conflictQuery, conflictValues);
+        // Lógica para evitar conflitos em todas as salas, exceto "Teams"
+        if (room !== 'Teams') {
+            const conflictQuery = `
+                SELECT * FROM meetings 
+                WHERE date = $1 AND room = $2 AND 
+                (
+                    ($3::time BETWEEN time AND time + interval '1 minute' * duration) OR 
+                    ($3::time + interval '1 minute' * $4 BETWEEN time AND time + interval '1 minute' * duration)
+                )
+            `;
+            const conflictValues = [date, room, time, duration];
+            const { rows } = await clientDB.query(conflictQuery, conflictValues);
 
-        if (rows.length > 0) {
-            await clientDB.query('ROLLBACK');
-            return res.status(400).json({ success: false, message: 'Horário de reunião conflita com uma existente.' });
+            if (rows.length > 0) {
+                await clientDB.query('ROLLBACK');
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'Horário de reunião conflita com uma existente.',
+                    conflict: rows[0] // Retorna a reunião conflitante
+                });
+            }
         }
 
+        // Insere a nova reunião se não houver conflito ou se for na sala "Teams"
         const insertQuery = `
             INSERT INTO meetings (date, time, duration, sector, speaker, room, client) 
             VALUES ($1, $2, $3, $4, $5, $6, $7)
