@@ -24,12 +24,14 @@ module.exports = async (req, res) => {
         if (rows.length > 0) {
             await clientDB.query('ROLLBACK');
             const conflict = rows[0];
+            const formattedEndTime = new Date(`1970-01-01T${conflict.end_time}`).toISOString().slice(11, 19); // Formatar corretamente o horário final
+
             return res.status(400).json({
                 success: false,
                 conflict: {
                     date: conflict.date,
                     time: conflict.time,
-                    endTime: conflict.end_time,  // Envia o horário final calculado da reunião conflitante
+                    endTime: formattedEndTime,  // Envia o horário final formatado
                     speaker: conflict.speaker,
                     room: conflict.room,
                     client: conflict.client
