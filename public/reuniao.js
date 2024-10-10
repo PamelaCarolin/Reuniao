@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Função para criar um arquivo .ics editável no Outlook
+    // Função para criar um arquivo .ics sem organizador
     function criarICSArquivo(date, time, duration, speaker, clientOrEmployee, room) {
         // Convertendo data e hora para o formato adequado
         const startDate = new Date(`${date}T${time}`);
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const formattedStartDate = startDate.toISOString().replace(/-|:|\.\d+/g, '') + 'Z';
         const formattedEndDate = endDate.toISOString().replace(/-|:|\.\d+/g, '') + 'Z';
 
-        // Conteúdo do arquivo .ics sem organizador e com descrição vazia
+        // Conteúdo do arquivo .ics sem o organizador e com descrição vazia
         const icsContent = `
 BEGIN:VCALENDAR
 VERSION:2.0
