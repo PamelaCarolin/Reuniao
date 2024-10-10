@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const tipoReuniao = document.getElementById('tipo-reuniao').value;
         const cliente = document.getElementById('cliente').value;
         const funcionario = document.getElementById('funcionario').value;
+        const organizerEmail = prompt("Digite o e-mail do organizador:");
 
         const clientOrEmployee = tipoReuniao === 'externa' ? cliente : funcionario;
 
@@ -75,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Perguntar se deseja baixar o arquivo .ics
                 if (confirm('Deseja adicionar esta reunião ao seu calendário?')) {
-                    criarICSArquivo(date, time, duration, speaker, clientOrEmployee, room);
+                    criarICSArquivo(date, time, duration, speaker, clientOrEmployee, room, organizerEmail);
                 }
             } else if (result.conflict) {
                 const conflict = result.conflict;
@@ -91,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Função para criar um arquivo .ics editável no Outlook
-    function criarICSArquivo(date, time, duration, speaker, clientOrEmployee, room) {
+    function criarICSArquivo(date, time, duration, speaker, clientOrEmployee, room, organizerEmail) {
         // Convertendo data e hora para o formato adequado
         const startDate = new Date(`${date}T${time}`);
         const endDate = new Date(startDate.getTime() + duration * 60000);
@@ -116,7 +117,7 @@ SUMMARY:Reunião com ${clientOrEmployee}
 DESCRIPTION:Detalhes da reunião:\nOrador: ${speaker}\nSala: ${room}\nCliente/Funcionário: ${clientOrEmployee}
 LOCATION:${room}
 ATTENDEE;CN=${clientOrEmployee}:mailto:noreply@example.com
-ORGANIZER;CN=${speaker}:mailto:noreply@example.com
+ORGANIZER;CN=${speaker}:mailto:${organizerEmail}
 STATUS:CONFIRMED
 SEQUENCE:0
 TRANSP:OPAQUE
