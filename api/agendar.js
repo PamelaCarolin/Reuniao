@@ -44,16 +44,8 @@ document.getElementById('meeting-form').addEventListener('submit', function(even
             }
         } else if (result.conflict) {
             const conflict = result.conflict;
-
-            // Corrigir a formatação da data e hora
-            const conflictStartDate = new Date(`${conflict.date}T${conflict.time}`);
-            const conflictEndDate = new Date(conflict.endTime);
-
-            const formattedConflictDate = conflictStartDate.toLocaleDateString('pt-BR');
-            const formattedStartTime = conflictStartDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            const formattedEndTime = conflictEndDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-
-            alert(`Conflito detectado com a seguinte reunião:\nData: ${formattedConflictDate}\nHorário de início: ${formattedStartTime}\nTérmino: ${formattedEndTime}\nOrador: ${conflict.speaker}\nSala: ${conflict.room}\nCliente/Funcionário: ${conflict.client}`);
+            const conflictEndTime = new Date(`1970-01-01T${conflict.endTime}`).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            alert(`Conflito detectado com a seguinte reunião:\nData: ${conflict.date}\nHorário de início: ${conflict.time}\nTérmino: ${conflictEndTime}\nOrador: ${conflict.speaker}\nSala: ${conflict.room}\nCliente/Funcionário: ${conflict.client}`);
         } else {
             alert(result.message || 'Erro ao agendar a reunião. Por favor, tente novamente.');
         }
