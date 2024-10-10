@@ -44,8 +44,21 @@ document.getElementById('meeting-form').addEventListener('submit', function(even
             }
         } else if (result.conflict) {
             const conflict = result.conflict;
-            const conflictEndTime = new Date(`1970-01-01T${conflict.endTime}`).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            alert(`Conflito detectado com a seguinte reunião:\nData: ${conflict.date}\nHorário de início: ${conflict.time}\nTérmino: ${conflictEndTime}\nOrador: ${conflict.speaker}\nSala: ${conflict.room}\nCliente/Funcionário: ${conflict.client}`);
+
+            // Hora de início da reunião conflitante
+            const conflictStartTime = new Date(`${conflict.date}T${conflict.time}`);
+
+            // Calcula o horário de término da reunião conflitante (adicionando a duração da reunião conflitante)
+            const conflictDuration = conflict.duration; // Duração da reunião conflitante (em minutos)
+            const conflictEndTime = new Date(conflictStartTime.getTime() + conflictDuration * 60000);
+
+            // Formatação da data e hora
+            const formattedConflictDate = conflictStartTime.toLocaleDateString('pt-BR');
+            const formattedStartTime = conflictStartTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            const formattedEndTime = conflictEndTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+            // Mostra a mensagem de conflito com horário de início, término e duração
+            alert(`Conflito detectado com a seguinte reunião:\nData: ${formattedConflictDate}\nHorário de início: ${formattedStartTime}\nTérmino: ${formattedEndTime}\nDuração: ${conflict.duration} minutos\nOrador: ${conflict.speaker}\nSala: ${conflict.room}\nCliente/Funcionário: ${conflict.client}`);
         } else {
             alert(result.message || 'Erro ao agendar a reunião. Por favor, tente novamente.');
         }
