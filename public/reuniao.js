@@ -90,16 +90,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Função para criar um arquivo .ics para o calendário
+    // Função para criar um arquivo .ics editável no Outlook
     function criarICSArquivo(date, time, duration, speaker, clientOrEmployee, room) {
         // Convertendo data e hora para o formato adequado
         const startDate = new Date(`${date}T${time}`);
         const endDate = new Date(startDate.getTime() + duration * 60000);
 
+        // Formatação da data no formato ICS com UTC (Z indica UTC)
         const formattedStartDate = startDate.toISOString().replace(/-|:|\.\d+/g, '') + 'Z';
         const formattedEndDate = endDate.toISOString().replace(/-|:|\.\d+/g, '') + 'Z';
 
-        // Conteúdo do arquivo .ics
+        // Conteúdo do arquivo .ics com a opção de ser editado no Outlook
         const icsContent = `
 BEGIN:VCALENDAR
 VERSION:2.0
@@ -114,6 +115,11 @@ DTEND:${formattedEndDate}
 SUMMARY:Reunião com ${clientOrEmployee}
 DESCRIPTION:Detalhes da reunião:\nOrador: ${speaker}\nSala: ${room}\nCliente/Funcionário: ${clientOrEmployee}
 LOCATION:${room}
+ATTENDEE;CN=${clientOrEmployee}:mailto:noreply@example.com
+ORGANIZER;CN=${speaker}:mailto:noreply@example.com
+STATUS:CONFIRMED
+SEQUENCE:0
+TRANSP:OPAQUE
 END:VEVENT
 END:VCALENDAR
         `.trim();
