@@ -45,7 +45,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const tipoReuniao = document.getElementById('tipo-reuniao').value;
         const cliente = document.getElementById('cliente').value;
         const funcionario = document.getElementById('funcionario').value;
-        const organizerEmail = prompt("Digite o e-mail do organizador:");
 
         const clientOrEmployee = tipoReuniao === 'externa' ? cliente : funcionario;
 
@@ -76,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Perguntar se deseja baixar o arquivo .ics
                 if (confirm('Deseja adicionar esta reunião ao seu calendário?')) {
-                    criarICSArquivo(date, time, duration, speaker, clientOrEmployee, room, organizerEmail);
+                    criarICSArquivo(date, time, duration, speaker, clientOrEmployee, room);
                 }
             } else if (result.conflict) {
                 const conflict = result.conflict;
@@ -92,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Função para criar um arquivo .ics editável no Outlook
-    function criarICSArquivo(date, time, duration, speaker, clientOrEmployee, room, organizerEmail) {
+    function criarICSArquivo(date, time, duration, speaker, clientOrEmployee, room) {
         // Convertendo data e hora para o formato adequado
         const startDate = new Date(`${date}T${time}`);
         const endDate = new Date(startDate.getTime() + duration * 60000);
@@ -101,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const formattedStartDate = startDate.toISOString().replace(/-|:|\.\d+/g, '') + 'Z';
         const formattedEndDate = endDate.toISOString().replace(/-|:|\.\d+/g, '') + 'Z';
 
-        // Conteúdo do arquivo .ics com a opção de ser editado no Outlook
+        // Conteúdo do arquivo .ics sem organizador e com descrição vazia
         const icsContent = `
 BEGIN:VCALENDAR
 VERSION:2.0
@@ -114,10 +113,8 @@ DTSTAMP:${formattedStartDate}
 DTSTART:${formattedStartDate}
 DTEND:${formattedEndDate}
 SUMMARY:Reunião com ${clientOrEmployee}
-DESCRIPTION:Detalhes da reunião:\nOrador: ${speaker}\nSala: ${room}\nCliente/Funcionário: ${clientOrEmployee}
+DESCRIPTION:
 LOCATION:${room}
-ATTENDEE;CN=${clientOrEmployee}:mailto:noreply@example.com
-ORGANIZER;CN=${speaker}:mailto:${organizerEmail}
 STATUS:CONFIRMED
 SEQUENCE:0
 TRANSP:OPAQUE
