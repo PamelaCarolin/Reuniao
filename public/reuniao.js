@@ -73,9 +73,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('meeting-form').reset(); // Redefine o formulário
                 toggleReuniaoTipo(); // Atualiza a visibilidade dos campos
 
-                // Perguntar se deseja agendar no Outlook
-                if (confirm('Deseja agendar esta reunião no Outlook?')) {
-                    abrirOutlookNovaReuniao(date, time, duration, speaker, clientOrEmployee, room);
+                // Perguntar se deseja baixar o arquivo .ics
+                if (confirm('Deseja adicionar esta reunião ao seu calendário?')) {
+                    criarICSArquivo(date, time, duration, speaker, clientOrEmployee, room);
                 }
             } else if (result.conflict) {
                 const conflict = result.conflict;
@@ -90,24 +90,46 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Função para abrir o Outlook diretamente com uma nova reunião
-    function abrirOutlookNovaReuniao(date, time, duration, speaker, clientOrEmployee, room) {
+    // Função para criar um arquivo .ics para o calendário
+    function criarICSArquivo(date, time, duration, speaker, clientOrEmployee, room) {
         // Convertendo data e hora para o formato adequado
         const startDate = new Date(`${date}T${time}`);
         const endDate = new Date(startDate.getTime() + duration * 60000);
 
-        const formattedStartDate = startDate.toISOString().replace(/-|:|\.\d+/g, '');
-        const formattedEndDate = endDate.toISOString().replace(/-|:|\.\d+/g, '');
+        const formattedStartDate = startDate.toISOString().replace(/-|:|\.\d+/g, '') + 'Z';
+        const formattedEndDate = endDate.toISOString().replace(/-|:|\.\d+/g, '') + 'Z';
 
-        // Gera o link para o Outlook com os parâmetros para a reunião
-        const subject = `Reunião com ${clientOrEmployee}`;
-        const body = `Detalhes da reunião:\nOrador: ${speaker}\nSala: ${room}\nCliente/Funcionário: ${clientOrEmployee}`;
+        // Conteúdo do arquivo .ics
+        const icsContent = `
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Agendamento de Reunião
+CALSCALE:GREGORIAN
+METHOD:REQUEST
+BEGIN:VEVENT
+UID:${new Date().getTime()}@example.com
+DTSTAMP:${formattedStartDate}
+DTSTART:${formattedStartDate}
+DTEND:${formattedEndDate}
+SUMMARY:Reunião com ${clientOrEmployee}
+DESCRIPTION:Detalhes da reunião:\nOrador: ${speaker}\nSala: ${room}\nCliente/Funcionário: ${clientOrEmployee}
+LOCATION:${room}
+END:VEVENT
+END:VCALENDAR
+        `.trim();
 
-        // Usa o URI Scheme para o Outlook (Windows)
-        const outlookURI = `outlook://meeting?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}&start=${formattedStartDate}&end=${formattedEndDate}&location=${encodeURIComponent(room)}`;
+        // Criar um arquivo blob com o conteúdo do ICS
+        const blob = new Blob([icsContent], { type: 'text/calendar' });
+        const url = window.URL.createObjectURL(blob);
 
-        // Abre o Outlook com a nova reunião
-        window.location.href = outlookURI;
+        // Criar um link temporário para download
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'reuniao.ics';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
     }
 
     // Adiciona o event listener para o campo de seleção "Tipo de Reunião"
