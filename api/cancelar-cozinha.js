@@ -1,6 +1,7 @@
-// Rota para cancelar uma reserva da cozinha
-app.delete('/cancelar-cozinha/:id', async (req, res) => {
-    const { id } = req.params; // Obtém o id da reserva a partir dos parâmetros da URL
+const db = require('./database');
+
+module.exports = async (req, res) => {
+    const { id } = req.query; // ID da reserva a ser cancelada
 
     try {
         // Verifica se a reserva existe
@@ -15,9 +16,9 @@ app.delete('/cancelar-cozinha/:id', async (req, res) => {
         const deleteQuery = `DELETE FROM kitchen_reservations WHERE id = $1`;
         await db.query(deleteQuery, [id]);
 
-        res.json({ success: true, message: 'Reserva cancelada com sucesso!' });
+        res.status(200).json({ success: true, message: 'Reserva cancelada com sucesso!' });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Erro ao cancelar a reserva.' });
+        console.error("Erro ao cancelar a reserva da cozinha:", error);
+        res.status(500).json({ success: false, message: 'Erro ao cancelar a reserva.', error: error.message });
     }
-});
+};
