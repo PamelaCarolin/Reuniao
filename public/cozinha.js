@@ -1,86 +1,59 @@
-// Toggle de exibição para formularios de consulta e cancelamento
-function toggleConsultForm() {
-    const consultForm = document.getElementById('consult-form');
-    consultForm.style.display = consultForm.style.display === 'none' ? 'block' : 'none';
-}
+const db = require('./database');
 
-function toggleCancelForm() {
-    const cancelForm = document.getElementById('cancel-form');
-    cancelForm.style.display = cancelForm.style.display === 'none' ? 'block' : 'none';
-}
+// Rota para reservar a cozinha
+app.post('/reservar-cozinha', async (req, res) => {
+    const { date, time, duration, team, reason } = req.body;
 
-// Evento de submissão do formulário de reserva
-document.getElementById('kitchen-form').addEventListener('submit', function(event) {
-    event.preventDefault();
+    try {
+        const conflictQuery = `
+            SELECT * FROM kitchen_reservations 
+            WHERE date = $1 AND time = $2
+        `;
+        const conflictResult = await db.query(conflictQuery, [date, time]);
 
-    const date = document.getElementById('data').value;
-    const time = document.getElementById('horario').value;
-    const duration = document.getElementById('duracao').value;
-    const team = document.getElementById('equipe').value;
-    const reason = document.getElementById('motivo').value;
-
-    fetch('/reservar-cozinha', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ date, time, duration, team, reason })
-    })
-    .then(response => response.json())
-    .then(result => {
-        alert(result.message);
-        if (result.success) {
-            document.getElementById('kitchen-form').reset();
+        if (conflictResult.rows.length > 0) {
+            return res.json({ success: false, message: 'Horário já reservado para essa data.' });
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Erro ao reservar a cozinha.');
-    });
+
+        const insertQuery = `
+            INSERT INTO kitchen_reservations (date, time, duration, team, reason)
+            VALUES ($1, $2, $3, $4, $5)
+        `;
+        await db.query(insertQuery, [date, time, duration, team, reason]);
+
+        res.json({ success: true, message: 'Reserva da cozinha realizada com sucesso!' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Erro ao reservar a cozinha.' });
+    }
 });
 
-// Consulta de reservas da cozinha
-function consultKitchenReservations() {
-    const date = document.getElementById('consulta-data').value;
+// Rota para consultar reservas da cozinha
+app.get('/consultar-cozinha', async (req, res) => {
+    const { date } = req.query;
 
-    fetch(`/consultar-cozinha?date=${date}`)
-    .then(response => response.json())
-    .then(data => {
-        const resultsList = document.getElementById('consult-results');
-        resultsList.innerHTML = '';
+    try {
+        const query = `SELECT * FROM kitchen_reservations WHERE date = $1`;
+        const result = await db.query(query, [date]);
 
-        if (data.length > 0) {
-            data.forEach(reservation => {
-                const listItem = document.createElement('li');
-                listItem.textContent = `ID: ${reservation.id}, Horário: ${reservation.time}, Equipe: ${reservation.team}, Motivo: ${reservation.reason}`;
-                resultsList.appendChild(listItem);
-            });
-        } else {
-            resultsList.innerHTML = '<li>Nenhuma reserva encontrada para esta data.</li>';
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Erro ao consultar reservas da cozinha.');
-    });
-}
+        res.json(result.rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Erro ao consultar reservas.' });
+    }
+});
 
-// Cancelamento de reserva da cozinha
-function cancelKitchenReservation() {
-    const reservationId = document.getElementById('cancel-id').value;
+// Rota para cancelar uma reserva da cozinha
+app.delete('/cancelar-cozinha/:id', async (req, res) => {
+    const { id } = req.params;
 
-    fetch(`/cancelar-cozinha/${reservationId}`, {
-        method: 'DELETE'
-    })
-    .then(response => response.json())
-    .then(result => {
-        alert(result.message);
-        if (result.success) {
-            document.getElementById('cancel-id').value = '';
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Erro ao cancelar reserva.');
-    });
-}
+    try {
+        const deleteQuery = `DELETE FROM kitchen_reservations WHERE id = $1`;
+        await db.query(deleteQuery, [id]);
+
+        res.json({ success: true, message: 'Reserva cancelada com sucesso!' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Erro ao cancelar reserva.' });
+    }
+});
