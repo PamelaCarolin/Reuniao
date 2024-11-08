@@ -1,5 +1,5 @@
 // Rota para cancelar uma reserva da cozinha
-app.delete('/cancelar-cozinha/:id', async (req, res) => {
+app.delete('/cancelar-Cozinha/:id', async (req, res) => {
     const { id } = req.params; // Obtém o id da reserva a partir dos parâmetros da URL
 
     try {
