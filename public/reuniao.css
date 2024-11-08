@@ -6,88 +6,142 @@ body {
     margin: 0;
 }
 
-/* Navbar */
-.navbar {
-    background-color: #1e3a8a;
-    overflow: hidden;
+/* Estilo para o menu de navegação */
+.menu {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.menu-button {
+    padding: 10px 25px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 25px;
+    font-size: 1em;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.menu-button:hover {
+    background-color: #0056b3;
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.menu-button:active {
+    background-color: #003f7f;
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Container principal */
+.container {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    width: 90%;
+    margin: 30px auto;
+    overflow-y: auto;
+}
+
+h1 {
+    text-align: center;
+    font-size: 1.8em;
+    margin-top: 20px;
+    color: #333;
+}
+
+/* Formulário */
+.form-container {
+    margin-top: 20px;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
+}
+
+.input-group input,
+.input-group select {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: 1em;
+    background-color: #f9f9f9;
+}
+
+/* Botão de envio do formulário */
+.button {
+    width: 100%;
+    padding: 12px;
+    background-color: #4B0082;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1.1em;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s, box-shadow 0.3s;
+    margin-top: 20px;
+}
+
+.button:hover {
+    background-color: #9932CC;
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.button:active {
+    background-color: #6a0080;
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Ações */
+.actions {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 0 10px;
-    position: fixed;
-    width: 100%;
-    top: 0;
-    z-index: 1000;
+    margin-top: 20px;
 }
 
-.logo {
-    color: white;
-    font-size: 24px;
-    font-weight: bold;
+.actions .button {
+    width: auto;
+    padding: 10px 20px;
 }
 
-.nav-links {
-    list-style: none;
-    margin: 0;
+/* Listas */
+#meeting-list,
+#consult-results {
+    list-style-type: none;
     padding: 0;
-    display: flex;
+    margin: 15px 0;
 }
 
-.nav-links li {
-    position: relative;
+/* Margens entre botões nos formulários de consulta e cancelamento */
+#consult-form .button,
+#cancel-form .button {
+    margin-top: 10px;
 }
 
-.nav-links a {
-    display: block;
-    color: white;
-    text-align: center;
-    padding: 25px 20px;
-    text-decoration: none;
+#consult-form .button:first-of-type,
+#cancel-form .button:first-of-type {
+    margin-right: 10px;
 }
 
-.nav-links a:hover {
-    background-color: #dc2626; /* Vermelho */
-}
-
-/* Dropdown */
-.dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: #575757;
-    min-width: 160px;
-    z-index: 1;
-}
-
-.dropdown-content a {
-    color: white;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-    text-align: left;
-}
-
-.dropdown-content a:hover {
-    background-color: #777;
-}
-
-.dropdown:hover .dropdown-content {
-    display: block;
-}
-
-/* Esquema de cores */
-.navbar {
-    background-color: #1e3a8a; /* Azul */
-}
-
-.nav-links a:hover, .dropdown-content a:hover {
-    background-color: #dc2626; /* Vermelho */
-}
-
-.logo, .nav-links a, .dropdown-content a {
-    color: #f4f4f4; /* Cinza claro */
-}
-
-/* Estilos da janela de confirmação */
+/* Janela de confirmação */
 .confirmation-dialog {
     display: none;
     position: fixed;
@@ -99,6 +153,7 @@ body {
     padding: 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     z-index: 1000;
+    border-radius: 10px;
 }
 
 .confirmation-dialog.open {
@@ -120,101 +175,13 @@ body {
     color: white;
     border: none;
     cursor: pointer;
+    border-radius: 5px;
 }
 
 .confirmation-content button.yes {
     background-color: #dc2626;
 }
 
-/* Container principal */
-.container {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    max-width: 800px;
-    width: 100%;
-    margin: 80px auto;
-    overflow-y: auto;
-}
-
-/* Títulos */
-h1, h2 {
-    text-align: center;
-}
-
-/* Formulário */
-.form-container {
-    margin-top: 12px;
-}
-
-.input-group {
-    margin-bottom: 10px;
-}
-
-.input-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
-}
-
-.input-group input,
-.input-group select {
-    width: 100%;
-    padding: 15px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-}
-
-/* Botões */
-.button {
-    width: 100%;
-    padding: 10px;
-    background-color: #4B0082;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-top: 10px;
-    transition: background-color 0.3s;
-}
-
-.button:hover {
-    background-color: #9932CC;
-}
-
-.button-small {
-    width: auto;
-    padding: 8px 12px;
-}
-
-/* Ações */
-.actions {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-}
-
-.actions .button {
-    margin: 0 5px;
-}
-
-/* Listas */
-#meeting-list,
-#consult-results {
-    list-style-type: none;
-    padding: 0;
-    margin: 15px 0;
-}
-
-/* Margens entre botões nos formulários de consulta e cancelamento */
-#consult-form .button,
-#cancel-form .button {
-    margin-top: 10px;
-}
-
-#consult-form .button:first-of-type,
-#cancel-form .button:first-of-type {
-    margin-right: 10px;
+.confirmation-content button:hover {
+    background-color: #333;
 }
