@@ -10,8 +10,8 @@
     { "src": "/consultar", "dest": "/api/consultar.js" },
     { "src": "/api/products", "dest": "/api/products.js" },
     { "src": "/reservar-cozinha", "dest": "/api/reservarCozinha.js" },
-    { "src": "/consultar-cozinha", "dest": "/api/consultar-Cozinha.js" },
-    { "src": "/cancelar-cozinha/(.*)", "dest": "/api/cancelar-Cozinha.js?id=$1" },
+    { "src": "/consultar-cozinha", "dest": "/api/consultar-cozinha.js" },
+    { "src": "/cancelar-cozinha/(.*)", "dest": "/api/cancelar-cozinha.js?id=$1" },
     { "src": "/", "dest": "/public/reuniao.html" },
     { "src": "/(.*)", "dest": "/public/$1" }
   ]
