@@ -31,7 +31,7 @@
                     <input type="number" id="duracao" min="30" max="180" step="30" required>
                 </div>
                 <div class="input-group">
-                    <label for="equipe">Equipe</label>
+                    <label for="equipe">Responsável</label>
                     <input type="text" id="equipe" required>
                 </div>
                 <div class="input-group">
@@ -57,14 +57,37 @@
                 </div>
                 <button type="button" onclick="consultKitchenReservations()" class="button">Pesquisar</button>
             </form>
-            <ul id="consult-results"></ul>
+            <!-- Tabela de resultados da consulta -->
+            <table id="consult-results-table" class="styled-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Horário</th>
+                        <th>Responsável</th>
+                        <th>Motivo</th>
+                    </tr>
+                </thead>
+                <tbody id="consult-results"></tbody>
+            </table>
             <button onclick="toggleConsultForm()" class="button">Fechar</button>
         </div>
 
         <!-- Formulário de Cancelamento -->
         <div id="cancel-form" class="form-container" style="display: none;">
             <h2>Cancelar Reserva da Cozinha</h2>
-            <ul id="cancel-results"></ul>
+            <!-- Tabela de cancelamento com caixas de seleção -->
+            <table id="cancel-results-table" class="styled-table">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" onclick="toggleSelectAll(this)"></th>
+                        <th>Data</th>
+                        <th>Horário</th>
+                        <th>Responsável</th>
+                    </tr>
+                </thead>
+                <tbody id="cancel-results"></tbody>
+            </table>
+            <button onclick="cancelSelectedReservations()" class="button">Cancelar Selecionados</button>
             <button onclick="toggleCancelForm()" class="button">Fechar</button>
         </div>
     </div>
