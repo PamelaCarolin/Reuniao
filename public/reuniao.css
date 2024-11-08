@@ -1,3 +1,4 @@
+/* Estilo geral */
 body {
     background: #34E1FF;
     font-family: "Fredoka One", cursive;
@@ -5,6 +6,7 @@ body {
     margin: 0;
 }
 
+/* Navbar */
 .navbar {
     background-color: #1e3a8a;
     overflow: hidden;
@@ -47,6 +49,7 @@ body {
     background-color: #dc2626; /* Vermelho */
 }
 
+/* Dropdown */
 .dropdown-content {
     display: none;
     position: absolute;
@@ -71,7 +74,7 @@ body {
     display: block;
 }
 
-/* Esquema de cores: Vermelho, Azul, Cinza */
+/* Esquema de cores */
 .navbar {
     background-color: #1e3a8a; /* Azul */
 }
@@ -123,6 +126,7 @@ body {
     background-color: #dc2626;
 }
 
+/* Container principal */
 .container {
     background-color: white;
     padding: 20px;
@@ -134,10 +138,12 @@ body {
     overflow-y: auto;
 }
 
+/* Títulos */
 h1, h2 {
     text-align: center;
 }
 
+/* Formulário */
 .form-container {
     margin-top: 12px;
 }
@@ -161,6 +167,7 @@ h1, h2 {
     box-sizing: border-box;
 }
 
+/* Botões */
 .button {
     width: 100%;
     padding: 10px;
@@ -170,6 +177,7 @@ h1, h2 {
     border-radius: 4px;
     cursor: pointer;
     margin-top: 10px;
+    transition: background-color 0.3s;
 }
 
 .button:hover {
@@ -181,6 +189,7 @@ h1, h2 {
     padding: 8px 12px;
 }
 
+/* Ações */
 .actions {
     display: flex;
     justify-content: space-between;
@@ -191,6 +200,7 @@ h1, h2 {
     margin: 0 5px;
 }
 
+/* Listas */
 #meeting-list,
 #consult-results {
     list-style-type: none;
@@ -198,7 +208,7 @@ h1, h2 {
     margin: 15px 0;
 }
 
-/* Adicione margens entre os botões no formulário de consulta e cancelamento */
+/* Margens entre botões nos formulários de consulta e cancelamento */
 #consult-form .button,
 #cancel-form .button {
     margin-top: 10px;
