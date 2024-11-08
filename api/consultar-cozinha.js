@@ -3,7 +3,7 @@ const app = express();
 const db = require('./database'); // Presume que você tem um arquivo de conexão com o banco de dados
 
 // Rota para consultar reservas da cozinha
-app.get('/consultar-Cozinha', async (req, res) => {
+app.get('/consultar-cozinha', async (req, res) => {
     const { date } = req.query; // Obtém a data a partir dos parâmetros da URL
 
     try {
