@@ -122,23 +122,47 @@ h1 {
     padding: 10px 20px;
 }
 
-/* Listas */
-#meeting-list,
-#consult-results {
-    list-style-type: none;
-    padding: 0;
-    margin: 15px 0;
+/* Estilo para as tabelas */
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 0.9em;
+    font-family: "Fredoka One", cursive;
+    color: #333;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* Margens entre botões nos formulários de consulta e cancelamento */
-#consult-form .button,
-#cancel-form .button {
-    margin-top: 10px;
+.styled-table th, .styled-table td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    text-align: center;
 }
 
-#consult-form .button:first-of-type,
-#cancel-form .button:first-of-type {
-    margin-right: 10px;
+.styled-table th {
+    background-color: #4B0082;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.styled-table tr:nth-child(even) {
+    background-color: #f3f3f3;
+}
+
+.styled-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+.styled-table input[type="checkbox"] {
+    transform: scale(1.2);
+    cursor: pointer;
+}
+
+/* Centralizar o checkbox de seleção */
+.styled-table th:first-child,
+.styled-table td:first-child {
+    text-align: center;
+    width: 50px;
 }
 
 /* Janela de confirmação */
