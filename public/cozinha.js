@@ -1,3 +1,14 @@
+// Função para formatar data e horário para o padrão pt-BR
+function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('pt-BR');
+}
+
+function formatTime(timeStr) {
+    const [hours, minutes] = timeStr.split(':');
+    return `${hours}:${minutes}`;
+}
+
 // Alterna exibição do formulário de consulta
 function toggleConsultForm() {
     const consultForm = document.getElementById('consult-form');
@@ -50,17 +61,25 @@ function consultKitchenReservations() {
     fetch(`/consultar-cozinha?date=${date}`)
     .then(response => response.json())
     .then(data => {
-        const resultsList = document.getElementById('consult-results');
-        resultsList.innerHTML = '';
+        const resultsTable = document.getElementById('consult-results-table');
+        const resultsBody = document.getElementById('consult-results');
+        resultsBody.innerHTML = ''; // Limpa os resultados anteriores
 
         if (data.length > 0) {
+            resultsTable.style.display = 'table';
             data.forEach(reservation => {
-                const listItem = document.createElement('li');
-                listItem.textContent = `ID: ${reservation.id}, Horário: ${reservation.time}, Equipe: ${reservation.team}, Motivo: ${reservation.reason}`;
-                resultsList.appendChild(listItem);
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${formatDate(reservation.date)}</td>
+                    <td>${formatTime(reservation.time)}</td>
+                    <td>${reservation.team}</td>
+                    <td>${reservation.reason}</td>
+                `;
+                resultsBody.appendChild(row);
             });
         } else {
-            resultsList.innerHTML = '<li>Nenhuma reserva encontrada para esta data.</li>';
+            resultsTable.style.display = 'none';
+            alert('Nenhuma reserva encontrada para esta data.');
         }
     })
     .catch(error => {
@@ -74,18 +93,23 @@ function loadCancellations() {
     fetch(`/consultar-cozinha`)
     .then(response => response.json())
     .then(data => {
-        const cancelList = document.getElementById('cancel-results');
-        cancelList.innerHTML = '';
+        const cancelTable = document.getElementById('cancel-results-table');
+        const cancelBody = document.getElementById('cancel-results');
+        cancelBody.innerHTML = ''; // Limpa os resultados anteriores
 
         if (data.length > 0) {
             data.forEach(reservation => {
-                const listItem = document.createElement('li');
-                listItem.innerHTML = `ID: ${reservation.id}, Data: ${reservation.date}, Horário: ${reservation.time}, Equipe: ${reservation.team} 
-                    <button onclick="cancelKitchenReservation(${reservation.id})" class="button-small">Cancelar</button>`;
-                cancelList.appendChild(listItem);
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><input type="checkbox" class="cancel-checkbox" value="${reservation.id}"></td>
+                    <td>${formatDate(reservation.date)}</td>
+                    <td>${formatTime(reservation.time)}</td>
+                    <td>${reservation.team}</td>
+                `;
+                cancelBody.appendChild(row);
             });
         } else {
-            cancelList.innerHTML = '<li>Não há reservas para cancelar.</li>';
+            alert('Não há reservas para cancelar.');
         }
     })
     .catch(error => {
@@ -94,20 +118,37 @@ function loadCancellations() {
     });
 }
 
-// Cancelamento de reserva da cozinha
-function cancelKitchenReservation(reservationId) {
-    fetch(`/cancelar-cozinha/${reservationId}`, {
-        method: 'DELETE'
-    })
-    .then(response => response.json())
-    .then(result => {
-        alert(result.message);
-        if (result.success) {
-            loadCancellations(); // Recarrega a lista de cancelamento após sucesso
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Erro ao cancelar reserva.');
+// Seleciona/Deseleciona todos os checkboxes
+function toggleSelectAll(checkbox) {
+    const checkboxes = document.querySelectorAll('.cancel-checkbox');
+    checkboxes.forEach(cb => cb.checked = checkbox.checked);
+}
+
+// Cancela as reservas selecionadas
+function cancelSelectedReservations() {
+    const selectedIds = Array.from(document.querySelectorAll('.cancel-checkbox:checked'))
+                              .map(checkbox => checkbox.value);
+
+    if (selectedIds.length === 0) {
+        alert('Selecione pelo menos uma reserva para cancelar.');
+        return;
+    }
+
+    Promise.all(selectedIds.map(id =>
+        fetch(`/cancelar-cozinha/${id}`, { method: 'DELETE' })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                console.log(`Reserva ID ${id} cancelada com sucesso.`);
+            } else {
+                console.error(`Erro ao cancelar reserva ID ${id}:`, result.message);
+            }
+        })
+    )).then(() => {
+        alert('Reservas selecionadas foram canceladas.');
+        loadCancellations(); // Recarrega a lista após cancelamento
+    }).catch(error => {
+        console.error('Erro ao cancelar reservas:', error);
+        alert('Erro ao cancelar reservas.');
     });
 }
