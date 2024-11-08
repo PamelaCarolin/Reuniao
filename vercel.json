@@ -9,8 +9,8 @@
     { "src": "/cancelar", "dest": "/api/cancelar.js" },
     { "src": "/consultar", "dest": "/api/consultar.js" },
     { "src": "/api/products", "dest": "/api/products.js" },
+    { "src": "/reservar-cozinha", "dest": "/api/reservarCozinha.js" },  // Nova rota para reserva da cozinha
     { "src": "/", "dest": "/public/reuniao.html" },
     { "src": "/(.*)", "dest": "/public/$1" }
   ]
 }
-
