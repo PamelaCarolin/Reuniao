@@ -64,13 +64,7 @@
         <!-- Formulário de Cancelamento -->
         <div id="cancel-form" class="form-container" style="display: none;">
             <h2>Cancelar Reserva da Cozinha</h2>
-            <form>
-                <div class="input-group">
-                    <label for="cancel-id">ID da Reserva</label>
-                    <input type="number" id="cancel-id" required>
-                </div>
-                <button type="button" onclick="cancelKitchenReservation()" class="button">Cancelar Reserva</button>
-            </form>
+            <ul id="cancel-results"></ul>
             <button onclick="toggleCancelForm()" class="button">Fechar</button>
         </div>
     </div>
