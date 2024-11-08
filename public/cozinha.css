@@ -1,100 +1,187 @@
-/* cozinha.css */
-
-/* Reset básico */
-* {
+/* Estilo geral */
+body {
+    background: #34E1FF;
+    font-family: "Fredoka One", cursive;
+    overflow-x: hidden;
     margin: 0;
-    padding: 0;
-    box-sizing: border-box;
 }
 
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
-    color: #333;
+/* Estilo para o menu de navegação */
+.menu {
     display: flex;
     justify-content: center;
-    align-items: center;
-    height: 100vh;
+    gap: 15px;
+    margin-top: 20px;
 }
 
+.menu-button {
+    padding: 10px 25px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 25px;
+    font-size: 1em;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.menu-button:hover {
+    background-color: #0056b3;
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.menu-button:active {
+    background-color: #003f7f;
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Container principal */
 .container {
-    width: 100%;
-    max-width: 500px;
-    padding: 20px;
-    background-color: #fff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    text-align: center;
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    width: 90%;
+    margin: 30px auto;
+    overflow-y: auto;
 }
 
 h1 {
+    text-align: center;
     font-size: 1.8em;
+    margin-top: 20px;
     color: #333;
-    margin-bottom: 20px;
 }
 
+/* Formulário */
 .form-container {
-    width: 100%;
-    margin-top: 10px;
+    margin-top: 20px;
 }
 
 .input-group {
     margin-bottom: 15px;
-    text-align: left;
 }
 
 .input-group label {
-    font-size: 1em;
-    color: #555;
-    margin-bottom: 5px;
     display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
 }
 
-.input-group input[type="text"],
-.input-group input[type="date"],
-.input-group input[type="time"],
-.input-group input[type="number"] {
+.input-group input,
+.input-group select {
     width: 100%;
-    padding: 10px;
+    padding: 15px;
     border: 1px solid #ccc;
     border-radius: 5px;
+    box-sizing: border-box;
+    font-family: inherit;
     font-size: 1em;
+    background-color: #f9f9f9;
 }
 
-.input-group input[type="number"] {
-    max-width: 120px;
-}
-
+/* Botão de envio do formulário */
 .button {
     width: 100%;
     padding: 12px;
-    background-color: #4CAF50; /* Cor verde para indicar ação */
+    background-color: #4B0082;
+    color: white;
     border: none;
-    border-radius: 5px;
-    color: #fff;
-    font-size: 1.1em;
+    border-radius: 25px;
+    font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.3s;
+    font-size: 1.1em;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s, box-shadow 0.3s;
+    margin-top: 20px;
 }
 
 .button:hover {
-    background-color: #45a049;
+    background-color: #9932CC;
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3);
 }
 
 .button:active {
-    background-color: #388E3C;
+    background-color: #6a0080;
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.2);
 }
 
-.button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
+/* Ações */
+.actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
 }
 
-@media (max-width: 500px) {
-    .container {
-        padding: 15px;
-    }
-    .button {
-        font-size: 1em;
-    }
+.actions .button {
+    width: auto;
+    padding: 10px 20px;
+}
+
+/* Listas */
+#meeting-list,
+#consult-results {
+    list-style-type: none;
+    padding: 0;
+    margin: 15px 0;
+}
+
+/* Margens entre botões nos formulários de consulta e cancelamento */
+#consult-form .button,
+#cancel-form .button {
+    margin-top: 10px;
+}
+
+#consult-form .button:first-of-type,
+#cancel-form .button:first-of-type {
+    margin-right: 10px;
+}
+
+/* Janela de confirmação */
+.confirmation-dialog {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    border-radius: 10px;
+}
+
+.confirmation-dialog.open {
+    display: block;
+}
+
+.confirmation-content {
+    text-align: center;
+}
+
+.confirmation-content p {
+    margin-bottom: 20px;
+}
+
+.confirmation-content button {
+    margin: 0 10px;
+    padding: 10px 20px;
+    background-color: #1e3a8a;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.confirmation-content button.yes {
+    background-color: #dc2626;
+}
+
+.confirmation-content button:hover {
+    background-color: #333;
 }
