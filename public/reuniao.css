@@ -1,211 +1,164 @@
-/* Estilo geral */
-body {
-    background: #34E1FF;
-    font-family: "Fredoka One", cursive;
-    overflow-x: hidden;
-    margin: 0;
+// Função para formatar data e horário para o padrão pt-BR
+function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('pt-BR');
 }
 
-/* Estilo para o menu de navegação */
-.menu {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-top: 20px;
+function formatTime(timeStr) {
+    const [hours, minutes] = timeStr.split(':');
+    return `${hours}:${minutes}`;
 }
 
-.menu-button {
-    padding: 10px 25px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 25px;
-    font-size: 1em;
-    cursor: pointer;
-    font-weight: bold;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.3s, box-shadow 0.3s;
+// Alterna exibição do formulário de consulta
+function toggleConsultForm() {
+    const consultForm = document.getElementById('consult-form');
+    consultForm.style.display = consultForm.style.display === 'none' ? 'block' : 'none';
+    document.getElementById('consult-results').innerHTML = ''; // Limpa os resultados anteriores
 }
 
-.menu-button:hover {
-    background-color: #0056b3;
-    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3);
+// Alterna exibição do formulário de cancelamento
+function toggleCancelForm() {
+    const cancelForm = document.getElementById('cancel-form');
+    cancelForm.style.display = cancelForm.style.display === 'none' ? 'block' : 'none';
+    document.getElementById('meeting-list').innerHTML = ''; // Limpa os resultados anteriores
+    loadCancellations(); // Carrega todas as reservas para cancelar
 }
 
-.menu-button:active {
-    background-color: #003f7f;
-    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.2);
+// Evento de submissão do formulário de agendamento de reunião
+document.getElementById('meeting-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const date = document.getElementById('data').value;
+    const time = document.getElementById('horario').value;
+    const duration = document.getElementById('duracao').value;
+    const orador = document.getElementById('nome-orador').value;
+    const setor = document.getElementById('setor').value;
+    const sala = document.getElementById('sala').value;
+    const tipoReuniao = document.getElementById('tipo-reuniao').value;
+    const cliente = document.getElementById('cliente').value;
+    const funcionario = document.getElementById('funcionario').value;
+
+    fetch('/agendar', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ date, time, duration, orador, setor, sala, tipoReuniao, cliente, funcionario })
+    })
+    .then(response => response.json())
+    .then(result => {
+        alert(result.message);
+        if (result.success) {
+            document.getElementById('meeting-form').reset();
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao agendar reunião:', error);
+        alert('Erro ao agendar a reunião.');
+    });
+});
+
+// Consulta de reuniões
+function consultMeetings() {
+    const date = document.getElementById('consulta-data').value;
+    const cliente = document.getElementById('consulta-cliente').value;
+    const orador = document.getElementById('consulta-orador').value;
+    const sala = document.getElementById('consulta-sala').value;
+    const setor = document.getElementById('consulta-setor').value;
+
+    fetch(`/consultar?date=${date}&cliente=${cliente}&orador=${orador}&sala=${sala}&setor=${setor}`)
+    .then(response => response.json())
+    .then(data => {
+        const resultsTable = document.getElementById('consult-results-table');
+        const resultsBody = document.getElementById('consult-results');
+        resultsBody.innerHTML = ''; // Limpa os resultados anteriores
+
+        if (data.length > 0) {
+            resultsTable.style.display = 'table';
+            data.forEach(meeting => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${formatDate(meeting.date)}</td>
+                    <td>${formatTime(meeting.time)}</td>
+                    <td>${meeting.orador}</td>
+                    <td>${meeting.sala}</td>
+                    <td>${meeting.cliente || meeting.funcionario || 'N/A'}</td>
+                `;
+                resultsBody.appendChild(row);
+            });
+        } else {
+            resultsTable.style.display = 'none';
+            alert('Nenhuma reunião encontrada para os critérios fornecidos.');
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao consultar reuniões:', error);
+        alert('Erro ao consultar reuniões.');
+    });
 }
 
-/* Container principal */
-.container {
-    background-color: white;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    max-width: 800px;
-    width: 90%;
-    margin: 30px auto;
-    overflow-y: auto;
+// Carrega todas as reuniões para o cancelamento
+function loadCancellations() {
+    fetch(`/consultar`)
+    .then(response => response.json())
+    .then(data => {
+        const cancelTable = document.getElementById('meeting-list-table');
+        const cancelBody = document.getElementById('meeting-list');
+        cancelBody.innerHTML = ''; // Limpa os resultados anteriores
+
+        if (data.length > 0) {
+            data.forEach(meeting => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><input type="checkbox" class="cancel-checkbox" value="${meeting.id}"></td>
+                    <td>${formatDate(meeting.date)}</td>
+                    <td>${formatTime(meeting.time)}</td>
+                    <td>${meeting.orador}</td>
+                    <td>${meeting.sala}</td>
+                `;
+                cancelBody.appendChild(row);
+            });
+        } else {
+            alert('Não há reuniões para cancelar.');
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao carregar reuniões para cancelamento:', error);
+        alert('Erro ao carregar reuniões para cancelamento.');
+    });
 }
 
-h1, h2 {
-    text-align: center;
-    font-size: 1.8em;
-    margin-top: 20px;
-    color: #333;
+// Seleciona/Deseleciona todos os checkboxes
+function toggleSelectAll(checkbox) {
+    const checkboxes = document.querySelectorAll('.cancel-checkbox');
+    checkboxes.forEach(cb => cb.checked = checkbox.checked);
 }
 
-/* Formulário */
-.form-container {
-    margin-top: 20px;
-}
+// Cancela as reuniões selecionadas
+function cancelSelectedMeetings() {
+    const selectedIds = Array.from(document.querySelectorAll('.cancel-checkbox:checked'))
+                              .map(checkbox => checkbox.value);
 
-.input-group {
-    margin-bottom: 15px;
-}
+    if (selectedIds.length === 0) {
+        alert('Selecione pelo menos uma reunião para cancelar.');
+        return;
+    }
 
-.input-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
-    color: #333;
-}
-
-.input-group input,
-.input-group select {
-    width: 100%;
-    padding: 15px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box;
-    font-family: inherit;
-    font-size: 1em;
-    background-color: #f9f9f9;
-}
-
-/* Botão de envio do formulário */
-.button {
-    width: 100%;
-    padding: 12px;
-    background-color: #4B0082;
-    color: white;
-    border: none;
-    border-radius: 25px;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: 1.1em;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.3s, box-shadow 0.3s;
-    margin-top: 20px;
-}
-
-.button:hover {
-    background-color: #9932CC;
-    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3);
-}
-
-.button:active {
-    background-color: #6a0080;
-    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.2);
-}
-
-/* Ações */
-.actions {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-}
-
-.actions .button {
-    width: auto;
-    padding: 10px 20px;
-}
-
-/* Estilo para as tabelas */
-.styled-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    font-size: 0.9em;
-    font-family: "Fredoka One", cursive;
-    color: #333;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.styled-table th, .styled-table td {
-    padding: 12px 15px;
-    border: 1px solid #ddd;
-    text-align: center;
-}
-
-.styled-table th {
-    background-color: #4B0082;
-    color: #ffffff;
-    font-weight: bold;
-}
-
-.styled-table tr:nth-child(even) {
-    background-color: #f3f3f3;
-}
-
-.styled-table tr:hover {
-    background-color: #f1f1f1;
-}
-
-.styled-table input[type="checkbox"] {
-    transform: scale(1.2);
-    cursor: pointer;
-}
-
-/* Centralizar o checkbox de seleção */
-.styled-table th:first-child,
-.styled-table td:first-child {
-    text-align: center;
-    width: 50px;
-}
-
-/* Janela de confirmação */
-.confirmation-dialog {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    border: 1px solid #ccc;
-    padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    border-radius: 10px;
-}
-
-.confirmation-dialog.open {
-    display: block;
-}
-
-.confirmation-content {
-    text-align: center;
-}
-
-.confirmation-content p {
-    margin-bottom: 20px;
-}
-
-.confirmation-content button {
-    margin: 0 10px;
-    padding: 10px 20px;
-    background-color: #1e3a8a;
-    color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-.confirmation-content button.yes {
-    background-color: #dc2626;
-}
-
-.confirmation-content button:hover {
-    background-color: #333;
+    Promise.all(selectedIds.map(id =>
+        fetch(`/cancelar/${id}`, { method: 'DELETE' })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                console.log(`Reunião ID ${id} cancelada com sucesso.`);
+            } else {
+                console.error(`Erro ao cancelar reunião ID ${id}:`, result.message);
+            }
+        })
+    )).then(() => {
+        alert('Reuniões selecionadas foram canceladas.');
+        loadCancellations(); // Recarrega a lista após cancelamento
+    }).catch(error => {
+        console.error('Erro ao cancelar reuniões:', error);
+        alert('Erro ao cancelar reuniões.');
+    });
 }
