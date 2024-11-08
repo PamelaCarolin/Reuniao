@@ -79,10 +79,14 @@
                 <button type="submit" class="button">Agendar Reunião</button>
             </form>
         </div>
+        
+        <!-- Ações -->
         <div class="actions">
             <button onclick="toggleCancelForm()" class="button">Cancelar Reunião</button>
             <button onclick="toggleConsultForm()" class="button">Consultar Reunião</button>
         </div>
+
+        <!-- Formulário de Cancelamento -->
         <div id="cancel-form" class="form-container" style="display: none;">
             <h2>Cancelar Reunião</h2>
             <div class="input-group">
@@ -94,10 +98,25 @@
                 <input type="text" id="filtro-cliente">
             </div>
             <button type="button" class="button" onclick="filterMeetings()">Filtrar</button>
-            <ul id="meeting-list"></ul>
+            
+            <!-- Tabela de Cancelamento -->
+            <table id="meeting-list-table" class="styled-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" onclick="toggleSelectAll(this)"></th>
+                        <th>Data</th>
+                        <th>Horário</th>
+                        <th>Orador</th>
+                        <th>Sala</th>
+                    </tr>
+                </thead>
+                <tbody id="meeting-list"></tbody>
+            </table>
             <button onclick="cancelSelectedMeetings()" class="button">Cancelar Selecionados</button>
-            <button onclick="closeCancelForm()" class="button">Fechar</button>
+            <button onclick="toggleCancelForm()" class="button">Fechar</button>
         </div>
+
+        <!-- Formulário de Consulta -->
         <div id="consult-form" class="form-container" style="display: none;">
             <h2>Consultar Reunião</h2>
             <form>
@@ -129,7 +148,20 @@
                 <button type="button" onclick="consultMeetings()" class="button">Pesquisar</button>
                 <button type="button" onclick="downloadPDF()" class="button">Baixar PDF</button>
             </form>
-            <ul id="consult-results"></ul>
+            
+            <!-- Tabela de Resultados da Consulta -->
+            <table id="consult-results-table" class="styled-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Horário</th>
+                        <th>Orador</th>
+                        <th>Sala</th>
+                        <th>Cliente/Funcionário</th>
+                    </tr>
+                </thead>
+                <tbody id="consult-results"></tbody>
+            </table>
             <button onclick="toggleConsultForm()" class="button">Fechar</button>
         </div>
     </div>
