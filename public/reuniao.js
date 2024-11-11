@@ -84,25 +84,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Funções para o formulário de consulta e cancelamento de reuniões
     document.getElementById('tipo-reuniao').addEventListener('change', toggleReuniaoTipo);
 
-    const toggleCancelFormBtn = document.getElementById('toggle-cancel-form');
-    if (toggleCancelFormBtn) {
-        toggleCancelFormBtn.addEventListener('click', toggleCancelForm);
-    }
-
-    const toggleConsultFormBtn = document.getElementById('toggle-consult-form');
-    if (toggleConsultFormBtn) {
-        toggleConsultFormBtn.addEventListener('click', toggleConsultForm);
-    }
-
-    const cancelSelectedBtn = document.getElementById('cancel-selected');
-    if (cancelSelectedBtn) {
-        cancelSelectedBtn.addEventListener('click', cancelSelectedMeetings);
-    }
-
-    const downloadPdfBtn = document.getElementById('download-pdf');
-    if (downloadPdfBtn) {
-        downloadPdfBtn.addEventListener('click', downloadPDF);
-    }
+    document.getElementById('toggle-cancel-form').addEventListener('click', toggleCancelForm);
+    document.getElementById('toggle-consult-form').addEventListener('click', toggleConsultForm);
+    document.getElementById('cancel-selected').addEventListener('click', cancelSelectedMeetings);
+    document.getElementById('download-pdf').addEventListener('click', downloadPDF);
 
     // Inicializa a página definindo o estado inicial dos campos
     toggleReuniaoTipo();
@@ -209,7 +194,6 @@ function filterMeetings() {
     });
 }
 
-// Ordenação
 function toggleCancelSortOrder() {
     cancelSortOrder = cancelSortOrder === 'desc' ? 'asc' : 'desc';
     loadMeetings();
@@ -220,7 +204,6 @@ function toggleSortOrder() {
     consultMeetings();
 }
 
-// Função para consultar reuniões
 function consultMeetings() {
     const date = document.getElementById('consulta-data').value;
     const client = document.getElementById('consulta-cliente').value;
@@ -315,7 +298,6 @@ function consultMeetings() {
     });
 }
 
-// Função para download de PDF
 function downloadPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -334,6 +316,10 @@ function downloadPDF() {
         if (!Array.isArray(meetings)) {
             console.error('Erro: resposta inesperada ao consultar reuniões');
             return;
+        }
+
+        if (speaker) {
+            meetings = meetings.filter(meeting => meeting.speaker.toLowerCase().includes(speaker.toLowerCase()));
         }
 
         const tableColumn = ["DATA", "HORÁRIO", "ORADOR", "SALA", "CLIENTE/FUNCIONÁRIO"];
