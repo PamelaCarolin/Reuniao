@@ -1,171 +1,421 @@
-// Executa o código apenas após o carregamento completo do DOM
-document.addEventListener("DOMContentLoaded", function() {
-    // Função para formatar data e horário para o padrão pt-BR
-    function formatDate(dateStr) {
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('pt-BR');
+let cancelSortOrder = 'asc'; // Definindo a ordem de classificação inicial para cancelamento
+let sortOrder = 'asc'; // Definindo a ordem de classificação inicial para consulta
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Função para alternar a visibilidade dos campos "Cliente" e "Funcionário"
+    function toggleReuniaoTipo() {
+        const tipoReuniao = document.getElementById('tipo-reuniao').value;
+        const clienteGroup = document.getElementById('cliente-group');
+        const funcionarioGroup = document.getElementById('funcionario-group');
+
+        if (tipoReuniao === 'externa') {
+            clienteGroup.style.display = 'block';
+            funcionarioGroup.style.display = 'none';
+        } else if (tipoReuniao === 'interna') {
+            clienteGroup.style.display = 'none';
+            funcionarioGroup.style.display = 'block';
+        } else {
+            clienteGroup.style.display = 'none';
+            funcionarioGroup.style.display = 'none';
+        }
     }
 
-    function formatTime(timeStr) {
-        const [hours, minutes] = timeStr.split(':');
-        return `${hours}:${minutes}`;
+    // Função para verificar se o horário da reunião já passou
+    function isPastTime(date, time) {
+        const now = new Date();
+        const meetingTime = new Date(`${date}T${time}`);
+        return meetingTime < now;
     }
 
-    // Alterna exibição do formulário de consulta
-    function toggleConsultForm() {
-        const consultForm = document.getElementById('consult-form');
-        consultForm.style.display = consultForm.style.display === 'none' ? 'block' : 'none';
-        document.getElementById('consult-results').innerHTML = ''; // Limpa os resultados anteriores
+    // Função para validar a entrada de dados no formulário
+    function validateInput(date, time, duration, sector, speaker, room, clientOrEmployee) {
+        return date && time && duration && sector && speaker && room && clientOrEmployee;
     }
 
-    // Alterna exibição do formulário de cancelamento
-    function toggleCancelForm() {
-        const cancelForm = document.getElementById('cancel-form');
-        cancelForm.style.display = cancelForm.style.display === 'none' ? 'block' : 'none';
-        const meetingList = document.getElementById('meeting-list');
-        if (meetingList) meetingList.innerHTML = ''; // Limpa os resultados anteriores
-        loadCancellations(); // Carrega todas as reservas para cancelar
-    }
+    // Função de agendamento de reunião
+    document.getElementById('meeting-form').addEventListener('submit', function(event) {
+        event.preventDefault();
 
-    // Evento de submissão do formulário de agendamento de reunião
-    const meetingForm = document.getElementById('meeting-form');
-    if (meetingForm) {
-        meetingForm.addEventListener('submit', function(event) {
-            event.preventDefault();
+        const date = document.getElementById('data').value;
+        const time = document.getElementById('horario').value;
+        const duration = document.getElementById('duracao').value;
+        const sector = document.getElementById('setor').value;
+        const speaker = document.getElementById('nome-orador').value;
+        const room = document.getElementById('sala').value;
+        const tipoReuniao = document.getElementById('tipo-reuniao').value;
+        const cliente = document.getElementById('cliente').value;
+        const funcionario = document.getElementById('funcionario').value;
 
-            const date = document.getElementById('data').value;
-            const time = document.getElementById('horario').value;
-            const duration = document.getElementById('duracao').value;
-            const orador = document.getElementById('nome-orador').value;
-            const setor = document.getElementById('setor').value;
-            const sala = document.getElementById('sala').value;
-            const tipoReuniao = document.getElementById('tipo-reuniao').value;
-            const cliente = document.getElementById('cliente').value;
-            const funcionario = document.getElementById('funcionario').value;
+        const clientOrEmployee = tipoReuniao === 'externa' ? cliente : funcionario;
 
-            fetch('/agendar', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ date, time, duration, orador, setor, sala, tipoReuniao, cliente, funcionario })
-            })
-            .then(response => response.json())
-            .then(result => {
-                alert(result.message);
-                if (result.success) {
-                    meetingForm.reset();
-                }
-            })
-            .catch(error => {
-                console.error('Erro ao agendar reunião:', error);
-                alert('Erro ao agendar a reunião.');
-            });
-        });
-    }
-
-    // Consulta de reuniões
-    function consultMeetings() {
-        const date = document.getElementById('consulta-data').value;
-        const cliente = document.getElementById('consulta-cliente').value;
-        const orador = document.getElementById('consulta-orador').value;
-        const sala = document.getElementById('consulta-sala').value;
-        const setor = document.getElementById('consulta-setor').value;
-
-        fetch(`/consultar?date=${date}&cliente=${cliente}&orador=${orador}&sala=${sala}&setor=${setor}`)
-        .then(response => response.json())
-        .then(data => {
-            const resultsTable = document.getElementById('consult-results-table');
-            const resultsBody = document.getElementById('consult-results');
-            if (resultsBody) resultsBody.innerHTML = ''; // Limpa os resultados anteriores
-
-            if (data.length > 0) {
-                resultsTable.style.display = 'table';
-                data.forEach(meeting => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${formatDate(meeting.date)}</td>
-                        <td>${formatTime(meeting.time)}</td>
-                        <td>${meeting.orador}</td>
-                        <td>${meeting.sala}</td>
-                        <td>${meeting.cliente || meeting.funcionario || 'N/A'}</td>
-                    `;
-                    resultsBody.appendChild(row);
-                });
-            } else {
-                resultsTable.style.display = 'none';
-                alert('Nenhuma reunião encontrada para os critérios fornecidos.');
-            }
-        })
-        .catch(error => {
-            console.error('Erro ao consultar reuniões:', error);
-            alert('Erro ao consultar reuniões.');
-        });
-    }
-
-    // Carrega todas as reuniões para o cancelamento
-    function loadCancellations() {
-        fetch(`/consultar`)
-        .then(response => response.json())
-        .then(data => {
-            const cancelTable = document.getElementById('meeting-list-table');
-            const cancelBody = document.getElementById('meeting-list');
-            if (cancelBody) cancelBody.innerHTML = ''; // Limpa os resultados anteriores
-
-            if (data.length > 0) {
-                data.forEach(meeting => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td><input type="checkbox" class="cancel-checkbox" value="${meeting.id}"></td>
-                        <td>${formatDate(meeting.date)}</td>
-                        <td>${formatTime(meeting.time)}</td>
-                        <td>${meeting.orador}</td>
-                        <td>${meeting.sala}</td>
-                    `;
-                    cancelBody.appendChild(row);
-                });
-            } else {
-                alert('Não há reuniões para cancelar.');
-            }
-        })
-        .catch(error => {
-            console.error('Erro ao carregar reuniões para cancelamento:', error);
-            alert('Erro ao carregar reuniões para cancelamento.');
-        });
-    }
-
-    // Seleciona/Deseleciona todos os checkboxes
-    function toggleSelectAll(checkbox) {
-        const checkboxes = document.querySelectorAll('.cancel-checkbox');
-        checkboxes.forEach(cb => cb.checked = checkbox.checked);
-    }
-
-    // Cancela as reuniões selecionadas
-    function cancelSelectedMeetings() {
-        const selectedIds = Array.from(document.querySelectorAll('.cancel-checkbox:checked'))
-                                  .map(checkbox => checkbox.value);
-
-        if (selectedIds.length === 0) {
-            alert('Selecione pelo menos uma reunião para cancelar.');
+        if (isPastTime(date, time)) {
+            alert("Não é possível agendar uma reunião para um horário que já passou.");
             return;
         }
 
-        Promise.all(selectedIds.map(id =>
-            fetch(`/cancelar/${id}`, { method: 'DELETE' })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    console.log(`Reunião ID ${id} cancelada com sucesso.`);
-                } else {
-                    console.error(`Erro ao cancelar reunião ID ${id}:`, result.message);
-                }
-            })
-        )).then(() => {
-            alert('Reuniões selecionadas foram canceladas.');
-            loadCancellations(); // Recarrega a lista após cancelamento
-        }).catch(error => {
-            console.error('Erro ao cancelar reuniões:', error);
-            alert('Erro ao cancelar reuniões.');
+        if (!validateInput(date, time, duration, sector, speaker, room, clientOrEmployee)) {
+            alert("Por favor, preencha todos os campos corretamente.");
+            return;
+        }
+
+        fetch('/agendar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ date, time, duration, sector, speaker, room, client: clientOrEmployee })
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                alert(result.message);
+                document.getElementById('meeting-form').reset(); // Redefine o formulário
+                toggleReuniaoTipo(); // Atualiza a visibilidade dos campos
+            } else {
+                alert(result.message || 'Erro ao agendar a reunião. Por favor, tente novamente.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Ocorreu um erro ao agendar a reunião. Por favor, tente novamente.');
         });
+    });
+
+    // Outras funcionalidades para cancelar e consultar reuniões...
+
+    // Adiciona o event listener para o campo de seleção "Tipo de Reunião"
+    document.getElementById('tipo-reuniao').addEventListener('change', toggleReuniaoTipo);
+
+    const toggleCancelFormBtn = document.getElementById('toggle-cancel-form');
+    if (toggleCancelFormBtn) {
+        toggleCancelFormBtn.addEventListener('click', toggleCancelForm);
     }
+
+    const toggleConsultFormBtn = document.getElementById('toggle-consult-form');
+    if (toggleConsultFormBtn) {
+        toggleConsultFormBtn.addEventListener('click', toggleConsultForm);
+    }
+
+    const cancelSelectedBtn = document.getElementById('cancel-selected');
+    if (cancelSelectedBtn) {
+        cancelSelectedBtn.addEventListener('click', cancelSelectedMeetings);
+    }
+
+    const downloadPdfBtn = document.getElementById('download-pdf');
+    if (downloadPdfBtn) {
+        downloadPdfBtn.addEventListener('click', downloadPDF);
+    }
+
+    // Inicializa a página definindo o estado inicial dos campos
+    toggleReuniaoTipo();
 });
+
+function loadMeetings() {
+    filterMeetings();
+}
+
+function filterMeetings() {
+    const filterDate = document.getElementById('filtro-data').value;
+    const filterClient = document.getElementById('filtro-cliente').value;
+
+    const params = new URLSearchParams({ date: filterDate, client: filterClient });
+
+    fetch(`/consultar?${params.toString()}`)
+    .then(response => response.json())
+    .then(meetings => {
+        if (!Array.isArray(meetings)) {
+            console.error('Erro: resposta inesperada ao consultar reuniões');
+            return;
+        }
+
+        meetings.sort((a, b) => {
+            const dateA = new Date(`${a.date}T${a.time}`);
+            const dateB = new Date(`${b.date}T${b.time}`);
+            return cancelSortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+        });
+
+        const meetingList = document.getElementById('meeting-list');
+        meetingList.innerHTML = '';
+
+        const table = document.createElement('table');
+        table.style.width = '100%';
+        table.style.borderCollapse = 'collapse';
+
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+
+        const headers = ['Data', 'Horário', 'Orador', 'Sala', 'Cliente/Funcionário', 'Selecionar'];
+        headers.forEach((headerText, index) => {
+            const th = document.createElement('th');
+            th.textContent = headerText;
+            th.style.border = '1px solid black';
+            th.style.padding = '8px';
+            th.style.textAlign = 'left';
+            th.style.cursor = 'pointer';
+
+            if (index === 0) {
+                const arrow = document.createElement('span');
+                arrow.textContent = cancelSortOrder === 'desc' ? ' ▼' : ' ▲';
+                th.appendChild(arrow);
+                th.addEventListener('click', () => toggleCancelSortOrder());
+            }
+
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+
+        meetings.forEach(meeting => {
+            const row = document.createElement('tr');
+
+            const formattedDate = new Date(meeting.date.split('/').reverse().join('-')).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+            const formattedTime = meeting.time.slice(0, 5);
+
+            const cells = [
+                formattedDate,
+                formattedTime,
+                meeting.speaker,
+                meeting.room,
+                meeting.client
+            ];
+
+            cells.forEach(cellText => {
+                const td = document.createElement('td');
+                td.textContent = cellText;
+                td.style.border = '1px solid black';
+                td.style.padding = '8px';
+                row.appendChild(td);
+            });
+
+            const selectTd = document.createElement('td');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = meeting.id;
+            selectTd.appendChild(checkbox);
+            selectTd.style.border = '1px solid black';
+            selectTd.style.padding = '8px';
+            row.appendChild(selectTd);
+
+            tbody.appendChild(row);
+        });
+
+        table.appendChild(tbody);
+        meetingList.appendChild(table);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Ocorreu um erro ao consultar as reuniões. Por favor, tente novamente.');
+    });
+}
+
+function toggleCancelSortOrder() {
+    cancelSortOrder = cancelSortOrder === 'desc' ? 'asc' : 'desc';
+    loadMeetings();
+}
+
+function toggleSortOrder() {
+    sortOrder = sortOrder === 'desc' ? 'asc' : 'desc';
+    consultMeetings();
+}
+
+function consultMeetings() {
+    const date = document.getElementById('consulta-data').value;
+    const client = document.getElementById('consulta-cliente').value;
+    const speaker = document.getElementById('consulta-orador').value;
+    const room = document.getElementById('consulta-sala').value;
+    const sector = document.getElementById('consulta-setor').value;
+
+    const params = new URLSearchParams({ date, client, speaker, room, sector });
+
+    fetch(`/consultar?${params.toString()}`)
+    .then(response => response.json())
+    .then(meetings => {
+        if (!Array.isArray(meetings)) {
+            console.error('Erro: resposta inesperada ao consultar reuniões');
+            return;
+        }
+
+        meetings.forEach(meeting => {
+            meeting.date = new Date(meeting.date.split('/').reverse().join('-')).toISOString().split('T')[0];
+        });
+
+        meetings.sort((a, b) => {
+            const dateA = new Date(`${a.date}T${a.time}`);
+            const dateB = new Date(`${b.date}T${b.time}`);
+            return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+        });
+
+        const results = document.getElementById('consult-results');
+        results.innerHTML = '';
+
+        const table = document.createElement('table');
+        table.style.width = '100%';
+        table.style.borderCollapse = 'collapse';
+
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+
+        const headers = ['Data', 'Horário', 'Orador', 'Sala', 'Cliente/Funcionário'];
+        headers.forEach((headerText, index) => {
+            const th = document.createElement('th');
+            th.textContent = headerText;
+            th.style.border = '1px solid black';
+            th.style.padding = '8px';
+            th.style.textAlign = 'left';
+            th.style.cursor = 'pointer';
+
+            if (index === 0) {
+                const arrow = document.createElement('span');
+                arrow.textContent = sortOrder === 'desc' ? ' ▼' : ' ▲';
+                th.appendChild(arrow);
+                th.addEventListener('click', () => toggleSortOrder());
+            }
+
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+
+        meetings.forEach(meeting => {
+            const row = document.createElement('tr');
+
+            const formattedDate = new Date(meeting.date.split('/').reverse().join('-')).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+            const formattedTime = meeting.time.slice(0, 5);
+
+            const cells = [
+                formattedDate,
+                formattedTime,
+                meeting.speaker,
+                meeting.room,
+                meeting.client
+            ];
+
+            cells.forEach(cellText => {
+                const td = document.createElement('td');
+                td.textContent = cellText;
+                td.style.border = '1px solid black';
+                td.style.padding = '8px';
+                row.appendChild(td);
+            });
+
+            tbody.appendChild(row);
+        });
+
+        table.appendChild(tbody);
+        results.appendChild(table);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Ocorreu um erro ao consultar as reuniões. Por favor, tente novamente.');
+    });
+}
+
+function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    const date = document.getElementById('consulta-data').value;
+    const client = document.getElementById('consulta-cliente').value;
+    const speaker = document.getElementById('consulta-orador').value;
+    const room = document.getElementById('consulta-sala').value;
+    const sector = document.getElementById('consulta-setor').value;
+
+    const params = new URLSearchParams({ date, client, speaker, room, sector });
+
+    fetch(`/consultar?${params.toString()}`)
+    .then(response => response.json())
+    .then(meetings => {
+        if (!Array.isArray(meetings)) {
+            console.error('Erro: resposta inesperada ao consultar reuniões');
+            return;
+        }
+
+        if (speaker) {
+            meetings = meetings.filter(meeting => meeting.speaker.toLowerCase().includes(speaker.toLowerCase()));
+        }
+
+        const tableColumn = ["DATA", "HORÁRIO", "ORADOR", "SALA", "CLIENTE/FUNCIONÁRIO"];
+        const tableRows = [];
+
+        meetings.forEach(meeting => {
+            const formattedDate = new Date(meeting.date.split('/').reverse().join('-')).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+            const formattedTime = meeting.time.slice(0, 5);
+            const meetingData = [
+                formattedDate,
+                formattedTime,
+                meeting.speaker,
+                meeting.room,
+                meeting.client
+            ];
+            tableRows.push(meetingData);
+        });
+
+        doc.autoTable({
+            head: [tableColumn],
+            body: tableRows,
+            startY: 10,
+            theme: 'striped'
+        });
+
+        doc.save('reunioes.pdf');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Ocorreu um erro ao gerar o PDF. Por favor, tente novamente.');
+    });
+}
+
+function toggleCancelForm() {
+    const cancelForm = document.getElementById('cancel-form');
+    cancelForm.style.display = cancelForm.style.display === 'block' ? 'none' : 'block';
+    if (cancelForm.style.display === 'block') {
+        loadMeetings();
+    }
+}
+
+function toggleConsultForm() {
+    const consultForm = document.getElementById('consult-form');
+    consultForm.style.display = consultForm.style.display === 'block' ? 'none' : 'block';
+}
+
+function cancelSelectedMeetings() {
+    const checkboxes = document.querySelectorAll('#meeting-list input[type="checkbox"]:checked');
+    const ids = Array.from(checkboxes).map(checkbox => checkbox.value);
+
+    if (ids.length === 0) {
+        alert('Selecione pelo menos uma reunião para cancelar.');
+        return;
+    }
+
+    if (!confirm('Você tem certeza que deseja cancelar as reuniões selecionadas?')) {
+        return;
+    }
+
+    ids.forEach(id => cancelMeeting(id));
+}
+
+function cancelMeeting(id) {
+    fetch('/cancelar', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ id })
+    })
+    .then(response => response.json())
+    .then(result => {
+        alert(result.message);
+        loadMeetings();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Ocorreu um erro ao cancelar a reunião. Por favor, tente novamente.');
+    });
+}
+
+function closeCancelForm() {
+    document.getElementById('cancel-form').style.display = 'none';
