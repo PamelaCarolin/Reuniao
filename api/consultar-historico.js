@@ -1,38 +1,44 @@
-// consultar-historico.js
 const db = require('./database');
 
 module.exports = async (req, res) => {
-    const { dataInicial, dataFinal, setor, orador, sala } = req.query;
+    const { startDate, endDate, sector, speaker, room } = req.query;
 
     try {
-        let query = `SELECT * FROM historico_reunioes WHERE 1=1`;
-        const values = [];
+        // Monta a query com base nos filtros recebidos
+        let query = `SELECT * FROM meetings WHERE date <= CURRENT_DATE`;
+        const queryParams = [];
 
-        if (dataInicial) {
-            values.push(dataInicial);
-            query += ` AND date >= $${values.length}`;
-        }
-        if (dataFinal) {
-            values.push(dataFinal);
-            query += ` AND date <= $${values.length}`;
-        }
-        if (setor) {
-            values.push(`%${setor}%`);
-            query += ` AND sector ILIKE $${values.length}`;
-        }
-        if (orador) {
-            values.push(`%${orador}%`);
-            query += ` AND speaker ILIKE $${values.length}`;
-        }
-        if (sala) {
-            values.push(sala);
-            query += ` AND room = $${values.length}`;
+        if (startDate) {
+            queryParams.push(startDate);
+            query += ` AND date >= $${queryParams.length}`;
         }
 
-        const { rows } = await db.query(query, values);
+        if (endDate) {
+            queryParams.push(endDate);
+            query += ` AND date <= $${queryParams.length}`;
+        }
+
+        if (sector) {
+            queryParams.push(sector);
+            query += ` AND sector = $${queryParams.length}`;
+        }
+
+        if (speaker) {
+            queryParams.push(speaker);
+            query += ` AND speaker = $${queryParams.length}`;
+        }
+
+        if (room) {
+            queryParams.push(room);
+            query += ` AND room = $${queryParams.length}`;
+        }
+
+        // Executa a consulta no banco de dados
+        const { rows } = await db.query(query, queryParams);
+
         res.status(200).json(rows);
-    } catch (error) {
-        console.error('Erro ao consultar histórico de reuniões:', error);
-        res.status(500).json({ error: 'Erro ao consultar histórico de reuniões' });
+    } catch (err) {
+        console.error('Erro ao consultar histórico de reuniões:', err);
+        res.status(500).json({ error: 'Erro ao consultar histórico de reuniões.' });
     }
 };
