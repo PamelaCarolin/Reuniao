@@ -20,6 +20,7 @@
         <h1>Agendamento de Sala de Reunião</h1>
         <div class="form-container">
             <form id="meeting-form">
+                <!-- Formulário de agendamento de reunião (mesmo conteúdo que antes) -->
                 <div class="input-group">
                     <label for="data">Data</label>
                     <input type="date" id="data" required>
@@ -83,31 +84,14 @@
             <button onclick="toggleCancelForm()" class="button">Cancelar Reunião</button>
             <button onclick="toggleConsultForm()" class="button">Consultar Reunião</button>
         </div>
-        <div id="cancel-form" class="form-container" style="display: none;">
-            <h2>Cancelar Reunião</h2>
-            <div class="input-group">
-                <label for="filtro-data">Filtrar por Data</label>
-                <input type="date" id="filtro-data">
-            </div>
-            <div class="input-group">
-                <label for="filtro-cliente">Filtrar por Cliente</label>
-                <input type="text" id="filtro-cliente">
-            </div>
-            <button type="button" class="button" onclick="filterMeetings()">Filtrar</button>
-            <ul id="meeting-list"></ul>
-            <button onclick="cancelSelectedMeetings()" class="button">Cancelar Selecionados</button>
-            <button onclick="closeCancelForm()" class="button">Fechar</button>
-        </div>
+        
+        <!-- Formulário de consulta -->
         <div id="consult-form" class="form-container" style="display: none;">
-            <h2>Consultar Reunião</h2>
+            <h2>Consultar Reuniões (Atuais e Passadas)</h2>
             <form>
                 <div class="input-group">
                     <label for="consulta-data">Data</label>
                     <input type="date" id="consulta-data">
-                </div>
-                <div class="input-group">
-                    <label for="consulta-cliente">Cliente</label>
-                    <input type="text" id="consulta-cliente">
                 </div>
                 <div class="input-group">
                     <label for="consulta-orador">Orador</label>
@@ -122,42 +106,14 @@
                         <option value="Teams">Teams</option>
                     </select>
                 </div>
-                <div class="input-group">
-                    <label for="consulta-setor">Setor</label>
-                    <input type="text" id="consulta-setor">
-                </div>
-                <button type="button" onclick="consultMeetings()" class="button">Pesquisar</button>
-                <button type="button" onclick="downloadPDF()" class="button">Baixar PDF</button>
-                <button type="button" id="generate-report" class="button">Relatório de Reuniões</button>
+                <button type="button" onclick="consultAllMeetings()" class="button">Pesquisar</button>
+                <button type="button" onclick="downloadAllMeetingsPDF()" class="button">Baixar PDF</button>
             </form>
             <ul id="consult-results"></ul>
             <button onclick="toggleConsultForm()" class="button">Fechar</button>
         </div>
-
-        <!-- Formulário para o Relatório de Reuniões Antigas -->
-        <div id="report-form" class="form-container" style="display: none;">
-            <h2>Configurar Relatório de Reuniões</h2>
-            <div class="input-group">
-                <label for="report-start-date">Data de Início</label>
-                <input type="date" id="report-start-date" required>
-            </div>
-            <div class="input-group">
-                <label for="report-end-date">Data de Término</label>
-                <input type="date" id="report-end-date" required>
-            </div>
-            <div class="input-group">
-                <label for="report-speaker">Orador</label>
-                <input type="text" id="report-speaker">
-            </div>
-            <div class="input-group">
-                <label for="report-room">Sala</label>
-                <input type="text" id="report-room">
-            </div>
-            <button onclick="generateReport()" class="button">Gerar Relatório em PDF</button>
-            <button onclick="toggleReportForm()" class="button">Fechar</button>
-        </div>
     </div>
+
     <script src="reuniao.js"></script>
-    <script src="manutencao.js"></script> <!-- Incluindo o novo script de manutenção -->
 </body>
 </html>
