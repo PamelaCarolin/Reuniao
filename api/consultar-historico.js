@@ -1,38 +1,37 @@
 const db = require('./database');
 
 module.exports = async (req, res) => {
-    const { dataInicial, dataFinal, setor, orador, sala } = req.query;
+    const { startDate, endDate, sector, speaker, room } = req.query;
 
     try {
-        let query = `SELECT * FROM meetings WHERE 1=1`; // Base da consulta
+        let query = `SELECT * FROM historico_reunioes WHERE 1=1`;
         const queryParams = [];
 
-        if (dataInicial) {
-            queryParams.push(dataInicial);
+        if (startDate) {
+            queryParams.push(startDate);
             query += ` AND date >= $${queryParams.length}`;
         }
 
-        if (dataFinal) {
-            queryParams.push(dataFinal);
+        if (endDate) {
+            queryParams.push(endDate);
             query += ` AND date <= $${queryParams.length}`;
         }
 
-        if (setor) {
-            queryParams.push(setor);
+        if (sector) {
+            queryParams.push(sector);
             query += ` AND sector = $${queryParams.length}`;
         }
 
-        if (orador) {
-            queryParams.push(orador);
+        if (speaker) {
+            queryParams.push(speaker);
             query += ` AND speaker = $${queryParams.length}`;
         }
 
-        if (sala) {
-            queryParams.push(sala);
+        if (room) {
+            queryParams.push(room);
             query += ` AND room = $${queryParams.length}`;
         }
 
-        // Executa a consulta no banco de dados
         const { rows } = await db.query(query, queryParams);
         res.status(200).json(rows);
     } catch (err) {
