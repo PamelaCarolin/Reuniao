@@ -1,5 +1,5 @@
-let cancelSortOrder = 'asc'; // Ordem de classificação inicial para cancelamento
-let sortOrder = 'asc'; // Ordem de classificação inicial para consulta
+let cancelSortOrder = 'asc'; // Definindo a ordem de classificação inicial para cancelamento
+let sortOrder = 'asc'; // Definindo a ordem de classificação inicial para consulta
 
 document.addEventListener('DOMContentLoaded', function() {
     // Função para alternar a visibilidade dos campos "Cliente" e "Funcionário"
@@ -58,6 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // Requisição para o backend
         fetch('/agendar', {
             method: 'POST',
             headers: {
@@ -71,6 +72,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert(result.message);
                 document.getElementById('meeting-form').reset(); // Redefine o formulário
                 toggleReuniaoTipo(); // Atualiza a visibilidade dos campos
+
+                // Perguntar se deseja baixar o arquivo .ics
+                if (confirm('Deseja adicionar esta reunião ao seu calendário?')) {
+                    criarICSArquivo(date, time, duration, speaker, clientOrEmployee, room);
+                }
+            } else if (result.conflict) {
+                const conflict = result.conflict;
+                const conflictEndTime = new Date(`1970-01-01T${conflict.endTime}`).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+                alert(`Conflito detectado com a seguinte reunião:\nData: ${conflict.date}\nHorário de início: ${conflict.time}\nTérmino: ${conflictEndTime}\nOrador: ${conflict.speaker}\nSala: ${conflict.room}\nCliente/Funcionário: ${conflict.client}`);
             } else {
                 alert(result.message || 'Erro ao agendar a reunião. Por favor, tente novamente.');
             }
@@ -81,19 +92,81 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Funções para o formulário de consulta e cancelamento de reuniões
+    // Função para criar um arquivo .ics sem organizador
+    function criarICSArquivo(date, time, duration, speaker, clientOrEmployee, room) {
+        // Convertendo data e hora para o formato adequado
+        const startDate = new Date(`${date}T${time}`);
+        const endDate = new Date(startDate.getTime() + duration * 60000);
+
+        // Formatação da data no formato ICS com UTC (Z indica UTC)
+        const formattedStartDate = startDate.toISOString().replace(/-|:|\.\d+/g, '') + 'Z';
+        const formattedEndDate = endDate.toISOString().replace(/-|:|\.\d+/g, '') + 'Z';
+
+        // Conteúdo do arquivo .ics sem o organizador e com descrição vazia
+        const icsContent = `
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Agendamento de Reunião
+CALSCALE:GREGORIAN
+METHOD:REQUEST
+BEGIN:VEVENT
+UID:${new Date().getTime()}@example.com
+DTSTAMP:${formattedStartDate}
+DTSTART:${formattedStartDate}
+DTEND:${formattedEndDate}
+SUMMARY:Reunião com ${clientOrEmployee}
+DESCRIPTION:
+LOCATION:${room}
+STATUS:CONFIRMED
+SEQUENCE:0
+TRANSP:OPAQUE
+END:VEVENT
+END:VCALENDAR
+        `.trim();
+
+        // Criar um arquivo blob com o conteúdo do ICS
+        const blob = new Blob([icsContent], { type: 'text/calendar' });
+        const url = window.URL.createObjectURL(blob);
+
+        // Criar um link temporário para download
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'reuniao.ics';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }
+
+    // Adiciona o event listener para o campo de seleção "Tipo de Reunião"
     document.getElementById('tipo-reuniao').addEventListener('change', toggleReuniaoTipo);
 
-    document.getElementById('toggle-cancel-form').addEventListener('click', toggleCancelForm);
-    document.getElementById('toggle-consult-form').addEventListener('click', toggleConsultForm);
-    document.getElementById('cancel-selected').addEventListener('click', cancelSelectedMeetings);
-    document.getElementById('download-pdf').addEventListener('click', downloadPDF);
+    const toggleCancelFormBtn = document.getElementById('toggle-cancel-form');
+    if (toggleCancelFormBtn) {
+        toggleCancelFormBtn.addEventListener('click', toggleCancelForm);
+    }
+
+    const toggleConsultFormBtn = document.getElementById('toggle-consult-form');
+    if (toggleConsultFormBtn) {
+        toggleConsultFormBtn.addEventListener('click', toggleConsultForm);
+    }
+
+    const cancelSelectedBtn = document.getElementById('cancel-selected');
+    if (cancelSelectedBtn) {
+        cancelSelectedBtn.addEventListener('click', cancelSelectedMeetings);
+    }
+
+    const downloadPdfBtn = document.getElementById('download-pdf');
+    if (downloadPdfBtn) {
+        downloadPdfBtn.addEventListener('click', downloadPDF);
+    }
 
     // Inicializa a página definindo o estado inicial dos campos
     toggleReuniaoTipo();
 });
 
-// Função para carregar e filtrar reuniões para o cancelamento
+// Outras funcionalidades para cancelar e consultar reuniões...
+
 function loadMeetings() {
     filterMeetings();
 }
