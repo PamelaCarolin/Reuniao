@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agendamento de Reunião</title>
     <link rel="stylesheet" href="reuniao.css">
-    <link rel="icon" type="image/x-icon" href="logo.ico"> <!-- Favicon atualizado -->
+    <link rel="icon" type="image/x-icon" href="logo.ico">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
     <!-- Menu de navegação -->
@@ -45,7 +47,7 @@
                         <option value="RH">RH</option>
                         <option value="Departamento Pessoal">Departamento Pessoal</option>
                         <option value="Coordenadores">Coordenadores</option>
-                        <option value="Gerencia">Gerencia</option> <!-- Setor Gerencia adicionado -->
+                        <option value="Gerencia">Gerencia</option>
                         <option value="Contabil">Contabil</option>
                         <option value="Comercial">Comercial</option>
                     </select>
@@ -77,13 +79,10 @@
                 <button type="submit" class="button">Agendar Reunião</button>
             </form>
         </div>
-
         <div class="actions">
             <button onclick="toggleCancelForm()" class="button">Cancelar Reunião</button>
             <button onclick="toggleConsultForm()" class="button">Consultar Reunião</button>
         </div>
-
-        <!-- Formulário de Cancelamento -->
         <div id="cancel-form" class="form-container" style="display: none;">
             <h2>Cancelar Reunião</h2>
             <div class="input-group">
@@ -99,8 +98,6 @@
             <button onclick="cancelSelectedMeetings()" class="button">Cancelar Selecionados</button>
             <button onclick="closeCancelForm()" class="button">Fechar</button>
         </div>
-
-        <!-- Formulário de Consulta -->
         <div id="consult-form" class="form-container" style="display: none;">
             <h2>Consultar Reunião</h2>
             <form>
@@ -131,12 +128,36 @@
                 </div>
                 <button type="button" onclick="consultMeetings()" class="button">Pesquisar</button>
                 <button type="button" onclick="downloadPDF()" class="button">Baixar PDF</button>
+                <button type="button" id="generate-report" class="button">Relatório de Reuniões</button>
             </form>
             <ul id="consult-results"></ul>
             <button onclick="toggleConsultForm()" class="button">Fechar</button>
         </div>
-    </div>
 
+        <!-- Formulário para o Relatório de Reuniões Antigas -->
+        <div id="report-form" class="form-container" style="display: none;">
+            <h2>Configurar Relatório de Reuniões</h2>
+            <div class="input-group">
+                <label for="report-start-date">Data de Início</label>
+                <input type="date" id="report-start-date" required>
+            </div>
+            <div class="input-group">
+                <label for="report-end-date">Data de Término</label>
+                <input type="date" id="report-end-date" required>
+            </div>
+            <div class="input-group">
+                <label for="report-speaker">Orador</label>
+                <input type="text" id="report-speaker">
+            </div>
+            <div class="input-group">
+                <label for="report-room">Sala</label>
+                <input type="text" id="report-room">
+            </div>
+            <button onclick="generateReport()" class="button">Gerar Relatório em PDF</button>
+            <button onclick="toggleReportForm()" class="button">Fechar</button>
+        </div>
+    </div>
     <script src="reuniao.js"></script>
+    <script src="manutencao.js"></script> <!-- Incluindo o novo script de manutenção -->
 </body>
 </html>
