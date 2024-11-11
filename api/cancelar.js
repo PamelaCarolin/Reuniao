@@ -3,12 +3,12 @@ const db = require('./database');
 module.exports = async (req, res) => {
     const { id } = req.body;
 
+    const clientDB = await db.connect();
+
     try {
-        // Inicia uma transação
-        const clientDB = await db.connect();
         await clientDB.query('BEGIN');
 
-        // Busca os detalhes da reunião antes de deletá-la
+        // Primeiro, obtenha os detalhes da reunião que será cancelada
         const selectQuery = `SELECT * FROM meetings WHERE id = $1`;
         const { rows } = await clientDB.query(selectQuery, [id]);
 
@@ -19,22 +19,30 @@ module.exports = async (req, res) => {
 
         const meeting = rows[0];
 
-        // Inserir a reunião cancelada no histórico com o status "cancelada"
-        const historyQuery = `
-            INSERT INTO historico_reunioes (date, time, duration, sector, speaker, room, client, status) 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, 'cancelada')
+        // Insere a reunião na tabela de histórico antes de deletá-la da tabela principal
+        const insertQuery = `
+            INSERT INTO meetings_historico (date, time, duration, sector, speaker, room, client, status)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         `;
-        const historyValues = [meeting.date, meeting.time, meeting.duration, meeting.sector, meeting.speaker, meeting.room, meeting.client];
-        await clientDB.query(historyQuery, historyValues);
+        const insertValues = [
+            meeting.date,
+            meeting.time,
+            meeting.duration,
+            meeting.sector,
+            meeting.speaker,
+            meeting.room,
+            meeting.client,
+            'Concluída'  // Define o status como "Concluída" ao mover para o histórico
+        ];
+        await clientDB.query(insertQuery, insertValues);
 
-        // Deleta a reunião da tabela principal
+        // Agora, exclua a reunião da tabela principal
         const deleteQuery = `DELETE FROM meetings WHERE id = $1`;
         await clientDB.query(deleteQuery, [id]);
 
-        // Confirma a transação
         await clientDB.query('COMMIT');
 
-        res.json({ success: true, message: 'Reunião cancelada com sucesso!' });
+        res.json({ success: true, message: 'Reunião cancelada com sucesso e movida para o histórico.' });
     } catch (err) {
         await clientDB.query('ROLLBACK');
         console.error('Erro ao cancelar reunião:', err);
