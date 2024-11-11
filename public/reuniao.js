@@ -1,5 +1,5 @@
-let cancelSortOrder = 'asc'; // Definindo a ordem de classificação inicial para cancelamento
-let sortOrder = 'asc'; // Definindo a ordem de classificação inicial para consulta
+let cancelSortOrder = 'asc'; // Ordem de classificação inicial para cancelamento
+let sortOrder = 'asc'; // Ordem de classificação inicial para consulta
 
 document.addEventListener('DOMContentLoaded', function() {
     // Função para alternar a visibilidade dos campos "Cliente" e "Funcionário"
@@ -81,9 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Outras funcionalidades para cancelar e consultar reuniões...
-
-    // Adiciona o event listener para o campo de seleção "Tipo de Reunião"
+    // Funções para o formulário de consulta e cancelamento de reuniões
     document.getElementById('tipo-reuniao').addEventListener('change', toggleReuniaoTipo);
 
     const toggleCancelFormBtn = document.getElementById('toggle-cancel-form');
@@ -110,6 +108,7 @@ document.addEventListener('DOMContentLoaded', function() {
     toggleReuniaoTipo();
 });
 
+// Função para carregar e filtrar reuniões para o cancelamento
 function loadMeetings() {
     filterMeetings();
 }
@@ -210,6 +209,7 @@ function filterMeetings() {
     });
 }
 
+// Ordenação
 function toggleCancelSortOrder() {
     cancelSortOrder = cancelSortOrder === 'desc' ? 'asc' : 'desc';
     loadMeetings();
@@ -220,6 +220,7 @@ function toggleSortOrder() {
     consultMeetings();
 }
 
+// Função para consultar reuniões
 function consultMeetings() {
     const date = document.getElementById('consulta-data').value;
     const client = document.getElementById('consulta-cliente').value;
@@ -314,6 +315,7 @@ function consultMeetings() {
     });
 }
 
+// Função para download de PDF
 function downloadPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -332,10 +334,6 @@ function downloadPDF() {
         if (!Array.isArray(meetings)) {
             console.error('Erro: resposta inesperada ao consultar reuniões');
             return;
-        }
-
-        if (speaker) {
-            meetings = meetings.filter(meeting => meeting.speaker.toLowerCase().includes(speaker.toLowerCase()));
         }
 
         const tableColumn = ["DATA", "HORÁRIO", "ORADOR", "SALA", "CLIENTE/FUNCIONÁRIO"];
@@ -419,3 +417,4 @@ function cancelMeeting(id) {
 
 function closeCancelForm() {
     document.getElementById('cancel-form').style.display = 'none';
+}
