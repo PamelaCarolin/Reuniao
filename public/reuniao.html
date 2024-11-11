@@ -5,17 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agendamento de Reunião</title>
     <link rel="stylesheet" href="reuniao.css">
-    <link rel="icon" type="image/x-icon" href="logo.ico">
+    <link rel="icon" type="image/x-icon" href="logo.ico"> <!-- Favicon atualizado -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
-    <!-- Menu de navegação -->
-    <div class="menu">
-        <button onclick="window.location.href='reuniao.html'" class="menu-button">Agendamento de Reunião</button>
-        <button onclick="window.location.href='cozinha.html'" class="menu-button">Reserva da Cozinha</button>
-    </div>
-
     <div class="container">
         <h1>Agendamento de Sala de Reunião</h1>
         <div class="form-container">
@@ -47,7 +41,7 @@
                         <option value="RH">RH</option>
                         <option value="Departamento Pessoal">Departamento Pessoal</option>
                         <option value="Coordenadores">Coordenadores</option>
-                        <option value="Gerencia">Gerencia</option>
+                        <option value="Gerencia">Gerencia</option> <!-- Setor Gerencia adicionado -->
                         <option value="Contabil">Contabil</option>
                         <option value="Comercial">Comercial</option>
                     </select>
@@ -79,14 +73,10 @@
                 <button type="submit" class="button">Agendar Reunião</button>
             </form>
         </div>
-        
-        <!-- Ações -->
         <div class="actions">
             <button onclick="toggleCancelForm()" class="button">Cancelar Reunião</button>
             <button onclick="toggleConsultForm()" class="button">Consultar Reunião</button>
         </div>
-
-        <!-- Formulário de Cancelamento -->
         <div id="cancel-form" class="form-container" style="display: none;">
             <h2>Cancelar Reunião</h2>
             <div class="input-group">
@@ -98,25 +88,10 @@
                 <input type="text" id="filtro-cliente">
             </div>
             <button type="button" class="button" onclick="filterMeetings()">Filtrar</button>
-            
-            <!-- Tabela de Cancelamento -->
-            <table id="meeting-list-table" class="styled-table" style="display: none;">
-                <thead>
-                    <tr>
-                        <th><input type="checkbox" onclick="toggleSelectAll(this)"></th>
-                        <th>Data</th>
-                        <th>Horário</th>
-                        <th>Orador</th>
-                        <th>Sala</th>
-                    </tr>
-                </thead>
-                <tbody id="meeting-list"></tbody>
-            </table>
+            <ul id="meeting-list"></ul>
             <button onclick="cancelSelectedMeetings()" class="button">Cancelar Selecionados</button>
-            <button onclick="toggleCancelForm()" class="button">Fechar</button>
+            <button onclick="closeCancelForm()" class="button">Fechar</button>
         </div>
-
-        <!-- Formulário de Consulta -->
         <div id="consult-form" class="form-container" style="display: none;">
             <h2>Consultar Reunião</h2>
             <form>
@@ -129,7 +104,7 @@
                     <input type="text" id="consulta-cliente">
                 </div>
                 <div class="input-group">
-                    <label for="consulta-orador">Orador</label>
+                    <label for="consulta-orador">Orador</label> <!-- Funcionario trocado para Orador -->
                     <input type="text" id="consulta-orador">
                 </div>
                 <div class="input-group">
@@ -148,24 +123,10 @@
                 <button type="button" onclick="consultMeetings()" class="button">Pesquisar</button>
                 <button type="button" onclick="downloadPDF()" class="button">Baixar PDF</button>
             </form>
-            
-            <!-- Tabela de Resultados da Consulta -->
-            <table id="consult-results-table" class="styled-table" style="display: none;">
-                <thead>
-                    <tr>
-                        <th>Data</th>
-                        <th>Horário</th>
-                        <th>Orador</th>
-                        <th>Sala</th>
-                        <th>Cliente/Funcionário</th>
-                    </tr>
-                </thead>
-                <tbody id="consult-results"></tbody>
-            </table>
+            <ul id="consult-results"></ul>
             <button onclick="toggleConsultForm()" class="button">Fechar</button>
         </div>
     </div>
-
     <script src="reuniao.js"></script>
 </body>
-</html>
+</html
