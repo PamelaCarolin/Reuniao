@@ -2,7 +2,6 @@ const db = require('./database');
 
 module.exports = async (req, res) => {
     const { date, time, duration, sector, speaker, room, client } = req.body;
-
     const clientDB = await db.connect();
 
     try {
@@ -23,9 +22,10 @@ module.exports = async (req, res) => {
 
             if (rows.length > 0) {
                 await clientDB.query('ROLLBACK');
-                // Incluir o horário final da reunião para exibir no alerta de conflito
+                // Inclui o horário final da reunião para exibir no alerta de conflito
                 const conflict = rows[0];
-                const conflictEndTime = new Date(new Date(`1970-01-01T${conflict.time}`).getTime() + conflict.duration * 60000).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                const conflictEndTime = new Date(new Date(`1970-01-01T${conflict.time}`).getTime() + conflict.duration * 60000)
+                    .toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
                 return res.status(400).json({
                     success: false,
                     conflict: {
@@ -40,7 +40,7 @@ module.exports = async (req, res) => {
             }
         }
 
-        // Inserção da reunião no banco de dados
+        // Inserção da reunião na tabela principal
         const insertQuery = `
             INSERT INTO meetings (date, time, duration, sector, speaker, room, client) 
             VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -48,9 +48,17 @@ module.exports = async (req, res) => {
         const insertValues = [date, time, duration, sector, speaker, room, client];
         await clientDB.query(insertQuery, insertValues);
 
-        await clientDB.query('COMMIT');
+        // Copiar reunião para o histórico
+        const historyQuery = `
+            INSERT INTO historico_reunioes (date, time, duration, sector, speaker, room, client, status) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, 'agendada')
+        `;
+        const historyValues = [date, time, duration, sector, speaker, room, client];
+        await clientDB.query(historyQuery, historyValues);
 
+        await clientDB.query('COMMIT');
         res.json({ success: true, message: 'Reunião agendada com sucesso!' });
+
     } catch (err) {
         await clientDB.query('ROLLBACK');
         console.error('Erro ao agendar reunião:', err);
