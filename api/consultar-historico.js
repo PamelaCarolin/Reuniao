@@ -1,41 +1,39 @@
 const db = require('./database');
 
 module.exports = async (req, res) => {
-    const { startDate, endDate, sector, speaker, room } = req.query;
+    const { dataInicial, dataFinal, setor, orador, sala } = req.query;
 
     try {
-        // Monta a query com base nos filtros recebidos
-        let query = `SELECT * FROM meetings WHERE date <= CURRENT_DATE`;
+        let query = `SELECT * FROM meetings WHERE 1=1`; // Base da consulta
         const queryParams = [];
 
-        if (startDate) {
-            queryParams.push(startDate);
+        if (dataInicial) {
+            queryParams.push(dataInicial);
             query += ` AND date >= $${queryParams.length}`;
         }
 
-        if (endDate) {
-            queryParams.push(endDate);
+        if (dataFinal) {
+            queryParams.push(dataFinal);
             query += ` AND date <= $${queryParams.length}`;
         }
 
-        if (sector) {
-            queryParams.push(sector);
+        if (setor) {
+            queryParams.push(setor);
             query += ` AND sector = $${queryParams.length}`;
         }
 
-        if (speaker) {
-            queryParams.push(speaker);
+        if (orador) {
+            queryParams.push(orador);
             query += ` AND speaker = $${queryParams.length}`;
         }
 
-        if (room) {
-            queryParams.push(room);
+        if (sala) {
+            queryParams.push(sala);
             query += ` AND room = $${queryParams.length}`;
         }
 
         // Executa a consulta no banco de dados
         const { rows } = await db.query(query, queryParams);
-
         res.status(200).json(rows);
     } catch (err) {
         console.error('Erro ao consultar histórico de reuniões:', err);
