@@ -1,3 +1,4 @@
+/* Estilo geral */
 body {
     background: #34E1FF;
     font-family: "Fredoka One", cursive;
@@ -5,125 +6,35 @@ body {
     margin: 0;
 }
 
-/* Navbar para alternar entre páginas */
-.navbar {
-    background-color: #1e3a8a;
-    overflow: hidden;
+/* Menu de navegação */
+.menu {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 10px;
-    position: fixed;
-    width: 100%;
-    top: 0;
-    z-index: 1000;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
 }
 
-.logo {
-    color: white;
-    font-size: 24px;
-    font-weight: bold;
-}
-
-.nav-links {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-}
-
-.nav-links li {
-    position: relative;
-}
-
-.nav-links a {
-    display: block;
-    color: white;
-    text-align: center;
-    padding: 25px 20px;
-    text-decoration: none;
-}
-
-.nav-links a:hover {
-    background-color: #dc2626;
-}
-
-.dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: #575757;
-    min-width: 160px;
-    z-index: 1;
-}
-
-.dropdown-content a {
-    color: white;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-    text-align: left;
-}
-
-.dropdown-content a:hover {
-    background-color: #777;
-}
-
-.dropdown:hover .dropdown-content {
-    display: block;
-}
-
-/* Esquema de cores */
-.navbar {
+.menu-button {
+    padding: 10px 25px;
     background-color: #1e3a8a;
-}
-
-.nav-links a:hover, .dropdown-content a:hover {
-    background-color: #dc2626;
-}
-
-.logo, .nav-links a, .dropdown-content a {
-    color: #f4f4f4;
-}
-
-/* Estilos da janela de confirmação */
-.confirmation-dialog {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    border: 1px solid #ccc;
-    padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    border-radius: 10px;
-}
-
-.confirmation-dialog.open {
-    display: block;
-}
-
-.confirmation-content {
-    text-align: center;
-}
-
-.confirmation-content p {
-    margin-bottom: 20px;
-}
-
-.confirmation-content button {
-    margin: 0 10px;
-    padding: 10px 20px;
-    background-color: #1e3a8a;
-    color: white;
+    color: #fff;
     border: none;
+    border-radius: 25px;
+    font-size: 1em;
     cursor: pointer;
-    border-radius: 5px;
+    font-weight: bold;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s, box-shadow 0.3s;
 }
 
-.confirmation-content button.yes {
-    background-color: #dc2626;
+.menu-button:hover {
+    background-color: #0056b3;
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.menu-button:active {
+    background-color: #003f7f;
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.2);
 }
 
 /* Container principal */
@@ -134,15 +45,17 @@ body {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     max-width: 800px;
     width: 90%;
-    margin: 80px auto; /* Ajuste para espaço da navbar fixa */
+    margin: 30px auto;
     overflow-y: auto;
 }
 
 h1, h2 {
     text-align: center;
     color: #333;
+    font-size: 1.8em;
 }
 
+/* Formulário */
 .form-container {
     margin-top: 20px;
 }
@@ -161,7 +74,7 @@ h1, h2 {
 .input-group input,
 .input-group select {
     width: 100%;
-    padding: 12px;
+    padding: 15px;
     border: 1px solid #ccc;
     border-radius: 5px;
     box-sizing: border-box;
@@ -182,12 +95,13 @@ h1, h2 {
     cursor: pointer;
     font-size: 1.1em;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-    margin-top: 10px;
     transition: background-color 0.3s, box-shadow 0.3s;
+    margin-top: 10px;
 }
 
 .button:hover {
     background-color: #9932CC;
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3);
 }
 
 .button:active {
@@ -208,18 +122,10 @@ h1, h2 {
 
 .actions .button {
     width: auto;
-    padding: 8px 20px;
+    padding: 10px 20px;
 }
 
-/* Lista e Resultados */
-#meeting-list,
-#consult-results {
-    list-style-type: none;
-    padding: 0;
-    margin: 15px 0;
-}
-
-/* Tabela estilizada */
+/* Estilo das tabelas */
 .styled-table {
     width: 100%;
     border-collapse: collapse;
@@ -262,13 +168,47 @@ h1, h2 {
     width: 50px;
 }
 
-/* Margens entre os botões no formulário de consulta e cancelamento */
-#consult-form .button,
-#cancel-form .button {
-    margin-top: 10px;
+/* Janela de confirmação */
+.confirmation-dialog {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    border-radius: 10px;
 }
 
-#consult-form .button:first-of-type,
-#cancel-form .button:first-of-type {
-    margin-right: 10px;
+.confirmation-dialog.open {
+    display: block;
+}
+
+.confirmation-content {
+    text-align: center;
+}
+
+.confirmation-content p {
+    margin-bottom: 20px;
+}
+
+.confirmation-content button {
+    margin: 0 10px;
+    padding: 10px 20px;
+    background-color: #1e3a8a;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.confirmation-content button.yes {
+    background-color: #dc2626;
+}
+
+.confirmation-content button:hover {
+    background-color: #333;
 }
