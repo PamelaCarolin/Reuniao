@@ -1,3 +1,5 @@
+let sortOrder = 'asc'; // Ordem inicial para classificação no histórico de reuniões
+
 document.addEventListener('DOMContentLoaded', function() {
     // Função para carregar o histórico de reuniões
     function loadHistorico() {
@@ -12,7 +14,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const orador = document.getElementById('orador').value;
         const sala = document.getElementById('sala').value;
 
-        const params = new URLSearchParams({ dataInicial, dataFinal, setor, orador, sala });
+        // Construir parâmetros de pesquisa, omitindo dataInicial e dataFinal se estiverem vazios
+        const params = new URLSearchParams();
+        if (dataInicial) params.append('dataInicial', dataInicial);
+        if (dataFinal) params.append('dataFinal', dataFinal);
+        if (setor) params.append('setor', setor);
+        if (orador) params.append('orador', orador);
+        if (sala) params.append('sala', sala);
 
         fetch(`/consultar-historico?${params.toString()}`)
             .then(response => response.json())
