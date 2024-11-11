@@ -5,18 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agendamento de Reunião</title>
     <link rel="stylesheet" href="reuniao.css">
-    <link rel="icon" type="image/x-icon" href="logo.ico">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
+    <link rel="icon" type="image/x-icon" href="logo.ico"> <!-- Favicon atualizado -->
 </head>
 <body>
-    <!-- Navbar para alternar entre páginas -->
-    <div class="navbar">
-        <div class="logo">Agendamento</div>
-        <ul class="nav-links">
-            <li><a href="reuniao.html">Sala de Reunião</a></li>
-            <li><a href="cozinha.html">Cozinha</a></li>
-        </ul>
+    <!-- Menu de navegação -->
+    <div class="menu">
+        <button onclick="window.location.href='reuniao.html'" class="menu-button">Agendamento de Reunião</button>
+        <button onclick="window.location.href='cozinha.html'" class="menu-button">Reserva da Cozinha</button>
     </div>
 
     <div class="container">
@@ -50,7 +45,7 @@
                         <option value="RH">RH</option>
                         <option value="Departamento Pessoal">Departamento Pessoal</option>
                         <option value="Coordenadores">Coordenadores</option>
-                        <option value="Gerencia">Gerencia</option>
+                        <option value="Gerencia">Gerencia</option> <!-- Setor Gerencia adicionado -->
                         <option value="Contabil">Contabil</option>
                         <option value="Comercial">Comercial</option>
                     </select>
@@ -82,10 +77,13 @@
                 <button type="submit" class="button">Agendar Reunião</button>
             </form>
         </div>
+
         <div class="actions">
             <button onclick="toggleCancelForm()" class="button">Cancelar Reunião</button>
             <button onclick="toggleConsultForm()" class="button">Consultar Reunião</button>
         </div>
+
+        <!-- Formulário de Cancelamento -->
         <div id="cancel-form" class="form-container" style="display: none;">
             <h2>Cancelar Reunião</h2>
             <div class="input-group">
@@ -101,6 +99,8 @@
             <button onclick="cancelSelectedMeetings()" class="button">Cancelar Selecionados</button>
             <button onclick="closeCancelForm()" class="button">Fechar</button>
         </div>
+
+        <!-- Formulário de Consulta -->
         <div id="consult-form" class="form-container" style="display: none;">
             <h2>Consultar Reunião</h2>
             <form>
@@ -136,6 +136,7 @@
             <button onclick="toggleConsultForm()" class="button">Fechar</button>
         </div>
     </div>
+
     <script src="reuniao.js"></script>
 </body>
 </html>
