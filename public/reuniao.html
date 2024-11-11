@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agendamento de Reunião</title>
     <link rel="stylesheet" href="reuniao.css">
-    <link rel="icon" type="image/x-icon" href="logo.ico">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
+    <link rel="icon" type="image/x-icon" href="logo.ico"> <!-- Favicon atualizado -->
 </head>
 <body>
     <!-- Menu de navegação -->
@@ -20,7 +18,6 @@
         <h1>Agendamento de Sala de Reunião</h1>
         <div class="form-container">
             <form id="meeting-form">
-                <!-- Formulário de agendamento de reunião (mesmo conteúdo que antes) -->
                 <div class="input-group">
                     <label for="data">Data</label>
                     <input type="date" id="data" required>
@@ -48,7 +45,7 @@
                         <option value="RH">RH</option>
                         <option value="Departamento Pessoal">Departamento Pessoal</option>
                         <option value="Coordenadores">Coordenadores</option>
-                        <option value="Gerencia">Gerencia</option>
+                        <option value="Gerencia">Gerencia</option> <!-- Setor Gerencia adicionado -->
                         <option value="Contabil">Contabil</option>
                         <option value="Comercial">Comercial</option>
                     </select>
@@ -80,18 +77,40 @@
                 <button type="submit" class="button">Agendar Reunião</button>
             </form>
         </div>
+
         <div class="actions">
             <button onclick="toggleCancelForm()" class="button">Cancelar Reunião</button>
             <button onclick="toggleConsultForm()" class="button">Consultar Reunião</button>
         </div>
-        
-        <!-- Formulário de consulta -->
+
+        <!-- Formulário de Cancelamento -->
+        <div id="cancel-form" class="form-container" style="display: none;">
+            <h2>Cancelar Reunião</h2>
+            <div class="input-group">
+                <label for="filtro-data">Filtrar por Data</label>
+                <input type="date" id="filtro-data">
+            </div>
+            <div class="input-group">
+                <label for="filtro-cliente">Filtrar por Cliente</label>
+                <input type="text" id="filtro-cliente">
+            </div>
+            <button type="button" class="button" onclick="filterMeetings()">Filtrar</button>
+            <ul id="meeting-list"></ul>
+            <button onclick="cancelSelectedMeetings()" class="button">Cancelar Selecionados</button>
+            <button onclick="closeCancelForm()" class="button">Fechar</button>
+        </div>
+
+        <!-- Formulário de Consulta -->
         <div id="consult-form" class="form-container" style="display: none;">
-            <h2>Consultar Reuniões (Atuais e Passadas)</h2>
+            <h2>Consultar Reunião</h2>
             <form>
                 <div class="input-group">
                     <label for="consulta-data">Data</label>
                     <input type="date" id="consulta-data">
+                </div>
+                <div class="input-group">
+                    <label for="consulta-cliente">Cliente</label>
+                    <input type="text" id="consulta-cliente">
                 </div>
                 <div class="input-group">
                     <label for="consulta-orador">Orador</label>
@@ -106,8 +125,12 @@
                         <option value="Teams">Teams</option>
                     </select>
                 </div>
-                <button type="button" onclick="consultAllMeetings()" class="button">Pesquisar</button>
-                <button type="button" onclick="downloadAllMeetingsPDF()" class="button">Baixar PDF</button>
+                <div class="input-group">
+                    <label for="consulta-setor">Setor</label>
+                    <input type="text" id="consulta-setor">
+                </div>
+                <button type="button" onclick="consultMeetings()" class="button">Pesquisar</button>
+                <button type="button" onclick="downloadPDF()" class="button">Baixar PDF</button>
             </form>
             <ul id="consult-results"></ul>
             <button onclick="toggleConsultForm()" class="button">Fechar</button>
