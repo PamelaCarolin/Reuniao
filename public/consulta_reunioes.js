@@ -1,5 +1,3 @@
-let sortOrder = 'asc'; // Ordem inicial para classificação no histórico de reuniões
-
 document.addEventListener('DOMContentLoaded', function() {
     // Função para carregar o histórico de reuniões
     function loadHistorico() {
@@ -24,44 +22,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
 
-                reunioes.sort((a, b) => {
-                    const dateA = new Date(`${a.date}T${a.time}`);
-                    const dateB = new Date(`${b.date}T${b.time}`);
-                    return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
-                });
-
+                // Limpa o corpo da tabela antes de adicionar novas linhas
                 const historicoList = document.getElementById('historico-results');
                 historicoList.innerHTML = '';
-
-                const table = document.createElement('table');
-                table.style.width = '100%';
-                table.style.borderCollapse = 'collapse';
-
-                const thead = document.createElement('thead');
-                const headerRow = document.createElement('tr');
-
-                const headers = ['Data', 'Horário', 'Orador', 'Setor', 'Sala', 'Status'];
-                headers.forEach((headerText, index) => {
-                    const th = document.createElement('th');
-                    th.textContent = headerText;
-                    th.style.border = '1px solid black';
-                    th.style.padding = '8px';
-                    th.style.textAlign = 'left';
-                    th.style.cursor = 'pointer';
-
-                    if (index === 0) {
-                        const arrow = document.createElement('span');
-                        arrow.textContent = sortOrder === 'desc' ? ' ▼' : ' ▲';
-                        th.appendChild(arrow);
-                        th.addEventListener('click', () => toggleSortOrder());
-                    }
-
-                    headerRow.appendChild(th);
-                });
-                thead.appendChild(headerRow);
-                table.appendChild(thead);
-
-                const tbody = document.createElement('tbody');
 
                 reunioes.forEach(reuniao => {
                     const row = document.createElement('tr');
@@ -86,14 +49,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         row.appendChild(td);
                     });
 
-                    tbody.appendChild(row);
+                    historicoList.appendChild(row);
                 });
 
-                table.appendChild(tbody);
-                historicoList.appendChild(table);
+                // Mostra a tabela apenas se houver resultados
+                document.getElementById('historico-results-table').style.display = reunioes.length ? 'table' : 'none';
             })
             .catch(error => {
-                console.error('Error:', error);
+                console.error('Erro:', error);
                 alert('Ocorreu um erro ao consultar o histórico de reuniões. Por favor, tente novamente.');
             });
     }
