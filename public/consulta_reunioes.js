@@ -1,3 +1,14 @@
+// Função para formatar data para o padrão pt-BR
+function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('pt-BR');
+}
+
+// Função para formatar horário no formato HH:MM
+function formatTime(timeStr) {
+    return timeStr.slice(0, 5);
+}
+
 // Função para consultar o histórico de reuniões
 function consultarHistorico() {
     const dataInicial = document.getElementById('data-inicial').value;
