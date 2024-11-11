@@ -1,38 +1,19 @@
-// Função para formatar data e horário para o padrão pt-BR
-function formatDate(dateStr) {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('pt-BR');
-}
-
-function formatTime(timeStr) {
-    return timeStr.slice(0, 5);
-}
-
-// Função para consultar reuniões
-function consultarReunioes() {
+// Função para consultar o histórico de reuniões
+function consultarHistorico() {
     const dataInicial = document.getElementById('data-inicial').value;
     const dataFinal = document.getElementById('data-final').value;
     const setor = document.getElementById('setor').value;
     const orador = document.getElementById('orador').value;
     const sala = document.getElementById('sala').value;
-    const tipoReuniao = document.getElementById('tipo-reuniao').value;
 
-    // Monta os parâmetros de consulta, incluindo apenas os valores preenchidos
-    const params = new URLSearchParams();
-    if (dataInicial) params.append('dataInicial', dataInicial);
-    if (dataFinal) params.append('dataFinal', dataFinal);
-    if (setor) params.append('setor', setor);
-    if (orador) params.append('orador', orador);
-    if (sala) params.append('sala', sala);
-    if (tipoReuniao) params.append('tipoReuniao', tipoReuniao);
+    const params = new URLSearchParams({ dataInicial, dataFinal, setor, orador, sala });
 
-    // Faz a consulta
-    fetch(`/consultar?${params.toString()}`)
+    fetch(`/consultar-historico?${params.toString()}`)
     .then(response => response.json())
     .then(data => {
-        const resultsTable = document.getElementById('reunioes-results-table');
-        const resultsBody = document.getElementById('reunioes-results');
-        resultsBody.innerHTML = ''; // Limpa os resultados anteriores
+        const resultsTable = document.getElementById('historico-results-table');
+        const resultsBody = document.getElementById('historico-results');
+        resultsBody.innerHTML = '';
 
         if (data.length > 0) {
             resultsTable.style.display = 'table';
@@ -44,40 +25,32 @@ function consultarReunioes() {
                     <td>${reuniao.speaker}</td>
                     <td>${reuniao.sector}</td>
                     <td>${reuniao.room}</td>
-                    <td>${reuniao.status || 'Agendada'}</td> <!-- Exibe 'Agendada' se o status estiver undefined -->
+                    <td>${reuniao.status}</td>
                 `;
                 resultsBody.appendChild(row);
             });
         } else {
             resultsTable.style.display = 'none';
-            alert('Nenhuma reunião encontrada.');
+            alert('Nenhuma reunião encontrada no período especificado.');
         }
     })
     .catch(error => {
-        console.error('Erro ao consultar reuniões:', error);
-        alert('Erro ao consultar reuniões.');
+        console.error('Erro ao consultar o histórico de reuniões:', error);
+        alert('Erro ao consultar o histórico de reuniões.');
     });
 }
 
-// Função para baixar o resultado da consulta como PDF
-function downloadReunioesPDF() {
+// Função para baixar o histórico de reuniões como PDF
+function downloadHistoricoPDF() {
     const dataInicial = document.getElementById('data-inicial').value;
     const dataFinal = document.getElementById('data-final').value;
     const setor = document.getElementById('setor').value;
     const orador = document.getElementById('orador').value;
     const sala = document.getElementById('sala').value;
-    const tipoReuniao = document.getElementById('tipo-reuniao').value;
 
-    // Monta os parâmetros de consulta
-    const params = new URLSearchParams();
-    if (dataInicial) params.append('dataInicial', dataInicial);
-    if (dataFinal) params.append('dataFinal', dataFinal);
-    if (setor) params.append('setor', setor);
-    if (orador) params.append('orador', orador);
-    if (sala) params.append('sala', sala);
-    if (tipoReuniao) params.append('tipoReuniao', tipoReuniao);
+    const params = new URLSearchParams({ dataInicial, dataFinal, setor, orador, sala });
 
-    fetch(`/consultar?${params.toString()}`)
+    fetch(`/consultar-historico?${params.toString()}`)
     .then(response => response.json())
     .then(data => {
         const { jsPDF } = window.jspdf;
@@ -92,7 +65,7 @@ function downloadReunioesPDF() {
                 reuniao.speaker,
                 reuniao.sector,
                 reuniao.room,
-                reuniao.status || 'Agendada'
+                reuniao.status
             ];
             tableRows.push(rowData);
         });
@@ -104,10 +77,10 @@ function downloadReunioesPDF() {
             theme: 'striped'
         });
 
-        doc.save('reunioes.pdf');
+        doc.save('historico_reunioes.pdf');
     })
     .catch(error => {
-        console.error('Erro ao gerar o PDF das reuniões:', error);
-        alert('Erro ao gerar o PDF das reuniões.');
+        console.error('Erro ao gerar o PDF do histórico de reuniões:', error);
+        alert('Erro ao gerar o PDF do histórico de reuniões.');
     });
 }
