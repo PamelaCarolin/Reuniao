@@ -1,34 +1,36 @@
 const db = require('./database');
 
 module.exports = async (req, res) => {
-    const { startDate, endDate, sector, speaker, room } = req.query;
+    const { dataInicial, dataFinal, setor, orador, sala } = req.query;
 
     try {
         let query = `SELECT * FROM historico_reunioes WHERE 1=1`;
         const queryParams = [];
 
-        if (startDate) {
-            queryParams.push(startDate);
+        // Aplica os filtros de data
+        if (dataInicial) {
+            queryParams.push(dataInicial);
             query += ` AND date >= $${queryParams.length}`;
         }
 
-        if (endDate) {
-            queryParams.push(endDate);
+        if (dataFinal) {
+            queryParams.push(dataFinal);
             query += ` AND date <= $${queryParams.length}`;
         }
 
-        if (sector) {
-            queryParams.push(sector);
+        // Aplica os filtros de setor, orador e sala
+        if (setor) {
+            queryParams.push(setor);
             query += ` AND sector = $${queryParams.length}`;
         }
 
-        if (speaker) {
-            queryParams.push(speaker);
+        if (orador) {
+            queryParams.push(orador);
             query += ` AND speaker = $${queryParams.length}`;
         }
 
-        if (room) {
-            queryParams.push(room);
+        if (sala) {
+            queryParams.push(sala);
             query += ` AND room = $${queryParams.length}`;
         }
 
