@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function () {
         downloadPdfButton.addEventListener('click', downloadHistoricoPDF);
     }
 
-    // Função para baixar o histórico de reuniões em PDF
+    // Define a função `downloadHistoricoPDF`
     function downloadHistoricoPDF() {
         const dataInicial = document.getElementById('data-inicial').value;
         const dataFinal = document.getElementById('data-final').value;
