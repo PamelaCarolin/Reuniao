@@ -17,10 +17,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const orador = document.getElementById('orador').value;
         const sala = document.getElementById('sala').value;
 
-        const params = new URLSearchParams({ dataInicial, dataFinal, setor, orador, sala });
+        // Exibe os valores dos filtros no console para depuração
+        console.log("Filtros:", { dataInicial, dataFinal, setor, orador, sala });
 
-        // Exibe a URL para depuração
-        console.log(`/consultar-historico?${params.toString()}`);
+        const params = new URLSearchParams({ dataInicial, dataFinal, setor, orador, sala });
 
         fetch(`/consultar-historico?${params.toString()}`)
             .then(response => response.json())
