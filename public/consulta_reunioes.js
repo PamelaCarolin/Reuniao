@@ -1,4 +1,4 @@
-let sortOrder = 'asc'; // Define a ordem de classificação inicial
+let sortOrder = 'asc'; // Define a ordem de classificação inicial para o histórico
 
 document.addEventListener('DOMContentLoaded', function () {
     // Carrega o histórico de reuniões ao iniciar
@@ -90,35 +90,39 @@ document.addEventListener('DOMContentLoaded', function () {
         historicoTable.querySelector('th').addEventListener('click', toggleSortOrder);
     }
 
-    // Adiciona evento para o botão de download do CSV
-    const downloadCsvButton = document.getElementById('download-csv');
-    if (downloadCsvButton) {
-        downloadCsvButton.addEventListener('click', downloadCSV);
+    // Adiciona evento para o botão de download do PDF
+    const downloadPdfButton = document.getElementById('download-pdf');
+    if (downloadPdfButton) {
+        downloadPdfButton.addEventListener('click', downloadHistoricoPDF);
     }
 
-    // Função para gerar e baixar um arquivo CSV com os dados atualmente exibidos na tabela
-    function downloadCSV() {
-        const rows = document.querySelectorAll("#historico-results tr");
-        const csvContent = [];
-        
-        // Adiciona o cabeçalho da tabela CSV
-        const headers = ["DATA", "HORÁRIO", "ORADOR", "SETOR", "SALA", "STATUS"];
-        csvContent.push(headers.join(","));
+    // Função para gerar e baixar o PDF com os dados atualmente exibidos na tabela
+    function downloadHistoricoPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
 
-        // Adiciona os dados exibidos na tabela para o CSV
+        // Define cabeçalhos da tabela para o PDF
+        const tableColumn = ["DATA", "HORÁRIO", "ORADOR", "SETOR", "SALA", "STATUS"];
+        const tableRows = [];
+
+        // Seleciona todas as linhas exibidas na tabela de resultados
+        const rows = document.querySelectorAll("#historico-results tr");
+
+        // Extrai dados das linhas exibidas e prepara para o PDF
         rows.forEach(row => {
             const rowData = Array.from(row.cells).map(cell => cell.innerText);
-            csvContent.push(rowData.join(","));
+            tableRows.push(rowData);
         });
 
-        // Cria um Blob com o conteúdo do CSV e gera o link de download
-        const blob = new Blob([csvContent.join("\n")], { type: "text/csv;charset=utf-8;" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.setAttribute("download", "historico_reunioes.csv");
-        link.style.display = "none";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // Gera a tabela no PDF com os dados exibidos
+        doc.autoTable({
+            head: [tableColumn],
+            body: tableRows,
+            startY: 10,
+            theme: 'striped'
+        });
+
+        // Salva o PDF diretamente no computador do usuário
+        doc.save('historico_reunioes.pdf');
     }
 });
