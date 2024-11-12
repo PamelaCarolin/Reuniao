@@ -17,9 +17,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const orador = document.getElementById('orador').value;
         const sala = document.getElementById('sala').value;
 
-        // Exibe os valores dos filtros no console para depuração
-        console.log("Filtros:", { dataInicial, dataFinal, setor, orador, sala });
-
         const params = new URLSearchParams({ dataInicial, dataFinal, setor, orador, sala });
 
         fetch(`/consultar-historico?${params.toString()}`)
@@ -99,50 +96,40 @@ document.addEventListener('DOMContentLoaded', function () {
         downloadPdfButton.addEventListener('click', downloadHistoricoPDF);
     }
 
-    // Define a função `downloadHistoricoPDF`
+    // Define a função `downloadHistoricoPDF` para gerar o PDF com os resultados da consulta
     function downloadHistoricoPDF() {
-        const dataInicial = document.getElementById('data-inicial').value;
-        const dataFinal = document.getElementById('data-final').value;
-        const setor = document.getElementById('setor').value;
-        const orador = document.getElementById('orador').value;
-        const sala = document.getElementById('sala').value;
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
 
-        const params = new URLSearchParams({ dataInicial, dataFinal, setor, orador, sala });
+        // Define os cabeçalhos da tabela do PDF
+        const tableColumn = ["DATA", "HORÁRIO", "ORADOR", "SETOR", "SALA", "STATUS"];
+        const tableRows = [];
 
-        fetch(`/consultar-historico?${params.toString()}`)
-            .then(response => response.json())
-            .then(reunioes => {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                const tableColumn = ["DATA", "HORÁRIO", "ORADOR", "SETOR", "SALA", "STATUS"];
-                const tableRows = [];
+        // Seleciona todas as linhas da tabela de resultados
+        const rows = document.querySelectorAll("#historico-results tr");
 
-                reunioes.forEach(reuniao => {
-                    const formattedDate = new Date(reuniao.date.split('/').reverse().join('-')).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-                    const formattedTime = reuniao.time.slice(0, 5);
-                    const rowData = [
-                        formattedDate,
-                        formattedTime,
-                        reuniao.speaker,
-                        reuniao.sector,
-                        reuniao.room,
-                        reuniao.status || 'Concluída'
-                    ];
-                    tableRows.push(rowData);
-                });
+        // Adiciona os dados da tabela ao PDF
+        rows.forEach(row => {
+            const rowData = [
+                row.cells[0].innerText, // DATA
+                row.cells[1].innerText, // HORÁRIO
+                row.cells[2].innerText, // ORADOR
+                row.cells[3].innerText, // SETOR
+                row.cells[4].innerText, // SALA
+                row.cells[5].innerText  // STATUS
+            ];
+            tableRows.push(rowData);
+        });
 
-                doc.autoTable({
-                    head: [tableColumn],
-                    body: tableRows,
-                    startY: 10,
-                    theme: 'striped'
-                });
+        // Gera o PDF com a tabela formatada
+        doc.autoTable({
+            head: [tableColumn],
+            body: tableRows,
+            startY: 10,
+            theme: 'striped'
+        });
 
-                doc.save('historico_reunioes.pdf');
-            })
-            .catch(error => {
-                console.error('Erro:', error);
-                alert('Erro ao gerar o PDF do histórico de reuniões.');
-            });
+        // Salva o arquivo PDF
+        doc.save('historico_reunioes.pdf');
     }
 });
