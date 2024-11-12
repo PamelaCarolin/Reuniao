@@ -99,6 +99,7 @@ document.addEventListener('DOMContentLoaded', function () {
         downloadPdfButton.addEventListener('click', downloadHistoricoPDF);
     }
 
+    // Define a função `downloadHistoricoPDF` no escopo global
     function downloadHistoricoPDF() {
         const dataInicial = document.getElementById('data-inicial').value;
         const dataFinal = document.getElementById('data-final').value;
