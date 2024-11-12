@@ -1,4 +1,35 @@
-let sortOrder = 'asc'; // Define a ordem de classificação inicial para o histórico
+// Define a ordem de classificação inicial para o histórico
+let sortOrder = 'asc';
+
+// Função para gerar e baixar o PDF com os dados atualmente exibidos na tabela
+function downloadHistoricoPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Define cabeçalhos da tabela para o PDF
+    const tableColumn = ["DATA", "HORÁRIO", "ORADOR", "SETOR", "SALA", "STATUS"];
+    const tableRows = [];
+
+    // Seleciona todas as linhas exibidas na tabela de resultados
+    const rows = document.querySelectorAll("#historico-results tr");
+
+    // Extrai dados das linhas exibidas e prepara para o PDF
+    rows.forEach(row => {
+        const rowData = Array.from(row.cells).map(cell => cell.innerText);
+        tableRows.push(rowData);
+    });
+
+    // Gera a tabela no PDF com os dados exibidos
+    doc.autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: 10,
+        theme: 'striped'
+    });
+
+    // Salva o PDF diretamente no computador do usuário
+    doc.save('historico_reunioes.pdf');
+}
 
 document.addEventListener('DOMContentLoaded', function () {
     // Carrega o histórico de reuniões ao iniciar
@@ -94,35 +125,5 @@ document.addEventListener('DOMContentLoaded', function () {
     const downloadPdfButton = document.getElementById('download-pdf');
     if (downloadPdfButton) {
         downloadPdfButton.addEventListener('click', downloadHistoricoPDF);
-    }
-
-    // Função para gerar e baixar o PDF com os dados atualmente exibidos na tabela
-    function downloadHistoricoPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-
-        // Define cabeçalhos da tabela para o PDF
-        const tableColumn = ["DATA", "HORÁRIO", "ORADOR", "SETOR", "SALA", "STATUS"];
-        const tableRows = [];
-
-        // Seleciona todas as linhas exibidas na tabela de resultados
-        const rows = document.querySelectorAll("#historico-results tr");
-
-        // Extrai dados das linhas exibidas e prepara para o PDF
-        rows.forEach(row => {
-            const rowData = Array.from(row.cells).map(cell => cell.innerText);
-            tableRows.push(rowData);
-        });
-
-        // Gera a tabela no PDF com os dados exibidos
-        doc.autoTable({
-            head: [tableColumn],
-            body: tableRows,
-            startY: 10,
-            theme: 'striped'
-        });
-
-        // Salva o PDF diretamente no computador do usuário
-        doc.save('historico_reunioes.pdf');
     }
 });
