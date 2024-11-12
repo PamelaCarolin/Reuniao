@@ -1,4 +1,4 @@
-let sortOrder = 'asc'; // Definindo a ordem de classificação inicial para o histórico
+let sortOrder = 'asc'; // Definindo a ordem de classificação inicial para o histórico (das mais antigas para as mais recentes)
 
 document.addEventListener('DOMContentLoaded', function () {
     // Carregar o histórico de reuniões ao iniciar
@@ -31,11 +31,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 const historicoList = document.getElementById('historico-results');
                 historicoList.innerHTML = '';
 
-                // Ordena as reuniões de acordo com a ordem selecionada
+                // Ordena as reuniões do mais antigo para o mais recente
                 reunioes.sort((a, b) => {
                     const dateA = new Date(`${a.date}T${a.time}`);
                     const dateB = new Date(`${b.date}T${b.time}`);
-                    return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+                    return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
                 });
 
                 // Popula a tabela com os resultados
