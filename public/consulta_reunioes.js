@@ -93,13 +93,13 @@ document.addEventListener('DOMContentLoaded', function () {
         historicoTable.querySelector('th').addEventListener('click', toggleSortOrder);
     }
 
-    // Função para baixar o histórico de reuniões em PDF
+    // Adiciona o evento para o botão de download do PDF
     const downloadPdfButton = document.getElementById('download-pdf');
     if (downloadPdfButton) {
         downloadPdfButton.addEventListener('click', downloadHistoricoPDF);
     }
 
-    // Define a função `downloadHistoricoPDF` no escopo global
+    // Função para baixar o histórico de reuniões em PDF
     function downloadHistoricoPDF() {
         const dataInicial = document.getElementById('data-inicial').value;
         const dataFinal = document.getElementById('data-final').value;
