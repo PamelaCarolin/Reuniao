@@ -33,8 +33,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // Ordena as reuniões do mais antigo para o mais recente
                 reunioes.sort((a, b) => {
-                    const dateA = new Date(`${a.date}T${a.time}`);
-                    const dateB = new Date(`${b.date}T${b.time}`);
+                    const dateA = new Date(`${a.date.split('/').reverse().join('-')}T${a.time}`);
+                    const dateB = new Date(`${b.date.split('/').reverse().join('-')}T${b.time}`);
                     return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
                 });
 
