@@ -19,6 +19,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const params = new URLSearchParams({ dataInicial, dataFinal, setor, orador, sala });
 
+        // Exibe a URL para depuração
+        console.log(`/consultar-historico?${params.toString()}`);
+
         fetch(`/consultar-historico?${params.toString()}`)
             .then(response => response.json())
             .then(reunioes => {
@@ -79,13 +82,22 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Evento de clique para o botão de pesquisa
-    document.getElementById('search-historico').addEventListener('click', loadHistorico);
+    const searchButton = document.getElementById('search-historico');
+    if (searchButton) {
+        searchButton.addEventListener('click', loadHistorico);
+    }
 
-    // Evento para alternar a classificação ao clicar no cabeçalho da coluna "Data"
-    document.getElementById('historico-results-table').querySelector('th').addEventListener('click', toggleSortOrder);
+    // Verifica se o cabeçalho da tabela existe antes de adicionar o evento para alternar a classificação
+    const historicoTable = document.getElementById('historico-results-table');
+    if (historicoTable && historicoTable.querySelector('th')) {
+        historicoTable.querySelector('th').addEventListener('click', toggleSortOrder);
+    }
 
     // Função para baixar o histórico de reuniões em PDF
-    document.getElementById('download-pdf').addEventListener('click', downloadHistoricoPDF);
+    const downloadPdfButton = document.getElementById('download-pdf');
+    if (downloadPdfButton) {
+        downloadPdfButton.addEventListener('click', downloadHistoricoPDF);
+    }
 
     function downloadHistoricoPDF() {
         const dataInicial = document.getElementById('data-inicial').value;
