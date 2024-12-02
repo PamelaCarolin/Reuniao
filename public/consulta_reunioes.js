@@ -13,11 +13,10 @@ document.addEventListener('DOMContentLoaded', function () {
     function filterHistorico() {
         const dataInicial = document.getElementById('data-inicial').value;
         const dataFinal = document.getElementById('data-final').value;
-        const setor = document.getElementById('setor').value;
         const orador = document.getElementById('orador').value;
         const sala = document.getElementById('sala').value;
 
-        const params = new URLSearchParams({ dataInicial, dataFinal, setor, orador, sala });
+        const params = new URLSearchParams({ dataInicial, dataFinal, orador, sala });
 
         fetch(`/consultar-historico?${params.toString()}`)
             .then(response => response.json())
@@ -33,8 +32,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // Ordena as reuniões conforme a ordem selecionada
                 reunioes.sort((a, b) => {
-                    const dateA = new Date(`${a.date.split('/').reverse().join('-')}T${a.time}`);
-                    const dateB = new Date(`${b.date.split('/').reverse().join('-')}T${b.time}`);
+                    const dateA = new Date(`${a.date}T${a.time}`);
+                    const dateB = new Date(`${b.date}T${b.time}`);
                     return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
                 });
 
@@ -42,16 +41,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 reunioes.forEach(reuniao => {
                     const row = document.createElement('tr');
 
-                    const formattedDate = new Date(reuniao.date.split('/').reverse().join('-')).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+                    const formattedDate = new Date(reuniao.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
                     const formattedTime = reuniao.time.slice(0, 5);
 
                     const cells = [
                         formattedDate,
                         formattedTime,
                         reuniao.speaker,
-                        reuniao.sector,
                         reuniao.room,
-                        reuniao.status || 'Concluída'
+                        reuniao.client // Cliente ou Funcionário
                     ];
 
                     cells.forEach(cellText => {
@@ -102,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const doc = new jsPDF();
 
         // Define cabeçalhos da tabela para o PDF
-        const tableColumn = ["DATA", "HORÁRIO", "ORADOR", "SETOR", "SALA", "STATUS"];
+        const tableColumn = ["DATA", "HORÁRIO", "ORADOR", "SALA", "CLIENTE/FUNCIONÁRIO"];
         const tableRows = [];
 
         // Seleciona todas as linhas exibidas na tabela de resultados
