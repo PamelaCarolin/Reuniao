@@ -4,10 +4,13 @@ module.exports = async (req, res) => {
     const { dataInicial, dataFinal, setor, orador, sala } = req.query;
 
     try {
-        let query = `SELECT * FROM historico_reunioes WHERE 1=1`;
+        let query = `
+            SELECT date, time, speaker, sector, room, status, origin 
+            FROM historico_reunioes 
+            WHERE 1=1
+        `;
         const queryParams = [];
 
-        // Aplica os filtros de data
         if (dataInicial) {
             queryParams.push(dataInicial);
             query += ` AND date >= $${queryParams.length}`;
@@ -18,7 +21,6 @@ module.exports = async (req, res) => {
             query += ` AND date <= $${queryParams.length}`;
         }
 
-        // Aplica os filtros de setor, orador e sala
         if (setor) {
             queryParams.push(setor);
             query += ` AND sector = $${queryParams.length}`;
