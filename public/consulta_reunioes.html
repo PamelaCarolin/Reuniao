@@ -3,75 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consulta de Reuniões</title>
+    <title>Consulta de Histórico de Reuniões</title>
     <link rel="stylesheet" href="consulta_reunioes.css">
-    <script defer src="consulta_reunioes.js"></script>
+    <link rel="icon" type="image/x-icon" href="logo.ico">
 </head>
 <body>
-    <header>
+    <div class="container">
         <h1>Consulta de Histórico de Reuniões</h1>
-    </header>
-
-    <main>
-        <!-- Filtros de Pesquisa -->
-        <section id="filters">
-            <h2>Filtros</h2>
-            <form id="filter-form">
-                <div>
-                    <label for="data-inicial">Data Inicial:</label>
-                    <input type="date" id="data-inicial" name="data-inicial">
+        <div class="form-container">
+            <form id="historico-form">
+                <div class="input-group">
+                    <label for="data-inicial">Data Inicial</label>
+                    <input type="date" id="data-inicial">
                 </div>
-                <div>
-                    <label for="data-final">Data Final:</label>
-                    <input type="date" id="data-final" name="data-final">
+                <div class="input-group">
+                    <label for="data-final">Data Final</label>
+                    <input type="date" id="data-final">
                 </div>
-                <div>
-                    <label for="setor">Setor:</label>
-                    <input type="text" id="setor" name="setor" placeholder="Digite o setor">
+                <div class="input-group">
+                    <label for="setor">Setor</label>
+                    <input type="text" id="setor">
                 </div>
-                <div>
-                    <label for="orador">Orador:</label>
-                    <input type="text" id="orador" name="orador" placeholder="Digite o nome do orador">
+                <div class="input-group">
+                    <label for="orador">Orador</label>
+                    <input type="text" id="orador">
                 </div>
-                <div>
-                    <label for="sala">Sala:</label>
-                    <input type="text" id="sala" name="sala" placeholder="Digite a sala">
+                <div class="input-group">
+                    <label for="sala">Sala</label>
+                    <select id="sala">
+                        <option value="">Todas</option>
+                        <option value="Fundo">Fundo</option>
+                        <option value="Frente">Frente</option>
+                        <option value="Teams">Teams</option>
+                    </select>
                 </div>
-                <button type="button" id="search-historico">Pesquisar</button>
+                <button type="button" id="search-historico" class="button">Pesquisar</button>
+                <button type="button" onclick="downloadHistoricoPDF()" class="button">Baixar PDF</button>
             </form>
-        </section>
-
-        <!-- Resultados -->
-        <section id="results">
-            <h2>Resultados</h2>
-            <table id="historico-results-table">
-                <thead>
-                    <tr>
-                        <th>Data</th>
-                        <th>Horário</th>
-                        <th>Orador / Setor / Sala</th>
-                        <th>Tipo</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="historico-results">
-                    <!-- Os resultados serão inseridos aqui dinamicamente -->
-                </tbody>
-            </table>
-
-            <div id="no-results" style="display: none;">
-                <p>Nenhuma reunião encontrada com os filtros aplicados.</p>
-            </div>
-        </section>
-
-        <!-- Exportação -->
-        <section id="export">
-            <button id="download-pdf">Baixar PDF</button>
-        </section>
-    </main>
-
-    <footer>
-        <p>&copy; 2024 - Sistema de Gestão de Reuniões</p>
-    </footer>
+        </div>
+        <!-- Tabela de resultados -->
+        <table id="historico-results-table" class="styled-table" style="display: none;">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Horário</th>
+                    <th>Orador</th>
+                    <th>Setor</th>
+                    <th>Sala</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="historico-results"></tbody>
+        </table>
+    </div>
+    <script src="consulta_reunioes.js"></script>
 </body>
 </html>
