@@ -21,19 +21,19 @@ document.addEventListener('DOMContentLoaded', function () {
         fetch(`/consultar-historico?${params.toString()}`)
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Erro ao consultar histórico. Verifique os filtros e tente novamente.');
+                    throw new Error('Erro ao consultar histórico.');
                 }
                 return response.json();
             })
             .then(reunioes => {
-                if (!Array.isArray(reunioes)) {
-                    console.error('Erro: resposta inesperada ao consultar histórico de reuniões');
-                    return;
-                }
-
-                // Limpa o corpo da tabela antes de adicionar novas linhas
                 const historicoList = document.getElementById('historico-results');
                 historicoList.innerHTML = '';
+
+                if (!reunioes.length) {
+                    document.getElementById('historico-results-table').style.display = 'none';
+                    alert('Nenhum registro encontrado.');
+                    return;
+                }
 
                 // Ordena as reuniões conforme a ordem selecionada
                 reunioes.sort((a, b) => {
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         formattedTime,
                         reuniao.speaker,
                         reuniao.room,
-                        reuniao.client // Cliente ou Funcionário
+                        reuniao.client
                     ];
 
                     cells.forEach(cellText => {
@@ -66,12 +66,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     historicoList.appendChild(row);
                 });
 
-                // Exibe a tabela apenas se houver resultados
-                document.getElementById('historico-results-table').style.display = reunioes.length ? 'table' : 'none';
+                // Exibe a tabela
+                document.getElementById('historico-results-table').style.display = 'table';
             })
             .catch(error => {
                 console.error('Erro:', error);
-                alert('Ocorreu um erro ao consultar o histórico de reuniões. Por favor, tente novamente.');
+                alert('Ocorreu um erro ao consultar o histórico de reuniões.');
             });
     }
 
@@ -87,30 +87,22 @@ document.addEventListener('DOMContentLoaded', function () {
         searchButton.addEventListener('click', loadHistorico);
     }
 
-    // Adiciona evento para o cabeçalho da tabela para alternar a classificação
-    const historicoTable = document.getElementById('historico-results-table');
-    if (historicoTable && historicoTable.querySelector('th')) {
-        historicoTable.querySelector('th').addEventListener('click', toggleSortOrder);
-    }
-
     // Adiciona evento para o botão de download do PDF
     const downloadPdfButton = document.getElementById('download-pdf');
     if (downloadPdfButton) {
         downloadPdfButton.addEventListener('click', downloadHistoricoPDF);
     }
 
-    // Função para gerar e baixar o PDF com os dados filtrados no backend
+    // Função para gerar e baixar o PDF com os dados filtrados
     function downloadHistoricoPDF() {
-        // Obtém os filtros aplicados no formulário
         const dataInicial = document.getElementById('data-inicial').value;
         const dataFinal = document.getElementById('data-final').value;
         const orador = document.getElementById('orador').value;
         const sala = document.getElementById('sala').value;
 
-        // Constrói os parâmetros da URL
-        const params = new URLSearchParams({ dataInicial, dataFinal, orador, sala });
+        const params = new URLSearchParams({ dataInicial, dataFinal, orador, sala, format: 'pdf' });
 
-        // Redireciona o navegador para a rota de geração de PDF no backend
-        window.location.href = `/gerar-pdf?${params.toString()}`;
+        // Redireciona para o backend para baixar o PDF
+        window.location.href = `/consultar-historico?${params.toString()}`;
     }
 });
