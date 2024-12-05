@@ -22,7 +22,7 @@
                 </div>
                 <div class="input-group">
                     <label for="orador">Orador</label>
-                    <input type="text" id="orador">
+                    <input type="text" id="orador" placeholder="Digite o nome do orador">
                 </div>
                 <div class="input-group">
                     <label for="sala">Sala</label>
@@ -33,23 +33,30 @@
                         <option value="Teams">Teams</option>
                     </select>
                 </div>
-                <button type="button" id="search-historico" class="button">Pesquisar</button>
-                <button type="button" onclick="downloadHistoricoPDF()" class="button">Baixar PDF</button>
+                <div class="button-group">
+                    <button type="button" id="search-historico" class="button">Pesquisar</button>
+                    <button type="button" id="download-pdf" class="button">Baixar PDF</button>
+                </div>
             </form>
         </div>
         <!-- Tabela de resultados -->
-        <table id="historico-results-table" class="styled-table" style="display: none;">
-            <thead>
-                <tr>
-                    <th>Data</th>
-                    <th>Horário</th>
-                    <th>Orador</th>
-                    <th>Sala</th>
-                    <th>Cliente/Funcionário</th> <!-- Atualizado -->
-                </tr>
-            </thead>
-            <tbody id="historico-results"></tbody>
-        </table>
+        <div class="results-container">
+            <table id="historico-results-table" class="styled-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Horário</th>
+                        <th>Orador</th>
+                        <th>Sala</th>
+                        <th>Cliente/Funcionário</th>
+                    </tr>
+                </thead>
+                <tbody id="historico-results"></tbody>
+            </table>
+            <div id="no-results" style="display: none;">
+                <p>Nenhum registro encontrado para os filtros aplicados.</p>
+            </div>
+        </div>
     </div>
     <script src="consulta_reunioes.js"></script>
 </body>
