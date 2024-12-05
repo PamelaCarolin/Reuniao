@@ -1,29 +1,24 @@
-/* Estilo geral */
 body {
-    background: #34E1FF;
-    font-family: "Fredoka One", cursive;
+    background: #f4f4f4;
+    font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
 }
 
-/* Container principal */
 .container {
-    background-color: white;
+    background: white;
+    margin: 50px auto;
     padding: 20px;
+    max-width: 800px;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    max-width: 800px;
-    width: 90%;
-    margin: 50px auto;
 }
 
 h1 {
     text-align: center;
     color: #333;
-    font-size: 1.8em;
 }
 
-/* Formulário */
 .form-container {
     margin-top: 20px;
 }
@@ -33,10 +28,9 @@ h1 {
 }
 
 .input-group label {
-    display: block;
-    margin-bottom: 8px;
     font-weight: bold;
-    color: #333;
+    display: block;
+    margin-bottom: 5px;
 }
 
 .input-group input,
@@ -48,95 +42,40 @@ h1 {
     box-sizing: border-box;
 }
 
-.input-group input:focus,
-.input-group select:focus {
-    border-color: #4B0082;
-    outline: none;
-    box-shadow: 0 0 5px rgba(75, 0, 130, 0.5);
-}
-
-/* Botões */
 .button-group {
     display: flex;
     gap: 10px;
-    flex-wrap: wrap;
 }
 
 .button {
     flex: 1;
-    padding: 12px;
-    background-color: #4B0082;
+    padding: 10px;
+    background-color: #4CAF50;
     color: white;
     border: none;
     border-radius: 5px;
-    font-weight: bold;
     cursor: pointer;
-    text-align: center;
-    transition: background-color 0.3s ease;
+    font-size: 16px;
 }
 
 .button:hover {
-    background-color: #9932CC;
+    background-color: #45a049;
 }
 
-.button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-}
-
-/* Tabela */
 .styled-table {
     width: 100%;
-    border-collapse: collapse;
     margin-top: 20px;
-    font-size: 0.9em;
+    border-collapse: collapse;
+    display: none;
 }
 
 .styled-table th, .styled-table td {
-    padding: 10px;
+    padding: 12px;
     border: 1px solid #ddd;
-    text-align: center;
+    text-align: left;
 }
 
 .styled-table th {
-    background-color: #4B0082;
-    color: #ffffff;
-}
-
-.styled-table tr:nth-child(even) {
-    background-color: #f3f3f3;
-}
-
-.styled-table tr:hover {
-    background-color: #d1c4e9;
-}
-
-/* Mensagem de erro ou vazio */
-#no-results {
-    display: none;
-    text-align: center;
-    font-size: 1.2em;
-    color: #777;
-    margin-top: 20px;
-}
-
-/* Responsividade */
-@media (max-width: 600px) {
-    .container {
-        padding: 15px;
-    }
-
-    h1 {
-        font-size: 1.5em;
-    }
-
-    .button-group {
-        flex-direction: column;
-        gap: 5px;
-    }
-
-    .styled-table th, .styled-table td {
-        font-size: 0.8em;
-        padding: 8px;
-    }
+    background-color: #4CAF50;
+    color: white;
 }
