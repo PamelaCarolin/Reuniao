@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consulta de Histórico de Reuniões</title>
     <link rel="stylesheet" href="consulta_reunioes.css">
-    <link rel="icon" type="image/x-icon" href="logo.ico">
 </head>
 <body>
     <div class="container">
@@ -39,24 +38,18 @@
                 </div>
             </form>
         </div>
-        <!-- Tabela de resultados -->
-        <div class="results-container">
-            <table id="historico-results-table" class="styled-table" style="display: none;">
-                <thead>
-                    <tr>
-                        <th>Data</th>
-                        <th>Horário</th>
-                        <th>Orador</th>
-                        <th>Sala</th>
-                        <th>Cliente/Funcionário</th>
-                    </tr>
-                </thead>
-                <tbody id="historico-results"></tbody>
-            </table>
-            <div id="no-results" style="display: none;">
-                <p>Nenhum registro encontrado para os filtros aplicados.</p>
-            </div>
-        </div>
+        <table id="historico-results-table" class="styled-table" style="display: none;">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Horário</th>
+                    <th>Orador</th>
+                    <th>Sala</th>
+                    <th>Cliente/Funcionário</th>
+                </tr>
+            </thead>
+            <tbody id="historico-results"></tbody>
+        </table>
     </div>
     <script src="consulta_reunioes.js"></script>
 </body>
