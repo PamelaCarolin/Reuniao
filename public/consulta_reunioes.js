@@ -94,33 +94,18 @@ document.addEventListener('DOMContentLoaded', function () {
         downloadPdfButton.addEventListener('click', downloadHistoricoPDF);
     }
 
-    // Função para gerar e baixar o PDF com os dados atualmente exibidos na tabela
+    // Função para gerar e baixar o PDF com os dados filtrados no backend
     function downloadHistoricoPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+        // Obtém os filtros aplicados no formulário
+        const dataInicial = document.getElementById('data-inicial').value;
+        const dataFinal = document.getElementById('data-final').value;
+        const orador = document.getElementById('orador').value;
+        const sala = document.getElementById('sala').value;
 
-        // Define cabeçalhos da tabela para o PDF
-        const tableColumn = ["DATA", "HORÁRIO", "ORADOR", "SALA", "CLIENTE/FUNCIONÁRIO"];
-        const tableRows = [];
+        // Constrói os parâmetros da URL
+        const params = new URLSearchParams({ dataInicial, dataFinal, orador, sala });
 
-        // Seleciona todas as linhas exibidas na tabela de resultados
-        const rows = document.querySelectorAll("#historico-results tr");
-
-        // Extrai dados das linhas exibidas e prepara para o PDF
-        rows.forEach(row => {
-            const rowData = Array.from(row.cells).map(cell => cell.innerText);
-            tableRows.push(rowData);
-        });
-
-        // Gera a tabela no PDF com os dados exibidos
-        doc.autoTable({
-            head: [tableColumn],
-            body: tableRows,
-            startY: 10,
-            theme: 'striped'
-        });
-
-        // Salva o PDF diretamente no computador do usuário
-        doc.save('historico_reunioes.pdf');
+        // Redireciona o navegador para a rota de geração de PDF no backend
+        window.location.href = `/gerar-pdf?${params.toString()}`;
     }
 });
