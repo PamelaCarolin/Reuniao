@@ -1,16 +1,16 @@
 const db = require('./database'); // Importa o módulo de conexão com o banco de dados
 const express = require('express');
-const { exec } = require('child_process'); // Para chamar scripts PHP externamente
+const { PDFDocument, StandardFonts } = require('pdf-lib'); // Biblioteca PDF-lib
+const fs = require('fs');
+const path = require('path');
 
 const router = express.Router();
 
 // Rota para consultar histórico de reuniões
 router.get('/consultar-historico', async (req, res) => {
-    // Extrai os parâmetros de consulta enviados pela requisição
     const { dataInicial, dataFinal, orador, sala } = req.query;
 
     try {
-        // Define a base da consulta SQL
         let query = `
             SELECT date, time, speaker, room, client
             FROM historico_reunioes
@@ -18,37 +18,26 @@ router.get('/consultar-historico', async (req, res) => {
         `;
         const queryParams = [];
 
-        // Filtro por data inicial
         if (dataInicial) {
             queryParams.push(dataInicial);
             query += ` AND date >= $${queryParams.length}`;
         }
-
-        // Filtro por data final
         if (dataFinal) {
             queryParams.push(dataFinal);
             query += ` AND date <= $${queryParams.length}`;
         }
-
-        // Filtro por orador
         if (orador) {
             queryParams.push(orador);
             query += ` AND speaker = $${queryParams.length}`;
         }
-
-        // Filtro por sala
         if (sala) {
             queryParams.push(sala);
             query += ` AND room = $${queryParams.length}`;
         }
 
-        // Executa a consulta no banco de dados
         const { rows } = await db.query(query, queryParams);
-
-        // Retorna os resultados da consulta como resposta JSON
         res.status(200).json(rows);
     } catch (err) {
-        // Trata erros e retorna uma mensagem de erro no servidor
         console.error('Erro ao consultar histórico de reuniões:', err);
         res.status(500).json({ error: 'Erro ao consultar histórico de reuniões.' });
     }
@@ -56,11 +45,9 @@ router.get('/consultar-historico', async (req, res) => {
 
 // Rota para gerar o PDF
 router.get('/gerar-pdf', async (req, res) => {
-    // Extrai os parâmetros de consulta enviados pela requisição
     const { dataInicial, dataFinal, orador, sala } = req.query;
 
     try {
-        // Define a base da consulta SQL
         let query = `
             SELECT date, time, speaker, room, client
             FROM historico_reunioes
@@ -68,94 +55,48 @@ router.get('/gerar-pdf', async (req, res) => {
         `;
         const queryParams = [];
 
-        // Filtro por data inicial
-        if (dataInicial) {
-            queryParams.push(dataInicial);
-            query += ` AND date >= $${queryParams.length}`;
-        }
+        if (dataInicial) queryParams.push(dataInicial) && (query += ` AND date >= $${queryParams.length}`);
+        if (dataFinal) queryParams.push(dataFinal) && (query += ` AND date <= $${queryParams.length}`);
+        if (orador) queryParams.push(orador) && (query += ` AND speaker = $${queryParams.length}`);
+        if (sala) queryParams.push(sala) && (query += ` AND room = $${queryParams.length}`);
 
-        // Filtro por data final
-        if (dataFinal) {
-            queryParams.push(dataFinal);
-            query += ` AND date <= $${queryParams.length}`;
-        }
-
-        // Filtro por orador
-        if (orador) {
-            queryParams.push(orador);
-            query += ` AND speaker = $${queryParams.length}`;
-        }
-
-        // Filtro por sala
-        if (sala) {
-            queryParams.push(sala);
-            query += ` AND room = $${queryParams.length}`;
-        }
-
-        // Executa a consulta no banco de dados
         const { rows } = await db.query(query, queryParams);
 
-        // Gera o HTML para o PDF
-        let html = `
-            <h1>Histórico de Reuniões</h1>
-            <table border="1" style="width:100%; border-collapse: collapse;">
-                <thead>
-                    <tr>
-                        <th>Data</th>
-                        <th>Horário</th>
-                        <th>Orador</th>
-                        <th>Sala</th>
-                        <th>Cliente/Funcionário</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
+        // Cria um novo documento PDF
+        const pdfDoc = await PDFDocument.create();
+        const page = pdfDoc.addPage([600, 800]); // Tamanho da página: 600x800
+        const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+        // Adiciona um cabeçalho
+        const title = 'Histórico de Reuniões';
+        page.drawText(title, { x: 200, y: 750, size: 20, font });
+
+        // Prepara os dados para o PDF
+        let yPosition = 700;
+        const lineHeight = 20;
 
         rows.forEach(row => {
-            html += `
-                <tr>
-                    <td>${row.date}</td>
-                    <td>${row.time}</td>
-                    <td>${row.speaker}</td>
-                    <td>${row.room}</td>
-                    <td>${row.client}</td>
-                </tr>
-            `;
-        });
+            const text = `Data: ${row.date}, Hora: ${row.time}, Orador: ${row.speaker}, Sala: ${row.room}, Cliente: ${row.client}`;
+            page.drawText(text, { x: 50, y: yPosition, size: 12, font });
+            yPosition -= lineHeight; // Move para a próxima linha
 
-        html += `
-                </tbody>
-            </table>
-        `;
-
-        // Salva o HTML em um arquivo temporário
-        const fs = require('fs');
-        const htmlFilePath = './temp/historico.html';
-        const pdfFilePath = './temp/historico.pdf';
-
-        fs.writeFileSync(htmlFilePath, html);
-
-        // Executa o script PHP para gerar o PDF
-        exec(`php gerar_pdf.php ${htmlFilePath} ${pdfFilePath}`, (error, stdout, stderr) => {
-            if (error) {
-                console.error('Erro ao gerar o PDF:', stderr);
-                return res.status(500).json({ error: 'Erro ao gerar o PDF.' });
+            // Adiciona outra página se necessário
+            if (yPosition < 50) {
+                yPosition = 750;
+                page = pdfDoc.addPage([600, 800]);
             }
-
-            // Envia o PDF gerado para o cliente
-            res.download(pdfFilePath, 'historico_reunioes.pdf', (err) => {
-                if (err) {
-                    console.error('Erro ao enviar o PDF:', err);
-                }
-
-                // Remove os arquivos temporários após o download
-                fs.unlinkSync(htmlFilePath);
-                fs.unlinkSync(pdfFilePath);
-            });
         });
+
+        // Salva o PDF em buffer
+        const pdfBytes = await pdfDoc.save();
+
+        // Envia o PDF como resposta para download
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename="historico_reunioes.pdf"');
+        res.send(pdfBytes);
     } catch (err) {
-        console.error('Erro ao processar a requisição de PDF:', err);
-        res.status(500).json({ error: 'Erro ao processar a requisição de PDF.' });
+        console.error('Erro ao gerar o PDF:', err);
+        res.status(500).json({ error: 'Erro ao gerar o PDF.' });
     }
 });
 
