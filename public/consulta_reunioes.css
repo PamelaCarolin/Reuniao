@@ -1,9 +1,12 @@
+/* Estilo geral */
 body {
     background: #34E1FF;
     font-family: "Fredoka One", cursive;
     margin: 0;
+    padding: 0;
 }
 
+/* Container principal */
 .container {
     background-color: white;
     padding: 20px;
@@ -17,8 +20,10 @@ body {
 h1 {
     text-align: center;
     color: #333;
+    font-size: 1.8em;
 }
 
+/* Formulário */
 .form-container {
     margin-top: 20px;
 }
@@ -43,8 +48,22 @@ h1 {
     box-sizing: border-box;
 }
 
+.input-group input:focus,
+.input-group select:focus {
+    border-color: #4B0082;
+    outline: none;
+    box-shadow: 0 0 5px rgba(75, 0, 130, 0.5);
+}
+
+/* Botões */
+.button-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
 .button {
-    width: 100%;
+    flex: 1;
     padding: 12px;
     background-color: #4B0082;
     color: white;
@@ -52,17 +71,25 @@ h1 {
     border-radius: 5px;
     font-weight: bold;
     cursor: pointer;
-    margin-top: 15px;
+    text-align: center;
+    transition: background-color 0.3s ease;
 }
 
 .button:hover {
     background-color: #9932CC;
 }
 
+.button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Tabela */
 .styled-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
+    font-size: 0.9em;
 }
 
 .styled-table th, .styled-table td {
@@ -78,4 +105,38 @@ h1 {
 
 .styled-table tr:nth-child(even) {
     background-color: #f3f3f3;
+}
+
+.styled-table tr:hover {
+    background-color: #d1c4e9;
+}
+
+/* Mensagem de erro ou vazio */
+#no-results {
+    display: none;
+    text-align: center;
+    font-size: 1.2em;
+    color: #777;
+    margin-top: 20px;
+}
+
+/* Responsividade */
+@media (max-width: 600px) {
+    .container {
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 1.5em;
+    }
+
+    .button-group {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .styled-table th, .styled-table td {
+        font-size: 0.8em;
+        padding: 8px;
+    }
 }
