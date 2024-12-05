@@ -19,7 +19,12 @@ document.addEventListener('DOMContentLoaded', function () {
         const params = new URLSearchParams({ dataInicial, dataFinal, orador, sala });
 
         fetch(`/consultar-historico?${params.toString()}`)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro ao consultar histórico. Verifique os filtros e tente novamente.');
+                }
+                return response.json();
+            })
             .then(reunioes => {
                 if (!Array.isArray(reunioes)) {
                     console.error('Erro: resposta inesperada ao consultar histórico de reuniões');
