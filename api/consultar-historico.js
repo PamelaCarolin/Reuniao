@@ -1,8 +1,8 @@
 const db = require('./database'); // Importa o módulo de conexão com o banco de dados
-const { PDFDocument, StandardFonts } = require('pdf-lib'); // Biblioteca para manipular PDFs
+const { jsPDF } = require('jspdf'); // Biblioteca para manipular PDFs
+require('jspdf-autotable'); // Plugin para tabelas no jsPDF
 
 module.exports = async (req, res) => {
-    // Extrai os parâmetros enviados pela requisição
     const { dataInicial, dataFinal, orador, sala, format } = req.query;
 
     try {
@@ -43,35 +43,43 @@ module.exports = async (req, res) => {
             }
 
             // Cria um novo documento PDF
-            const pdfDoc = await PDFDocument.create();
-            let page = pdfDoc.addPage([600, 800]); // Cria a primeira página
-            const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+            const doc = new jsPDF();
 
-            // Cabeçalho do PDF
-            const title = 'Histórico de Reuniões';
-            page.drawText(title, { x: 50, y: 750, size: 20, font });
+            // Adiciona título ao PDF
+            doc.setFontSize(16);
+            doc.text('Histórico de Reuniões', 105, 20, { align: 'center' });
 
-            // Conteúdo do PDF
-            let y = 700; // Posição inicial no eixo Y
-            rows.forEach(row => {
-                const text = `Data: ${row.date}, Hora: ${row.time}, Orador: ${row.speaker}, Sala: ${row.room}, Cliente: ${row.client}`;
-                page.drawText(text, { x: 50, y, size: 12, font });
-                y -= 20;
+            // Formata os dados para a tabela
+            const tableData = rows.map(row => {
+                const formattedDate = new Date(row.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+                const formattedTime = row.time.slice(0, 5);
+                return [
+                    formattedDate,
+                    formattedTime,
+                    row.speaker,
+                    row.room,
+                    row.client,
+                ];
+            });
 
-                // Adiciona uma nova página se necessário
-                if (y < 50) {
-                    page = pdfDoc.addPage([600, 800]); // Cria uma nova página
-                    y = 750; // Reseta a posição Y
-                }
+            // Adiciona a tabela ao PDF usando autotable
+            doc.autoTable({
+                head: [['Data', 'Hora', 'Orador', 'Sala', 'Cliente']],
+                body: tableData,
+                startY: 30, // Define a posição inicial da tabela
+                margin: { left: 10, right: 10 },
+                styles: { fontSize: 10 },
+                headStyles: { fillColor: [22, 160, 133] }, // Cor do cabeçalho
+                bodyStyles: { textColor: [50, 50, 50] },
             });
 
             // Gera os bytes do PDF
-            const pdfBytes = await pdfDoc.save();
+            const pdfBytes = doc.output('arraybuffer');
 
             // Define os cabeçalhos e envia o PDF como resposta
             res.setHeader('Content-Type', 'application/pdf');
             res.setHeader('Content-Disposition', 'attachment; filename="historico_reunioes.pdf"');
-            res.send(pdfBytes);
+            res.send(Buffer.from(pdfBytes));
             return;
         }
 
