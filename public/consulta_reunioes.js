@@ -105,4 +105,10 @@ document.addEventListener('DOMContentLoaded', function () {
         // Redireciona para o backend para baixar o PDF
         window.location.href = `/consultar-historico?${params.toString()}`;
     }
+
+    // Adiciona evento para alternar ordem de classificação
+    const sortButton = document.getElementById('sort-historico');
+    if (sortButton) {
+        sortButton.addEventListener('click', toggleSortOrder);
+    }
 });
