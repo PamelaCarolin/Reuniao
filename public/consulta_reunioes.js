@@ -1,16 +1,15 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // Define a ordem de classificação inicial
-    let sortOrder = 'asc';
+    let sortOrder = 'asc'; // Define a ordem de classificação inicial
 
     // Carrega o histórico de reuniões ao iniciar
     loadHistorico();
 
-    // Função para carregar o histórico de reuniões com filtros aplicados
+    // Função principal para carregar e filtrar o histórico
     function loadHistorico() {
         filterHistorico();
     }
 
-    // Função para aplicar filtros e buscar dados no histórico
+    // Função para filtrar os dados e buscar no backend
     function filterHistorico() {
         const dataInicial = document.getElementById('data-inicial').value;
         const dataFinal = document.getElementById('data-final').value;
@@ -20,50 +19,22 @@ document.addEventListener('DOMContentLoaded', function () {
         const params = new URLSearchParams({ dataInicial, dataFinal, orador, sala });
 
         fetch(`/consultar-historico?${params.toString()}`)
-            .then(response => response.json())
-            .then(reunioes => {
-                if (!Array.isArray(reunioes)) {
-                    console.error('Erro: resposta inesperada ao consultar histórico de reuniões');
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Erro ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(result => {
+                // Caso de mensagem "Nenhum registro encontrado."
+                if (result.message) {
+                    alert(result.message);
+                    clearTable(); // Limpa a tabela caso não haja dados
                     return;
                 }
 
-                // Limpa o corpo da tabela antes de adicionar novas linhas
-                const historicoList = document.getElementById('historico-results');
-                historicoList.innerHTML = '';
-
-                // Ordena as reuniões conforme a ordem selecionada
-                reunioes.sort((a, b) => {
-                    const dateA = new Date(`${a.date}T${a.time}`);
-                    const dateB = new Date(`${b.date}T${b.time}`);
-                    return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
-                });
-
-                // Preenche a tabela com os dados filtrados
-                reunioes.forEach(reuniao => {
-                    const row = document.createElement('tr');
-
-                    const formattedDate = new Date(reuniao.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-                    const formattedTime = reuniao.time.slice(0, 5);
-
-                    const cells = [
-                        formattedDate,
-                        formattedTime,
-                        reuniao.speaker,
-                        reuniao.room,
-                        reuniao.client // Cliente ou Funcionário
-                    ];
-
-                    cells.forEach(cellText => {
-                        const td = document.createElement('td');
-                        td.textContent = cellText;
-                        row.appendChild(td);
-                    });
-
-                    historicoList.appendChild(row);
-                });
-
-                // Exibe a tabela apenas se houver resultados
-                document.getElementById('historico-results-table').style.display = reunioes.length ? 'table' : 'none';
+                // Caso haja dados, processa e exibe na tabela
+                populateTable(result);
             })
             .catch(error => {
                 console.error('Erro:', error);
@@ -71,19 +42,66 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     }
 
-    // Alterna a ordem de classificação e recarrega o histórico
+    // Função para preencher a tabela com os dados
+    function populateTable(reunioes) {
+        const historicoList = document.getElementById('historico-results');
+        historicoList.innerHTML = ''; // Limpa o conteúdo anterior
+
+        // Ordena os dados
+        reunioes.sort((a, b) => {
+            const dateA = new Date(`${a.date}T${a.time}`);
+            const dateB = new Date(`${b.date}T${b.time}`);
+            return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+        });
+
+        // Preenche a tabela com os dados
+        reunioes.forEach(reuniao => {
+            const row = document.createElement('tr');
+
+            const formattedDate = new Date(reuniao.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+            const formattedTime = reuniao.time.slice(0, 5);
+
+            const cells = [
+                formattedDate,
+                formattedTime,
+                reuniao.speaker,
+                reuniao.room,
+                reuniao.client
+            ];
+
+            cells.forEach(cellText => {
+                const td = document.createElement('td');
+                td.textContent = cellText;
+                row.appendChild(td);
+            });
+
+            historicoList.appendChild(row);
+        });
+
+        // Exibe a tabela
+        document.getElementById('historico-results-table').style.display = 'table';
+    }
+
+    // Função para limpar a tabela quando não houver dados
+    function clearTable() {
+        const historicoList = document.getElementById('historico-results');
+        historicoList.innerHTML = '';
+        document.getElementById('historico-results-table').style.display = 'none';
+    }
+
+    // Alterna a ordem de classificação
     function toggleSortOrder() {
         sortOrder = sortOrder === 'desc' ? 'asc' : 'desc';
         loadHistorico();
     }
 
-    // Adiciona evento para o botão de pesquisa
+    // Configura os eventos do botão de pesquisa
     const searchButton = document.getElementById('search-historico');
     if (searchButton) {
         searchButton.addEventListener('click', loadHistorico);
     }
 
-    // Adiciona evento para o cabeçalho da tabela para alternar a classificação
+    // Adiciona evento ao cabeçalho da tabela para alternar a ordem de classificação
     const historicoTable = document.getElementById('historico-results-table');
     if (historicoTable && historicoTable.querySelector('th')) {
         historicoTable.querySelector('th').addEventListener('click', toggleSortOrder);
@@ -95,28 +113,16 @@ document.addEventListener('DOMContentLoaded', function () {
         downloadExcelButton.addEventListener('click', downloadHistoricoExcel);
     }
 
-    // Função para gerar e baixar o Excel com os dados atualmente exibidos na tabela
+    // Função para baixar os dados no formato Excel
     function downloadHistoricoExcel() {
-        const rows = document.querySelectorAll("#historico-results tr");
+        const dataInicial = document.getElementById('data-inicial').value;
+        const dataFinal = document.getElementById('data-final').value;
+        const orador = document.getElementById('orador').value;
+        const sala = document.getElementById('sala').value;
 
-        if (!rows.length) {
-            alert('Nenhum dado disponível para exportar.');
-            return;
-        }
+        const params = new URLSearchParams({ dataInicial, dataFinal, orador, sala, format: 'excel' });
 
-        // Cria os dados para o Excel
-        const data = Array.from(rows).map(row => Array.from(row.cells).map(cell => cell.innerText));
-
-        // Adiciona cabeçalhos
-        const headers = ["Data", "Horário", "Orador", "Sala", "Cliente/Funcionário"];
-        data.unshift(headers);
-
-        // Converte os dados em um workbook e gera o Excel
-        const workbook = XLSX.utils.book_new();
-        const worksheet = XLSX.utils.aoa_to_sheet(data);
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Histórico de Reuniões");
-
-        // Gera o arquivo Excel e faz o download
-        XLSX.writeFile(workbook, "historico_reunioes.xlsx");
+        // Redireciona para o backend para baixar o Excel
+        window.location.href = `/consultar-historico?${params.toString()}`;
     }
 });
