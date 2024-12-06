@@ -12,9 +12,7 @@
   "ics": "^2.35.0",
   "xlsx": "^0.18.5",
   "jspdf": "^2.5.1",
-  "jspdf-autotable": "^3.5.25",
-  "chartjs-node-canvas": "^4.0.0",
-  "chart.js": "^4.0.1"
+  "jspdf-autotable": "^3.5.25"
 }
 
 }
