@@ -49,28 +49,42 @@ module.exports = async (req, res) => {
             doc.setFontSize(16);
             doc.text('Histórico de Reuniões', 105, 20, { align: 'center' });
 
-            // Formata os dados para a tabela
-            const tableData = rows.map(row => {
+            // Agrupa os dados por data
+            const groupedData = rows.reduce((acc, row) => {
                 const formattedDate = new Date(row.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-                const formattedTime = row.time.slice(0, 5);
-                return [
-                    formattedDate,
-                    formattedTime,
-                    row.speaker,
-                    row.room,
-                    row.client,
-                ];
-            });
+                if (!acc[formattedDate]) acc[formattedDate] = [];
+                acc[formattedDate].push(row);
+                return acc;
+            }, {});
 
-            // Adiciona a tabela ao PDF usando autotable
-            doc.autoTable({
-                head: [['Data', 'Hora', 'Orador', 'Sala', 'Cliente']],
-                body: tableData,
-                startY: 30, // Define a posição inicial da tabela
-                margin: { left: 10, right: 10 },
-                styles: { fontSize: 10 },
-                headStyles: { fillColor: [22, 160, 133] }, // Cor do cabeçalho
-                bodyStyles: { textColor: [50, 50, 50] },
+            // Adiciona os dados organizados por dia no PDF
+            let startY = 30;
+            Object.entries(groupedData).forEach(([date, entries]) => {
+                doc.setFontSize(12);
+                doc.text(`Data: ${date}`, 10, startY);
+
+                const tableData = entries.map(entry => [
+                    entry.time.slice(0, 5), // Hora
+                    entry.speaker, // Orador
+                    entry.room, // Sala
+                    entry.client, // Cliente
+                ]);
+
+                doc.autoTable({
+                    head: [['Hora', 'Orador', 'Sala', 'Cliente']],
+                    body: tableData,
+                    startY: startY + 5,
+                    margin: { left: 10, right: 10 },
+                    styles: { fontSize: 10 },
+                    headStyles: { fillColor: [22, 160, 133] },
+                    bodyStyles: { textColor: [50, 50, 50] },
+                });
+
+                startY = doc.previousAutoTable.finalY + 10;
+                if (startY > 270) { // Se a página estiver cheia, adiciona uma nova página
+                    doc.addPage();
+                    startY = 20;
+                }
             });
 
             // Gera os bytes do PDF
