@@ -2,7 +2,7 @@ const db = require('./database'); // Importa o módulo de conexão com o banco d
 const XLSX = require('xlsx'); // Importa a biblioteca para manipular Excel
 
 module.exports = async (req, res) => {
-    const { dataInicial, dataFinal, orador, sala, format } = req.query;
+    const { dataInicial, dataFinal, orador, sala, format } = req.query; // Extrai os parâmetros enviados na requisição
 
     try {
         // Define a base da consulta SQL
@@ -13,7 +13,7 @@ module.exports = async (req, res) => {
         `;
         const queryParams = [];
 
-        // Adiciona filtros dinamicamente com base nos parâmetros
+        // Adiciona filtros dinamicamente com base nos parâmetros enviados
         if (dataInicial) {
             queryParams.push(dataInicial);
             query += ` AND date >= $${queryParams.length}`;
@@ -34,30 +34,33 @@ module.exports = async (req, res) => {
         // Executa a consulta no banco de dados
         const { rows } = await db.query(query, queryParams);
 
+        // Verifica se o formato solicitado é Excel
         if (format === 'excel') {
-            // Cria um novo workbook e worksheet
+            // Cria um novo workbook e uma worksheet a partir dos dados retornados
             const workbook = XLSX.utils.book_new();
             const worksheet = XLSX.utils.json_to_sheet(rows);
 
-            // Adiciona a planilha ao workbook
+            // Adiciona a worksheet ao workbook
             XLSX.utils.book_append_sheet(workbook, worksheet, 'Histórico de Reuniões');
 
-            // Converte o workbook para buffer
+            // Converte o workbook para um buffer no formato Excel
             const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' });
 
-            // Define os cabeçalhos para download do Excel
+            // Define os cabeçalhos para o download do arquivo Excel
             res.setHeader('Content-Disposition', 'attachment; filename="historico_reunioes.xlsx"');
             res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 
-            // Envia o arquivo Excel como resposta
+            // Envia o buffer como resposta
             res.send(excelBuffer);
             return;
         }
 
-        // Retorna os dados em formato JSON se não for solicitado Excel
+        // Se não for solicitado Excel, retorna os dados no formato JSON
         res.status(200).json(rows);
     } catch (err) {
-        console.error('Erro ao consultar histórico de reuniões:', err);
+        console.error('Erro ao consultar histórico de reuniões:', err.message);
+
+        // Retorna um erro no formato JSON para o cliente
         res.status(500).json({ error: 'Erro ao consultar histórico de reuniões.' });
     }
 };
