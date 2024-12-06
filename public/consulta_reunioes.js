@@ -1,6 +1,6 @@
-let sortOrder = 'asc'; // Define a ordem de classificação inicial para o histórico
-
 document.addEventListener('DOMContentLoaded', function () {
+    let sortOrder = 'asc'; // Define a ordem de classificação inicial
+
     // Carrega o histórico de reuniões ao iniciar
     loadHistorico();
 
@@ -102,11 +102,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const params = new URLSearchParams({ dataInicial, dataFinal, orador, sala, format: 'pdf' });
 
-        // Redireciona para o backend para baixar o PDF
+        // Redireciona para o backend para baixar o PDF com os filtros aplicados
         window.location.href = `/consultar-historico?${params.toString()}`;
     }
 
-    // Adiciona evento para alternar ordem de classificação
+    // Adiciona evento para alternar a ordem de classificação
     const sortButton = document.getElementById('sort-historico');
     if (sortButton) {
         sortButton.addEventListener('click', toggleSortOrder);
