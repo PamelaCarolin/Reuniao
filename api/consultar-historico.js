@@ -19,11 +19,11 @@ module.exports = async (req, res) => {
         // Aplica os filtros dinamicamente
         if (dataInicial) {
             queryParams.push(dataInicial);
-            query += ` AND date::date >= $${queryParams.length}`; // Converte a coluna `date` para ignorar horários
+            query += ` AND to_char(date::date, 'YYYY-MM-DD') >= $${queryParams.length}`; // Compara apenas a parte da data
         }
         if (dataFinal) {
             queryParams.push(dataFinal);
-            query += ` AND date::date <= $${queryParams.length}`; // Converte a coluna `date` para ignorar horários
+            query += ` AND to_char(date::date, 'YYYY-MM-DD') <= $${queryParams.length}`; // Compara apenas a parte da data
         }
         if (orador) {
             queryParams.push(orador);
