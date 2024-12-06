@@ -37,9 +37,14 @@ module.exports = async (req, res) => {
 
         // Se o formato solicitado for PDF, processa o PDF
         if (format === 'pdf') {
+            if (!rows.length) {
+                res.status(404).json({ error: 'Nenhum registro encontrado para gerar o PDF.' });
+                return;
+            }
+
             // Cria um novo documento PDF
             const pdfDoc = await PDFDocument.create();
-            const page = pdfDoc.addPage([600, 800]); // Página tamanho 600x800
+            let page = pdfDoc.addPage([600, 800]); // Cria a primeira página
             const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
             // Cabeçalho do PDF
@@ -55,8 +60,8 @@ module.exports = async (req, res) => {
 
                 // Adiciona uma nova página se necessário
                 if (y < 50) {
-                    y = 750;
-                    page.addPage([600, 800]);
+                    page = pdfDoc.addPage([600, 800]); // Cria uma nova página
+                    y = 750; // Reseta a posição Y
                 }
             });
 
@@ -73,7 +78,7 @@ module.exports = async (req, res) => {
         // Caso contrário, retorna os dados em formato JSON
         res.status(200).json(rows);
     } catch (err) {
-        console.error('Erro ao consultar histórico de reuniões:', err);
+        console.error('Erro ao consultar histórico de reuniões:', err.stack || err.message || err);
         res.status(500).json({ error: 'Erro ao consultar histórico de reuniões.' });
     }
 };
