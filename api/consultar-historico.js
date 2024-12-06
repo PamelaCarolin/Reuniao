@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
 
         // Define a base da consulta SQL
         let query = `
-            SELECT to_char(date, 'YYYY-MM-DD') AS date, time, speaker, room, client
+            SELECT to_char(date::date, 'YYYY-MM-DD') AS date, time, speaker, room, client
             FROM historico_reunioes
             WHERE 1=1
         `;
@@ -19,19 +19,19 @@ module.exports = async (req, res) => {
         // Aplica os filtros dinamicamente
         if (dataInicial) {
             queryParams.push(dataInicial);
-            query += ` AND date >= $${queryParams.length}`;
+            query += ` AND date::date >= $${queryParams.length}`; // Converte a coluna `date` para ignorar horários
         }
         if (dataFinal) {
             queryParams.push(dataFinal);
-            query += ` AND date <= $${queryParams.length}`;
+            query += ` AND date::date <= $${queryParams.length}`; // Converte a coluna `date` para ignorar horários
         }
         if (orador) {
             queryParams.push(orador);
-            query += ` AND speaker ILIKE $${queryParams.length}`;
+            query += ` AND speaker ILIKE $${queryParams.length}`; // Filtro para o nome do orador (case-insensitive)
         }
         if (sala) {
             queryParams.push(sala);
-            query += ` AND room = $${queryParams.length}`;
+            query += ` AND room = $${queryParams.length}`; // Filtro para a sala
         }
 
         console.log('Query gerada:', query);
@@ -54,7 +54,7 @@ module.exports = async (req, res) => {
             return;
         }
 
-        // Geração de PDF (mantendo o código atual para o PDF)
+        // Geração de PDF
         const doc = new jsPDF();
         doc.setFontSize(16);
         doc.text('Histórico de Reuniões', 105, 20, { align: 'center' });
@@ -74,10 +74,10 @@ module.exports = async (req, res) => {
             doc.text(`Data: ${date}`, 10, startY);
 
             const tableData = entries.map(entry => [
-                entry.time.slice(0, 5),
-                entry.speaker,
-                entry.room,
-                entry.client,
+                entry.time.slice(0, 5), // Hora
+                entry.speaker, // Orador
+                entry.room, // Sala
+                entry.client, // Cliente
             ]);
 
             doc.autoTable({
