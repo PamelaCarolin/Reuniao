@@ -11,7 +11,7 @@
     "express": "^4.17.1",
     "ics": "^2.35.0",
     "xlsx": "^0.18.5",
-    "jspdf": "^2.5.1",  // Adicionada a biblioteca jsPDF
-    "jspdf-autotable": "^3.5.25" // Adicionado o plugin jsPDF-Autotable para tabelas
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.5.25"
   }
 }
