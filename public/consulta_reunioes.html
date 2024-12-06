@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consulta de Histórico de Reuniões</title>
     <link rel="stylesheet" href="consulta_reunioes.css">
+    <link rel="icon" type="image/x-icon" href="logo.ico">
+    <!-- Adiciona a biblioteca XLSX -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -34,10 +37,11 @@
                 </div>
                 <div class="button-group">
                     <button type="button" id="search-historico" class="button">Pesquisar</button>
-                    <button type="button" id="download-pdf" class="button">Baixar PDF</button>
+                    <button type="button" id="download-excel" class="button">Baixar Excel</button>
                 </div>
             </form>
         </div>
+        <!-- Tabela de resultados -->
         <table id="historico-results-table" class="styled-table" style="display: none;">
             <thead>
                 <tr>
