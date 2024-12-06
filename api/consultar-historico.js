@@ -1,8 +1,7 @@
 const db = require('./database'); // Importa o módulo de conexão com o banco de dados
-const { PDFDocument, StandardFonts } = require('pdf-lib'); // Biblioteca para manipular PDFs
+const XLSX = require('xlsx'); // Importa a biblioteca para manipular Excel
 
 module.exports = async (req, res) => {
-    // Extrai os parâmetros enviados pela requisição
     const { dataInicial, dataFinal, orador, sala, format } = req.query;
 
     try {
@@ -14,7 +13,7 @@ module.exports = async (req, res) => {
         `;
         const queryParams = [];
 
-        // Aplica os filtros dinamicamente
+        // Adiciona filtros dinamicamente com base nos parâmetros
         if (dataInicial) {
             queryParams.push(dataInicial);
             query += ` AND date >= $${queryParams.length}`;
@@ -35,42 +34,27 @@ module.exports = async (req, res) => {
         // Executa a consulta no banco de dados
         const { rows } = await db.query(query, queryParams);
 
-        // Se o formato solicitado for PDF, processa o PDF
-        if (format === 'pdf') {
-            // Cria um novo documento PDF
-            const pdfDoc = await PDFDocument.create();
-            const page = pdfDoc.addPage([600, 800]); // Página tamanho 600x800
-            const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        if (format === 'excel') {
+            // Cria um novo workbook e worksheet
+            const workbook = XLSX.utils.book_new();
+            const worksheet = XLSX.utils.json_to_sheet(rows);
 
-            // Cabeçalho do PDF
-            const title = 'Histórico de Reuniões';
-            page.drawText(title, { x: 50, y: 750, size: 20, font });
+            // Adiciona a planilha ao workbook
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Histórico de Reuniões');
 
-            // Conteúdo do PDF
-            let y = 700; // Posição inicial no eixo Y
-            rows.forEach(row => {
-                const text = `Data: ${row.date}, Hora: ${row.time}, Orador: ${row.speaker}, Sala: ${row.room}, Cliente: ${row.client}`;
-                page.drawText(text, { x: 50, y, size: 12, font });
-                y -= 20;
+            // Converte o workbook para buffer
+            const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' });
 
-                // Adiciona uma nova página se necessário
-                if (y < 50) {
-                    y = 750;
-                    page.addPage([600, 800]);
-                }
-            });
+            // Define os cabeçalhos para download do Excel
+            res.setHeader('Content-Disposition', 'attachment; filename="historico_reunioes.xlsx"');
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 
-            // Gera os bytes do PDF
-            const pdfBytes = await pdfDoc.save();
-
-            // Define os cabeçalhos e envia o PDF como resposta
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', 'attachment; filename="historico_reunioes.pdf"');
-            res.send(pdfBytes);
+            // Envia o arquivo Excel como resposta
+            res.send(excelBuffer);
             return;
         }
 
-        // Caso contrário, retorna os dados em formato JSON
+        // Retorna os dados em formato JSON se não for solicitado Excel
         res.status(200).json(rows);
     } catch (err) {
         console.error('Erro ao consultar histórico de reuniões:', err);
