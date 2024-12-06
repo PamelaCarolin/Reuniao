@@ -1,7 +1,42 @@
-const db = require('./database'); // Conexão com banco de dados
+const db = require('./database'); // Importa o módulo de conexão com o banco de dados
 const { jsPDF } = require('jspdf'); // Biblioteca para manipular PDFs
 require('jspdf-autotable'); // Plugin para tabelas no jsPDF
-require('jspdf-chartjs-plugin'); // Plugin para gráficos no jsPDF
+const { ChartJSNodeCanvas } = require('chartjs-node-canvas'); // Geração de gráficos como imagens
+
+// Configuração do Chart.js Node Canvas
+const chartJSNodeCanvas = new ChartJSNodeCanvas({ width: 800, height: 400 });
+
+// Função para gerar o gráfico como imagem base64
+async function generateChart(labels, data, title) {
+    const configuration = {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [
+                {
+                    label: title,
+                    data,
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.5)',
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(255, 206, 86, 0.5)'
+                    ],
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                },
+            },
+        },
+    };
+    const imageBuffer = await chartJSNodeCanvas.renderToBuffer(configuration);
+    return imageBuffer;
+}
 
 module.exports = async (req, res) => {
     const { dataInicial, dataFinal, orador, sala, format } = req.query;
@@ -15,7 +50,7 @@ module.exports = async (req, res) => {
         `;
         const queryParams = [];
 
-        // Filtros
+        // Aplica filtros dinamicamente
         if (dataInicial) {
             queryParams.push(dataInicial);
             query += ` AND date >= $${queryParams.length}`;
@@ -33,7 +68,7 @@ module.exports = async (req, res) => {
             query += ` AND room = $${queryParams.length}`;
         }
 
-        // Consulta no banco de dados
+        // Executa a consulta no banco de dados
         const { rows } = await db.query(query, queryParams);
 
         if (format === 'pdf') {
@@ -90,7 +125,7 @@ module.exports = async (req, res) => {
             doc.setFontSize(16);
             doc.text('Estatísticas', 105, 20, { align: 'center' });
 
-            // Prepara dados para os gráficos
+            // Prepara os dados para os gráficos
             const roomUsage = {};
             const speakerUsage = {};
             const clientUsage = {};
@@ -111,38 +146,29 @@ module.exports = async (req, res) => {
                 .sort(([, a], [, b]) => b - a)
                 .slice(0, 4);
 
-            // Gráfico 1: Salas Mais Utilizadas
-            doc.addChart({
-                type: 'bar',
-                data: {
-                    labels: top4Rooms.map(([room]) => room),
-                    datasets: [{ label: 'Uso da Sala', data: top4Rooms.map(([, count]) => count), backgroundColor: 'rgba(54, 162, 235, 0.5)' }],
-                },
-                options: { responsive: true, plugins: { legend: { display: false } } },
-                position: { x: 10, y: 30, width: 180, height: 80 },
-            });
+            // Gráfico 1: Salas mais utilizadas
+            const roomChart = await generateChart(
+                top4Rooms.map(([room]) => room),
+                top4Rooms.map(([, count]) => count),
+                'Salas Mais Utilizadas'
+            );
+            doc.addImage(roomChart, 'PNG', 10, 30, 180, 80);
 
-            // Gráfico 2: Oradores Mais Ativos
-            doc.addChart({
-                type: 'bar',
-                data: {
-                    labels: top4Speakers.map(([speaker]) => speaker),
-                    datasets: [{ label: 'Oradores', data: top4Speakers.map(([, count]) => count), backgroundColor: 'rgba(75, 192, 192, 0.5)' }],
-                },
-                options: { responsive: true, plugins: { legend: { display: false } } },
-                position: { x: 10, y: 120, width: 180, height: 80 },
-            });
+            // Gráfico 2: Oradores mais ativos
+            const speakerChart = await generateChart(
+                top4Speakers.map(([speaker]) => speaker),
+                top4Speakers.map(([, count]) => count),
+                'Oradores Mais Ativos'
+            );
+            doc.addImage(speakerChart, 'PNG', 10, 120, 180, 80);
 
-            // Gráfico 3: Clientes/Funcionários Mais Ativos
-            doc.addChart({
-                type: 'bar',
-                data: {
-                    labels: top4Clients.map(([client]) => client),
-                    datasets: [{ label: 'Clientes/Funcionários', data: top4Clients.map(([, count]) => count), backgroundColor: 'rgba(255, 99, 132, 0.5)' }],
-                },
-                options: { responsive: true, plugins: { legend: { display: false } } },
-                position: { x: 10, y: 210, width: 180, height: 80 },
-            });
+            // Gráfico 3: Clientes/Funcionários mais frequentes
+            const clientChart = await generateChart(
+                top4Clients.map(([client]) => client),
+                top4Clients.map(([, count]) => count),
+                'Clientes/Funcionários Mais Frequentes'
+            );
+            doc.addImage(clientChart, 'PNG', 10, 210, 180, 80);
 
             // Gera o PDF
             const pdfBytes = doc.output('arraybuffer');
