@@ -11,9 +11,9 @@
     "express": "^4.17.1",
     "ics": "^2.35.0",
     "xlsx": "^0.18.5",
-    "jspdf": "^2.5.1",               // Biblioteca principal para PDFs
-    "jspdf-autotable": "^3.5.25",    // Plugin para tabelas em PDFs
-    "jspdf-chartjs-plugin": "^1.1.0",// Plugin para gráficos no jsPDF
-    "chart.js": "^4.0.1"             // Biblioteca para renderização dos gráficos
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.5.25",
+    "jspdf-chartjs-plugin": "^1.1.0",
+    "chart.js": "^4.0.1"
   }
 }
