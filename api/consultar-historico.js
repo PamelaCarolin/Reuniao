@@ -14,28 +14,36 @@ module.exports = async (req, res) => {
         `;
         const queryParams = [];
 
-        // Aplica os filtros dinamicamente
+        // Aplica filtros dinamicamente
+
+        // Filtro por data inicial
         if (dataInicial) {
             queryParams.push(dataInicial);
-            query += ` AND date >= $${queryParams.length}`;
+            query += ` AND date >= $${queryParams.length}`; // Filtra registros com data maior ou igual à data inicial
         }
+
+        // Filtro por data final
         if (dataFinal) {
             queryParams.push(dataFinal);
-            query += ` AND date <= $${queryParams.length}`;
+            query += ` AND date <= $${queryParams.length}`; // Filtra registros com data menor ou igual à data final
         }
+
+        // Filtro por orador
         if (orador) {
             queryParams.push(orador);
-            query += ` AND speaker = $${queryParams.length}`;
+            query += ` AND speaker ILIKE $${queryParams.length}`; // Filtra registros com o nome do orador (insensível a maiúsculas)
         }
+
+        // Filtro por sala
         if (sala) {
             queryParams.push(sala);
-            query += ` AND room = $${queryParams.length}`;
+            query += ` AND room = $${queryParams.length}`; // Filtra registros pela sala
         }
 
         // Executa a consulta no banco de dados
         const { rows } = await db.query(query, queryParams);
 
-        // Se o formato solicitado for PDF, processa o PDF
+        // Geração do PDF se solicitado
         if (format === 'pdf') {
             if (!rows.length) {
                 res.status(404).json({ error: 'Nenhum registro encontrado para gerar o PDF.' });
@@ -83,7 +91,7 @@ module.exports = async (req, res) => {
             return;
         }
 
-        // Caso contrário, retorna os dados em formato JSON
+        // Retorna os registros filtrados em JSON
         res.status(200).json(rows);
     } catch (err) {
         console.error('Erro ao consultar histórico de reuniões:', err.stack || err.message || err);
