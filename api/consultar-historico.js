@@ -34,6 +34,11 @@ module.exports = async (req, res) => {
         // Executa a consulta no banco de dados
         const { rows } = await db.query(query, queryParams);
 
+        // Verifica se há resultados
+        if (rows.length === 0) {
+            return res.status(200).json({ message: 'Nenhum registro encontrado.' });
+        }
+
         // Verifica se o formato solicitado é Excel
         if (format === 'excel') {
             // Cria um novo workbook e uma worksheet a partir dos dados retornados
@@ -61,6 +66,6 @@ module.exports = async (req, res) => {
         console.error('Erro ao consultar histórico de reuniões:', err.message);
 
         // Retorna um erro no formato JSON para o cliente
-        res.status(500).json({ error: 'Erro ao consultar histórico de reuniões.' });
+        res.status(500).json({ error: 'Erro ao consultar histórico de reuniões. Verifique o servidor.' });
     }
 };
