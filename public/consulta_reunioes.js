@@ -102,17 +102,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const params = new URLSearchParams({ dataInicial, dataFinal, orador, sala, format: 'pdf' });
 
-        // Identificar as linhas únicas da tabela antes de enviar os dados ao backend
+        // Identificar e remover duplicatas da tabela
         const rows = Array.from(document.getElementById('historico-results').querySelectorAll('tr'));
         const uniqueRows = [];
-
         const uniqueSet = new Set();
 
         rows.forEach(row => {
-            const rowData = Array.from(row.children).map(cell => cell.textContent.trim()).join('|');
-            if (!uniqueSet.has(rowData)) {
-                uniqueSet.add(rowData); // Adiciona ao Set para evitar duplicatas
-                uniqueRows.push(rowData); // Adiciona ao array de linhas únicas
+            // Combina Hora, Orador, Sala e Cliente em uma string única para comparar
+            const key = Array.from(row.children)
+                .slice(1, 5) // Pega as colunas correspondentes a Hora, Orador, Sala e Cliente
+                .map(cell => cell.textContent.trim())
+                .join('|');
+            if (!uniqueSet.has(key)) {
+                uniqueSet.add(key); // Adiciona ao Set para evitar duplicatas
+                uniqueRows.push(key); // Adiciona ao array de linhas únicas
             }
         });
 
