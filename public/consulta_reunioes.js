@@ -35,15 +35,35 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
 
+                // Remove duplicatas antes de renderizar
+                const uniqueReunioes = [];
+                const uniqueSet = new Set();
+
+                reunioes.forEach(reuniao => {
+                    // Cria uma chave única para cada reunião
+                    const key = [
+                        reuniao.date,
+                        reuniao.time,
+                        reuniao.speaker,
+                        reuniao.room,
+                        reuniao.client,
+                    ].join('|');
+
+                    if (!uniqueSet.has(key)) {
+                        uniqueSet.add(key); // Adiciona ao Set para evitar duplicatas
+                        uniqueReunioes.push(reuniao); // Adiciona à lista única
+                    }
+                });
+
                 // Ordena as reuniões conforme a ordem selecionada
-                reunioes.sort((a, b) => {
+                uniqueReunioes.sort((a, b) => {
                     const dateA = new Date(`${a.date}T${a.time}`);
                     const dateB = new Date(`${b.date}T${b.time}`);
                     return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
                 });
 
-                // Preenche a tabela com os dados filtrados
-                reunioes.forEach(reuniao => {
+                // Preenche a tabela com os dados filtrados e únicos
+                uniqueReunioes.forEach(reuniao => {
                     const row = document.createElement('tr');
 
                     const formattedDate = new Date(reuniao.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
@@ -95,55 +115,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Função para gerar e baixar o PDF com os dados filtrados
     function downloadHistoricoPDF() {
-        // Exibe a mensagem de processamento
-        const processingMessage = document.createElement('div');
-        processingMessage.id = 'processing-message';
-        processingMessage.textContent = 'Processando PDF...';
-        processingMessage.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 20px;
-            border-radius: 5px;
-            z-index: 1000;
-        `;
-        document.body.appendChild(processingMessage);
+        const dataInicial = document.getElementById('data-inicial').value;
+        const dataFinal = document.getElementById('data-final').value;
+        const orador = document.getElementById('orador').value;
+        const sala = document.getElementById('sala').value;
 
-        // Remoção de duplicatas
-        setTimeout(() => {
-            const dataInicial = document.getElementById('data-inicial').value;
-            const dataFinal = document.getElementById('data-final').value;
-            const orador = document.getElementById('orador').value;
-            const sala = document.getElementById('sala').value;
+        const params = new URLSearchParams({ dataInicial, dataFinal, orador, sala, format: 'pdf' });
 
-            const params = new URLSearchParams({ dataInicial, dataFinal, orador, sala, format: 'pdf' });
-
-            const rows = Array.from(document.getElementById('historico-results').querySelectorAll('tr'));
-            const uniqueRows = [];
-            const uniqueSet = new Set();
-
-            rows.forEach(row => {
-                const columns = Array.from(row.children).slice(1, 5).map(cell => cell.textContent.trim().toLowerCase());
-                const key = columns.join('|');
-
-                if (!uniqueSet.has(key)) {
-                    uniqueSet.add(key);
-                    uniqueRows.push(columns);
-                }
-            });
-
-            // Converte as linhas únicas para JSON e anexa como parâmetro
-            params.append('uniqueData', JSON.stringify(uniqueRows));
-
-            // Remove a mensagem de processamento
-            document.body.removeChild(processingMessage);
-
-            // Redireciona para o backend para gerar o PDF com dados únicos
-            window.location.href = `/consultar-historico?${params.toString()}`;
-        }, 2000); // Aguarda 2 segundos para simular o processamento
+        // Redireciona para o backend para gerar o PDF
+        window.location.href = `/consultar-historico?${params.toString()}`;
     }
 
     // Adiciona evento para alternar a ordem de classificação
