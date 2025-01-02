@@ -102,20 +102,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const params = new URLSearchParams({ dataInicial, dataFinal, orador, sala, format: 'pdf' });
 
-        // Remove duplicatas da tabela atual antes de enviar os parâmetros para o backend
+        // Identificar as linhas únicas da tabela antes de enviar os dados ao backend
         const rows = Array.from(document.getElementById('historico-results').querySelectorAll('tr'));
-        const uniqueData = new Set();
+        const uniqueRows = [];
+
+        const uniqueSet = new Set();
 
         rows.forEach(row => {
             const rowData = Array.from(row.children).map(cell => cell.textContent.trim()).join('|');
-            uniqueData.add(rowData); // Usar o `Set` para garantir unicidade
+            if (!uniqueSet.has(rowData)) {
+                uniqueSet.add(rowData); // Adiciona ao Set para evitar duplicatas
+                uniqueRows.push(rowData); // Adiciona ao array de linhas únicas
+            }
         });
 
-        // Adiciona os dados únicos como string para o backend processar
-        const uniqueArray = Array.from(uniqueData);
-        params.append('uniqueData', JSON.stringify(uniqueArray));
+        // Converte as linhas únicas para JSON e anexa como parâmetro
+        params.append('uniqueData', JSON.stringify(uniqueRows));
 
-        // Redireciona para o backend para baixar o PDF com os dados processados
+        // Redireciona para o backend para gerar o PDF com dados únicos
         window.location.href = `/consultar-historico?${params.toString()}`;
     }
 
