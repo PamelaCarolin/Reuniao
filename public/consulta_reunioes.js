@@ -102,7 +102,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const params = new URLSearchParams({ dataInicial, dataFinal, orador, sala, format: 'pdf' });
 
-        // Redireciona para o backend para baixar o PDF com os filtros aplicados
+        // Remove duplicatas da tabela atual antes de enviar os parâmetros para o backend
+        const rows = Array.from(document.getElementById('historico-results').querySelectorAll('tr'));
+        const uniqueData = new Set();
+
+        rows.forEach(row => {
+            const rowData = Array.from(row.children).map(cell => cell.textContent.trim()).join('|');
+            uniqueData.add(rowData); // Usar o `Set` para garantir unicidade
+        });
+
+        // Adiciona os dados únicos como string para o backend processar
+        const uniqueArray = Array.from(uniqueData);
+        params.append('uniqueData', JSON.stringify(uniqueArray));
+
+        // Redireciona para o backend para baixar o PDF com os dados processados
         window.location.href = `/consultar-historico?${params.toString()}`;
     }
 
