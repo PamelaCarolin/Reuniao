@@ -95,34 +95,55 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Função para gerar e baixar o PDF com os dados filtrados
     function downloadHistoricoPDF() {
-        const dataInicial = document.getElementById('data-inicial').value;
-        const dataFinal = document.getElementById('data-final').value;
-        const orador = document.getElementById('orador').value;
-        const sala = document.getElementById('sala').value;
+        // Exibe a mensagem de processamento
+        const processingMessage = document.createElement('div');
+        processingMessage.id = 'processing-message';
+        processingMessage.textContent = 'Processando PDF...';
+        processingMessage.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            z-index: 1000;
+        `;
+        document.body.appendChild(processingMessage);
 
-        const params = new URLSearchParams({ dataInicial, dataFinal, orador, sala, format: 'pdf' });
+        // Remoção de duplicatas
+        setTimeout(() => {
+            const dataInicial = document.getElementById('data-inicial').value;
+            const dataFinal = document.getElementById('data-final').value;
+            const orador = document.getElementById('orador').value;
+            const sala = document.getElementById('sala').value;
 
-        // Identificar e remover duplicatas da tabela
-        const rows = Array.from(document.getElementById('historico-results').querySelectorAll('tr'));
-        const uniqueRows = [];
-        const uniqueSet = new Set();
+            const params = new URLSearchParams({ dataInicial, dataFinal, orador, sala, format: 'pdf' });
 
-        rows.forEach(row => {
-            // Extrai as colunas Hora, Orador, Sala e Cliente
-            const columns = Array.from(row.children).slice(1, 5).map(cell => cell.textContent.trim().toLowerCase());
-            const key = columns.join('|'); // Cria uma chave única combinando os valores
+            const rows = Array.from(document.getElementById('historico-results').querySelectorAll('tr'));
+            const uniqueRows = [];
+            const uniqueSet = new Set();
 
-            if (!uniqueSet.has(key)) {
-                uniqueSet.add(key); // Adiciona ao Set para evitar duplicatas
-                uniqueRows.push(columns); // Armazena os dados únicos
-            }
-        });
+            rows.forEach(row => {
+                const columns = Array.from(row.children).slice(1, 5).map(cell => cell.textContent.trim().toLowerCase());
+                const key = columns.join('|');
 
-        // Converte as linhas únicas para JSON e anexa como parâmetro
-        params.append('uniqueData', JSON.stringify(uniqueRows));
+                if (!uniqueSet.has(key)) {
+                    uniqueSet.add(key);
+                    uniqueRows.push(columns);
+                }
+            });
 
-        // Redireciona para o backend para gerar o PDF com dados únicos
-        window.location.href = `/consultar-historico?${params.toString()}`;
+            // Converte as linhas únicas para JSON e anexa como parâmetro
+            params.append('uniqueData', JSON.stringify(uniqueRows));
+
+            // Remove a mensagem de processamento
+            document.body.removeChild(processingMessage);
+
+            // Redireciona para o backend para gerar o PDF com dados únicos
+            window.location.href = `/consultar-historico?${params.toString()}`;
+        }, 2000); // Aguarda 2 segundos para simular o processamento
     }
 
     // Adiciona evento para alternar a ordem de classificação
