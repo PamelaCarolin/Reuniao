@@ -115,15 +115,47 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Função para gerar e baixar o PDF com os dados filtrados
     function downloadHistoricoPDF() {
-        const dataInicial = document.getElementById('data-inicial').value;
-        const dataFinal = document.getElementById('data-final').value;
-        const orador = document.getElementById('orador').value;
-        const sala = document.getElementById('sala').value;
+        // Coleta os dados únicos da tabela renderizada
+        const rows = Array.from(document.getElementById('historico-results').querySelectorAll('tr'));
+        const filteredData = rows.map(row => {
+            const cells = Array.from(row.children).map(cell => cell.textContent.trim());
+            return {
+                date: cells[0],   // Data
+                time: cells[1],   // Horário
+                speaker: cells[2], // Orador
+                room: cells[3],   // Sala
+                client: cells[4]  // Cliente/Funcionário
+            };
+        });
 
-        const params = new URLSearchParams({ dataInicial, dataFinal, orador, sala, format: 'pdf' });
+        // Cria um parâmetro JSON com os dados únicos
+        const params = new URLSearchParams({ format: 'pdf' });
+        params.append('filteredData', JSON.stringify(filteredData));
 
-        // Redireciona para o backend para gerar o PDF
-        window.location.href = `/consultar-historico?${params.toString()}`;
+        // Redireciona para o backend para gerar o PDF com base nos dados filtrados
+        fetch(`/consultar-historico-pdf`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filteredData }),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erro ao gerar o PDF.');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'historico.pdf';
+            link.click();
+            window.URL.revokeObjectURL(url);
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Ocorreu um erro ao gerar o PDF.');
+        });
     }
 
     // Adiciona evento para alternar a ordem de classificação
