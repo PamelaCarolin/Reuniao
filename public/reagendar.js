@@ -2,34 +2,68 @@ document.addEventListener('DOMContentLoaded', function() {
     // Adiciona evento aos botões de reagendamento
     document.querySelectorAll('.btn-reagendar').forEach(button => {
         button.addEventListener('click', function() {
-            const meetingId = this.dataset.id; // Obtém o ID da reunião
-            const newDate = prompt("Informe a nova data e hora (YYYY-MM-DD HH:MM):"); // Solicita nova data
-
-            if (newDate) {
-                reagendarReuniao(meetingId, newDate); // Chama a função de reagendamento
-            }
+            const meetingId = this.dataset.id; // Obtém o ID da reunião a partir do atributo data-id
+            abrirModalReagendamento(meetingId);
         });
     });
 });
 
 /**
- * Função para reagendar uma reunião
+ * Abre um modal para o usuário inserir uma nova data e horário para a reunião
  * @param {string} meetingId - ID da reunião a ser reagendada
- * @param {string} newDate - Nova data e hora para a reunião
  */
-async function reagendarReuniao(meetingId, newDate) {
+function abrirModalReagendamento(meetingId) {
+    const modalHtml = `
+        <div id="modal-reagendar" class="modal">
+            <div class="modal-content">
+                <h2>Reagendar Reunião</h2>
+                <label for="nova-data">Nova Data:</label>
+                <input type="date" id="nova-data" required>
+                <label for="novo-horario">Novo Horário:</label>
+                <input type="time" id="novo-horario" required>
+                <button onclick="confirmarReagendamento('${meetingId}')">Confirmar</button>
+                <button onclick="fecharModal()">Cancelar</button>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+/**
+ * Fecha o modal de reagendamento
+ */
+function fecharModal() {
+    const modal = document.getElementById('modal-reagendar');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+/**
+ * Confirma o reagendamento enviando os novos dados para o servidor
+ * @param {string} meetingId - ID da reunião a ser reagendada
+ */
+async function confirmarReagendamento(meetingId) {
+    const novaData = document.getElementById('nova-data').value;
+    const novoHorario = document.getElementById('novo-horario').value;
+
+    if (!novaData || !novoHorario) {
+        alert('Por favor, preencha todos os campos.');
+        return;
+    }
+
     try {
         const response = await fetch('/api/reunioes/reagendar', {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ id: meetingId, newDate })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: meetingId, newDate: `${novaData} ${novoHorario}` })
         });
 
         if (response.ok) {
             alert('Reunião reagendada com sucesso!');
-            location.reload(); // Recarrega a página para atualizar a lista
+            fecharModal();
+            location.reload(); // Recarrega a página para refletir a mudança
         } else {
             const errorData = await response.json();
             alert(`Erro ao reagendar: ${errorData.message || 'Tente novamente.'}`);
