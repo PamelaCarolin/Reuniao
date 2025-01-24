@@ -1,11 +1,13 @@
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.btn-reagendar').forEach(button => {
         button.addEventListener('click', function() {
-            const meetingId = this.dataset.id;
+            const meetingId = this.getAttribute('data-id');  // Captura o ID corretamente do botão
+
             if (!meetingId || meetingId === "undefined") {
-                alert('Por favor, selecione uma reunião válida antes de reagendar.');
+                alert('Erro: Nenhuma reunião selecionada. Por favor, selecione uma reunião para reagendar.');
                 return;
             }
+
             openReagendarModal(meetingId);
         });
     });
@@ -54,7 +56,7 @@ async function submitReagendar(meetingId) {
     const novaData = document.getElementById('reagendar-data').value;
     const novoHorario = document.getElementById('reagendar-horario').value;
 
-    if (!novaData || !novoHorario || !meetingId) {
+    if (!novaData || !novoHorario || !meetingId || meetingId === "undefined") {
         alert('Preencha todos os campos corretamente.');
         return;
     }
