@@ -70,16 +70,19 @@
         <!-- Formulário de Cancelamento -->
         <div id="cancel-form" class="form-container" style="display: none;">
             <h2>Cancelar Reunião</h2>
-            <div class="input-group">
-                <label for="filtro-data">Filtrar por Data</label>
-                <input type="date" id="filtro-data">
-            </div>
-            <div class="input-group">
-                <label for="filtro-cliente">Filtrar por Cliente</label>
-                <input type="text" id="filtro-cliente">
-            </div>
-            <button type="button" class="button" onclick="filterMeetings()">Filtrar</button>
-            <ul id="meeting-list"></ul>
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Selecionar</th>
+                        <th>Data</th>
+                        <th>Horário</th>
+                        <th>Orador</th>
+                        <th>Sala</th>
+                        <th>Cliente/Funcionário</th>
+                    </tr>
+                </thead>
+                <tbody id="meeting-list"></tbody>
+            </table>
             <button onclick="cancelSelectedMeetings()" class="button">Cancelar Selecionados</button>
             <button onclick="closeCancelForm()" class="button">Fechar</button>
         </div>
@@ -87,37 +90,39 @@
         <!-- Formulário de Modificação -->
         <div id="modify-form" class="form-container" style="display: none;">
             <h2>Modificar Reunião</h2>
-            <div class="input-group">
-                <label for="modify-filtro-data">Filtrar por Data</label>
-                <input type="date" id="modify-filtro-data">
-            </div>
-            <div class="input-group">
-                <label for="modify-filtro-cliente">Filtrar por Cliente</label>
-                <input type="text" id="modify-filtro-cliente">
-            </div>
-            <button type="button" class="button" onclick="filterMeetings()">Filtrar</button>
-            <ul id="modify-meeting-list"></ul>
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Selecionar</th>
+                        <th>Data</th>
+                        <th>Horário</th>
+                        <th>Orador</th>
+                        <th>Sala</th>
+                        <th>Cliente/Funcionário</th>
+                    </tr>
+                </thead>
+                <tbody id="modify-meeting-list"></tbody>
+            </table>
             <button onclick="modifySelectedMeetings()" class="button">Modificar Selecionados</button>
             <button onclick="closeModifyForm()" class="button">Fechar</button>
         </div>
 
-        <!-- Formulário de Consulta -->
+        <!-- Formulário de Visualização -->
         <div id="consult-form" class="form-container" style="display: none;">
-            <h2>Consultar Reunião</h2>
-            <form>
-                <div class="input-group">
-                    <label for="consulta-data">Data</label>
-                    <input type="date" id="consulta-data">
-                </div>
-                <div class="input-group">
-                    <label for="consulta-cliente">Cliente</label>
-                    <input type="text" id="consulta-cliente">
-                </div>
-                <button type="button" onclick="consultMeetings()" class="button">Pesquisar</button>
-                <button type="button" onclick="downloadPDF()" class="button">Baixar PDF</button>
-            </form>
-            <ul id="consult-results"></ul>
-            <button onclick="toggleConsultForm()" class="button">Fechar</button>
+            <h2>Visualizar Reuniões</h2>
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Horário</th>
+                        <th>Orador</th>
+                        <th>Sala</th>
+                        <th>Cliente/Funcionário</th>
+                    </tr>
+                </thead>
+                <tbody id="consult-results"></tbody>
+            </table>
+            <button onclick="closeConsultForm()" class="button">Fechar</button>
         </div>
     </div>
 
