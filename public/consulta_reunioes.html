@@ -38,50 +38,19 @@
                 </div>
             </form>
         </div>
-
         <table id="historico-results-table" class="styled-table" style="display: none;">
             <thead>
                 <tr>
-                    <th>Selecionar</th>
                     <th>Data</th>
                     <th>Horário</th>
                     <th>Orador</th>
                     <th>Sala</th>
                     <th>Cliente/Funcionário</th>
-                    <th>Ações</th>
                 </tr>
             </thead>
-<table id="historico-results" class="styled-table">
-    <thead>
-        <tr>
-            <th>Data</th>
-            <th>Horário</th>
-            <th>Orador</th>
-            <th>Sala</th>
-            <th>Cliente/Funcionário</th>
-            <th>Ações</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr data-id="1">
-            <td>2024-11-11</td>
-            <td>18:00</td>
-            <td>teste PAM</td>
-            <td>TI</td>
-            <td>Cliente 1</td>
-            <td>
-                <button class="btn-reagendar" data-id="1">Reagendar</button>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-        <div class="button-group">
-            <button onclick="openSelectedReagendarModal()" class="button">Reagendar Selecionados</button>
-        </div>
+            <tbody id="historico-results"></tbody>
+        </table>
     </div>
-
     <script src="consulta_reunioes.js"></script>
-    <script src="reagendar.js"></script>
 </body>
 </html>
