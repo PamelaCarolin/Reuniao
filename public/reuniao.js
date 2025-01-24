@@ -430,7 +430,15 @@ function toggleCancelForm() {
     const cancelForm = document.getElementById('cancel-form');
     cancelForm.style.display = cancelForm.style.display === 'block' ? 'none' : 'block';
     if (cancelForm.style.display === 'block') {
-        loadMeetings();
+        loadMeetings('meeting-list');
+    }
+}
+
+function toggleModifyForm() {
+    const modifyForm = document.getElementById('modify-form');
+    modifyForm.style.display = modifyForm.style.display === 'block' ? 'none' : 'block';
+    if (modifyForm.style.display === 'block') {
+        loadMeetings('modify-meeting-list');
     }
 }
 
@@ -466,12 +474,30 @@ function cancelMeeting(id) {
     .then(response => response.json())
     .then(result => {
         alert(result.message);
-        loadMeetings();
+        loadMeetings('meeting-list');
     })
     .catch(error => {
         console.error('Error:', error);
         alert('Ocorreu um erro ao cancelar a reunião. Por favor, tente novamente.');
     });
+}
+
+function modifySelectedMeetings() {
+    const checkboxes = document.querySelectorAll('#modify-meeting-list input[type="checkbox"]:checked');
+    const ids = Array.from(checkboxes).map(checkbox => checkbox.value);
+
+    if (ids.length === 0) {
+        alert('Selecione pelo menos uma reunião para modificar.');
+        return;
+    }
+
+    if (!confirm('Você tem certeza que deseja modificar as reuniões selecionadas?')) {
+        return;
+    }
+
+    alert(`Modificar reuniões: ${ids.join(', ')}`);
+
+    // Adicionar lógica de modificação aqui futuramente
 }
 
 function rescheduleMeeting() {
@@ -502,7 +528,7 @@ function rescheduleMeeting() {
         if (result.success) {
             alert('Reunião reagendada com sucesso!');
             document.getElementById('reschedule-form').style.display = 'none';
-            loadMeetings(); // Atualizar a lista após o reagendamento
+            loadMeetings('meeting-list'); // Atualizar a lista após o reagendamento
         } else {
             alert(result.message || 'Erro ao reagendar a reunião. Por favor, tente novamente.');
         }
@@ -531,4 +557,31 @@ function toggleRescheduleForm() {
 
 function closeCancelForm() {
     document.getElementById('cancel-form').style.display = 'none';
+}
+
+function closeModifyForm() {
+    document.getElementById('modify-form').style.display = 'none';
+}
+
+// Função para carregar reuniões na tabela
+function loadMeetings(listId) {
+    fetch('/consultar')
+    .then(response => response.json())
+    .then(meetings => {
+        const meetingList = document.getElementById(listId);
+        meetingList.innerHTML = '';
+
+        meetings.forEach(meeting => {
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `
+                <input type="checkbox" value="${meeting.id}">
+                ${meeting.date} - ${meeting.time} - ${meeting.speaker} - ${meeting.room} - ${meeting.client}
+            `;
+            meetingList.appendChild(listItem);
+        });
+    })
+    .catch(error => {
+        console.error('Erro ao carregar reuniões:', error);
+        alert('Ocorreu um erro ao carregar as reuniões.');
+    });
 }
