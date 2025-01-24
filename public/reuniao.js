@@ -494,3 +494,136 @@ function cancelMeeting(id) {
 function closeCancelForm() {
     document.getElementById('cancel-form').style.display = 'none';
 }
+
+// Função para aguardar a carga da tabela antes de atribuir eventos aos botões de reagendamento
+function waitForTableLoad() {
+    const table = document.getElementById('historico-results');
+
+    if (!table || table.children.length === 0) {
+        console.warn('Aguardando a tabela ser carregada...');
+        setTimeout(waitForTableLoad, 1000);
+        return;
+    }
+
+    const buttons = document.querySelectorAll('.btn-reagendar');
+
+    if (buttons.length === 0) {
+        console.warn('Nenhum botão de reagendamento encontrado. Aguardando...');
+        setTimeout(waitForTableLoad, 1000);
+        return;
+    }
+
+    buttons.forEach(button => {
+        button.addEventListener('click', function() {
+            const meetingId = this.getAttribute('data-id');
+            if (!meetingId) {
+                alert('Erro: ID da reunião não encontrado.');
+                return;
+            }
+            openReagendarModal(meetingId);
+        });
+    });
+
+    console.log('Botões de reagendamento detectados e eventos atribuídos.');
+}
+
+// Chamar a função após o carregamento da página
+document.addEventListener('DOMContentLoaded', waitForTableLoad);
+
+/**
+ * Abre o modal para reagendamento.
+ * @param {string} meetingId - ID da reunião a ser reagendada.
+ */
+function openReagendarModal(meetingId) {
+    closeModal();
+
+    const modalHtml = `
+        <div id="reagendar-modal" class="modal">
+            <div class="modal-content">
+                <h2>Reagendar Reunião</h2>
+                <label for="reagendar-data">Nova Data:</label>
+                <input type="date" id="reagendar-data" required>
+                <label for="reagendar-horario">Novo Horário:</label>
+                <input type="time" id="reagendar-horario" required>
+                <button onclick="submitReagendar('${meetingId}')">Confirmar</button>
+                <button onclick="closeModal()">Cancelar</button>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    document.getElementById('reagendar-modal').style.display = 'flex';
+}
+
+/**
+ * Fecha o modal de reagendamento.
+ */
+function closeModal() {
+    const modal = document.getElementById('reagendar-modal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+/**
+ * Submete os novos dados de reagendamento para o servidor.
+ * @param {string} meetingId - ID da reunião a ser reagendada.
+ */
+async function submitReagendar(meetingId) {
+    const novaData = document.getElementById('reagendar-data').value;
+    const novoHorario = document.getElementById('reagendar-horario').value;
+
+    if (!novaData || !novoHorario) {
+        alert('Por favor, preencha todos os campos.');
+        return;
+    }
+
+    try {
+        const response = await fetch('/reagendar', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: meetingId, newDate: `${novaData} ${novoHorario}` })
+        });
+
+        if (response.ok) {
+            alert('Reunião reagendada com sucesso!');
+            closeModal();
+            location.reload();
+        } else {
+            const errorData = await response.json();
+            alert(`Erro ao reagendar: ${errorData.message || 'Tente novamente.'}`);
+        }
+    } catch (error) {
+        console.error('Erro ao reagendar reunião:', error);
+        alert('Erro ao tentar reagendar. Verifique a conexão.');
+    }
+}
+
+/**
+ * Abre o modal de reagendamento para reuniões selecionadas.
+ */
+function openSelectedReagendarModal() {
+    const selectedCheckboxes = document.querySelectorAll('input[name="selected-meeting"]:checked');
+
+    if (selectedCheckboxes.length === 0) {
+        alert('Por favor, selecione pelo menos uma reunião para reagendar.');
+        return;
+    }
+
+    // Pegando o primeiro selecionado para reagendamento
+    const meetingId = selectedCheckboxes[0].value;
+
+    if (!meetingId) {
+        alert('Erro: ID da reunião não encontrado.');
+        return;
+    }
+
+    openReagendarModal(meetingId);
+}
+
+// Torna as funções globais para uso no HTML
+window.openReagendarModal = openReagendarModal;
+window.closeModal = closeModal;
+window.submitReagendar = submitReagendar;
+window.openSelectedReagendarModal = openSelectedReagendarModal;
+
