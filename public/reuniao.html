@@ -107,12 +107,13 @@
             <button onclick="closeModifyForm()" class="button">Fechar</button>
         </div>
 
-        <!-- Formulário de Visualização -->
+        <!-- Formulário de Consulta -->
         <div id="consult-form" class="form-container" style="display: none;">
-            <h2>Visualizar Reuniões</h2>
+            <h2>Consultar Reunião</h2>
             <table class="styled-table">
                 <thead>
                     <tr>
+                        <th>Selecionar</th>
                         <th>Data</th>
                         <th>Horário</th>
                         <th>Orador</th>
@@ -122,7 +123,7 @@
                 </thead>
                 <tbody id="consult-results"></tbody>
             </table>
-            <button onclick="closeConsultForm()" class="button">Fechar</button>
+            <button onclick="toggleConsultForm()" class="button">Fechar</button>
         </div>
     </div>
 
