@@ -1,19 +1,11 @@
 const db = require('./database');
 
 module.exports = async (req, res) => {
-    const { id, date, time, duration, sector, speaker, room, client } = req.body;
+    const { date, time, duration, sector, speaker, room, client } = req.body;
     const clientDB = await db.connect();
 
     try {
         await clientDB.query('BEGIN');
-
-        // Se um ID for fornecido, deletar a reunião existente antes de criar uma nova
-        if (id) {
-            const deleteQuery = `DELETE FROM meetings WHERE id = $1`;
-            const deleteHistoryQuery = `UPDATE historico_reunioes SET status = 'cancelada' WHERE id = $1`;
-            await clientDB.query(deleteQuery, [id]);
-            await clientDB.query(deleteHistoryQuery, [id]);
-        }
 
         // Se a reunião for na sala "Teams", ignorar a verificação de conflitos
         if (room.toLowerCase() !== 'teams') {
@@ -30,6 +22,7 @@ module.exports = async (req, res) => {
 
             if (rows.length > 0) {
                 await clientDB.query('ROLLBACK');
+                // Inclui o horário final da reunião para exibir no alerta de conflito
                 const conflict = rows[0];
                 const conflictEndTime = new Date(new Date(`1970-01-01T${conflict.time}`).getTime() + conflict.duration * 60000)
                     .toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -47,31 +40,29 @@ module.exports = async (req, res) => {
             }
         }
 
-        // Inserção da nova reunião na tabela principal
+        // Inserção da reunião na tabela principal
         const insertQuery = `
             INSERT INTO meetings (date, time, duration, sector, speaker, room, client) 
             VALUES ($1, $2, $3, $4, $5, $6, $7)
-            RETURNING id
         `;
         const insertValues = [date, time, duration, sector, speaker, room, client];
-        const result = await clientDB.query(insertQuery, insertValues);
-        const newMeetingId = result.rows[0].id;
+        await clientDB.query(insertQuery, insertValues);
 
-        // Copiar reunião para o histórico com status de "reagendada"
+        // Copiar reunião para o histórico
         const historyQuery = `
-            INSERT INTO historico_reunioes (id, date, time, duration, sector, speaker, room, client, status) 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'reagendada')
+            INSERT INTO historico_reunioes (date, time, duration, sector, speaker, room, client, status) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, 'agendada')
         `;
-        const historyValues = [newMeetingId, date, time, duration, sector, speaker, room, client];
+        const historyValues = [date, time, duration, sector, speaker, room, client];
         await clientDB.query(historyQuery, historyValues);
 
         await clientDB.query('COMMIT');
-        res.json({ success: true, message: 'Reunião reagendada com sucesso!' });
+        res.json({ success: true, message: 'Reunião agendada com sucesso!' });
 
     } catch (err) {
         await clientDB.query('ROLLBACK');
-        console.error('Erro ao reagendar reunião:', err);
-        res.status(500).json({ error: 'Erro ao reagendar reunião' });
+        console.error('Erro ao agendar reunião:', err);
+        res.status(500).json({ error: 'Erro ao agendar reunião' });
     } finally {
         clientDB.release();
     }
