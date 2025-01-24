@@ -1,22 +1,5 @@
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.btn-reagendar').forEach(button => {
-        button.addEventListener('click', function() {
-            const meetingId = this.dataset.id;
-            if (!meetingId) {
-                alert('Erro: ID da reunião não encontrado.');
-                return;
-            }
-            abrirModalReagendamento(meetingId);
-        });
-    });
-});
-
-/**
- * Abre um modal para o usuário inserir uma nova data e horário para a reunião
- * @param {string} meetingId - ID da reunião a ser reagendada
- */
-function abrirModalReagendamento(meetingId) {
-    fecharModal(); // Fecha qualquer modal anterior antes de abrir um novo
+function openReagendarModal(meetingId) {
+    fecharModal(); // Fecha qualquer modal aberto antes
 
     const modalHtml = `
         <div id="reagendar-modal" class="modal">
@@ -36,9 +19,6 @@ function abrirModalReagendamento(meetingId) {
     document.getElementById('reagendar-modal').style.display = 'flex';
 }
 
-/**
- * Fecha o modal de reagendamento
- */
 function fecharModal() {
     const modal = document.getElementById('reagendar-modal');
     if (modal) {
@@ -46,10 +26,6 @@ function fecharModal() {
     }
 }
 
-/**
- * Envia os dados de reagendamento para o servidor
- * @param {string} meetingId - ID da reunião a ser reagendada
- */
 async function submitReagendar(meetingId) {
     const novaData = document.getElementById('reagendar-data').value;
     const novoHorario = document.getElementById('reagendar-horario').value;
@@ -84,3 +60,8 @@ async function submitReagendar(meetingId) {
         alert('Ocorreu um erro ao tentar reagendar. Verifique a conexão.');
     }
 }
+
+// Torna a função acessível globalmente
+window.openReagendarModal = openReagendarModal;
+window.fecharModal = fecharModal;
+window.submitReagendar = submitReagendar;
