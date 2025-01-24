@@ -49,6 +49,7 @@ body {
     overflow-y: auto;
 }
 
+/* Título */
 h1, h2 {
     text-align: center;
     color: #333;
@@ -58,6 +59,10 @@ h1, h2 {
 /* Formulário */
 .form-container {
     margin-top: 20px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .input-group {
@@ -114,7 +119,7 @@ h1, h2 {
     padding: 8px 12px;
 }
 
-/* Layout de botões de ação */
+/* Ações */
 .actions {
     display: flex;
     justify-content: space-between;
@@ -126,71 +131,125 @@ h1, h2 {
     padding: 15px 30px;
 }
 
-/* Estilo das tabelas */
+/* Tabelas */
 .styled-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
-    font-size: 0.9em;
+    font-size: 1em;
     font-family: "Fredoka One", cursive;
     color: #333;
+    border-radius: 10px 10px 0 0;
+    overflow: hidden;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.styled-table th, .styled-table td {
-    padding: 12px 15px;
+.styled-table thead tr {
+    background-color: #4B0082;
+    color: #ffffff;
+    text-align: left;
+    font-weight: bold;
+}
+
+.styled-table th, 
+.styled-table td {
+    padding: 15px 20px;
     border: 1px solid #ddd;
     text-align: center;
 }
 
 .styled-table th {
     background-color: #4B0082;
-    color: #ffffff;
+    color: white;
+    text-transform: uppercase;
     font-weight: bold;
+    font-size: 1em;
 }
 
-.styled-table tr:nth-child(even) {
+.styled-table tbody tr {
+    border-bottom: 1px solid #ddd;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
     background-color: #f3f3f3;
 }
 
-.styled-table tr:hover {
+.styled-table tbody tr:hover {
     background-color: #f1f1f1;
+    transition: all 0.3s ease-in-out;
 }
 
+.styled-table tbody tr:last-of-type {
+    border-bottom: 2px solid #4B0082;
+}
+
+/* Checkboxes */
 .styled-table input[type="checkbox"] {
     transform: scale(1.2);
     cursor: pointer;
+    accent-color: #4B0082;
 }
 
-/* Centralizar o checkbox de seleção */
-.styled-table th:first-child,
-.styled-table td:first-child {
+/* Janela de confirmação */
+.confirmation-dialog {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 20px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    border-radius: 10px;
+}
+
+.confirmation-dialog.open {
+    display: block;
+}
+
+.confirmation-content {
     text-align: center;
-    width: 50px;
 }
 
-/* Modificar formulário */
-#modify-form {
-    display: none;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+.confirmation-content p {
+    margin-bottom: 20px;
 }
 
-/* Visualizar reuniões */
-#consult-form {
-    display: none;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+.confirmation-content button {
+    margin: 0 10px;
+    padding: 10px 20px;
+    background-color: #1e3a8a;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
 }
 
-/* Estilo de feedback */
-.message {
-    color: red;
+.confirmation-content button.yes {
+    background-color: #dc2626;
+}
+
+.confirmation-content button:hover {
+    background-color: #333;
+}
+
+/* Feedback visual */
+.alert {
     font-weight: bold;
     text-align: center;
+    padding: 10px;
     margin-top: 10px;
+    border-radius: 5px;
+}
+
+.alert-success {
+    background-color: #4caf50;
+    color: white;
+}
+
+.alert-error {
+    background-color: #f44336;
+    color: white;
 }
