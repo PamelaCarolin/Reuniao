@@ -267,23 +267,6 @@ function filterMeetings() {
     });
 }
 
-function toggleReuniaoTipo() {
-    const tipoReuniao = document.getElementById('tipo-reuniao').value;
-    const clienteGroup = document.getElementById('cliente-group');
-    const funcionarioGroup = document.getElementById('funcionario-group');
-
-    if (tipoReuniao === 'externa') {
-        clienteGroup.style.display = 'block';
-        funcionarioGroup.style.display = 'none';
-    } else if (tipoReuniao === 'interna') {
-        clienteGroup.style.display = 'none';
-        funcionarioGroup.style.display = 'block';
-    } else {
-        clienteGroup.style.display = 'none';
-        funcionarioGroup.style.display = 'none';
-    }
-}
-
 function toggleCancelSortOrder() {
     cancelSortOrder = cancelSortOrder === 'desc' ? 'asc' : 'desc';
     loadMeetings();
@@ -494,62 +477,6 @@ function cancelMeeting(id) {
 function closeCancelForm() {
     document.getElementById('cancel-form').style.display = 'none';
 }
-
-// Função para aguardar a carga da tabela antes de atribuir eventos aos botões de reagendamento
-function waitForTableLoad(attempts = 0) {
-    const table = document.getElementById('meeting-list');
-
-    if (!table || table.children.length === 0) {
-        if (attempts > 20) {
-            console.error('Erro: Tabela não foi carregada após várias tentativas.');
-            return;
-        }
-        console.warn('Aguardando a tabela ser carregada...');
-        setTimeout(() => waitForTableLoad(attempts + 1), 1000);
-        return;
-    }
-
-    console.log('Tabela carregada com sucesso.');
-
-    // Certifique-se de que os botões estão corretamente selecionados após a tabela carregar
-    const buttons = document.querySelectorAll('.btn-reagendar');
-    if (buttons.length === 0) {
-        console.warn('Nenhum botão de reagendamento encontrado. Aguardando...');
-        setTimeout(() => waitForTableLoad(attempts + 1), 1000);
-        return;
-    }
-
-    buttons.forEach(button => {
-        button.addEventListener('click', function() {
-            const meetingId = this.getAttribute('data-id');
-            if (!meetingId) {
-                alert('Erro: ID da reunião não encontrado.');
-                return;
-            }
-            openReagendarModal(meetingId);
-        });
-    });
-
-    console.log('Botões de reagendamento detectados e eventos atribuídos.');
-}
-
-// Iniciar a verificação após o carregamento da página
-document.addEventListener('DOMContentLoaded', waitForTableLoad);
-
-    buttons.forEach(button => {
-        button.addEventListener('click', function() {
-            const meetingId = this.getAttribute('data-id');
-            if (!meetingId) {
-                alert('Erro: ID da reunião não encontrado.');
-                return;
-            }
-            openReagendarModal(meetingId);
-        });
-    });
-
-console.log('Botões de reagendamento detectados e eventos atribuídos.');
-
-// Chamar a função após o carregamento da página
 /**
  * Inicializa os eventos da página.
  */
