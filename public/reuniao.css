@@ -58,6 +58,7 @@ h1, h2 {
 /* Formulário */
 .form-container {
     margin-top: 20px;
+    display: none;
 }
 
 .input-group {
@@ -114,18 +115,11 @@ h1, h2 {
     padding: 8px 12px;
 }
 
-.actions {
-    display: flex;
-    justify-content: space-between;
+/* Estilização para as tabelas */
+.table-container {
     margin-top: 20px;
 }
 
-.actions .button {
-    width: auto;
-    padding: 10px 20px;
-}
-
-/* Estilo das tabelas */
 .styled-table {
     width: 100%;
     border-collapse: collapse;
@@ -166,6 +160,16 @@ h1, h2 {
 .styled-table td:first-child {
     text-align: center;
     width: 50px;
+}
+
+/* Estilo específico para os formulários de Cancelamento, Modificação e Visualização */
+#cancel-form, #modify-form, #consult-form {
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    max-width: 100%;
+    margin-top: 20px;
 }
 
 /* Janela de confirmação */
@@ -211,45 +215,4 @@ h1, h2 {
 
 .confirmation-content button:hover {
     background-color: #333;
-}
-
-/* Copia do estilo para Modificar Reunião */
-#modify-form {
-    background-color: white;
-    padding: 20px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
-    max-width: 90%;
-    margin-top: 20px;
-}
-
-#modify-form h2 {
-    text-align: center;
-    color: #333;
-    font-size: 1.8em;
-}
-
-#modify-form .styled-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-#modify-form .styled-table th {
-    background-color: #4B0082;
-    color: #ffffff;
-    font-weight: bold;
-}
-
-#modify-form .styled-table tr:nth-child(even) {
-    background-color: #f3f3f3;
-}
-
-#modify-form .styled-table tr:hover {
-    background-color: #f1f1f1;
-}
-
-#modify-form .styled-table input[type="checkbox"] {
-    transform: scale(1.2);
-    cursor: pointer;
 }
