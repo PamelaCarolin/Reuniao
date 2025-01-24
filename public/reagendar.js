@@ -4,32 +4,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (buttons.length === 0) {
             console.warn('Nenhum botão de reagendamento encontrado. Aguardando a tabela ser carregada...');
-            setTimeout(waitForReagendarButtons, 1000); // Tenta novamente em 1 segundo
+            setTimeout(waitForReagendarButtons, 1000);
             return;
         }
 
         buttons.forEach(button => {
             button.addEventListener('click', function() {
                 const meetingId = this.getAttribute('data-id');
-
-                if (!meetingId || meetingId.trim() === "") {
-                    alert('Por favor, selecione uma reunião válida antes de reagendar.');
+                if (!meetingId) {
+                    alert('Erro: ID da reunião não encontrado.');
                     return;
                 }
-
                 openReagendarModal(meetingId);
             });
         });
 
-        console.log('Botões de reagendamento prontos.');
+        console.log('Botões de reagendamento detectados.');
     }
 
     waitForReagendarButtons();
 });
 
 /**
- * Abre o modal para o usuário inserir uma nova data e horário para a reunião.
- * @param {string} meetingId - ID da reunião a ser reagendada.
+ * Abre o modal de reagendamento.
  */
 function openReagendarModal(meetingId) {
     closeModal();
@@ -61,9 +58,3 @@ function closeModal() {
         modal.remove();
     }
 }
-
-/**
- * Torna as funções globais para uso no HTML.
- */
-window.openReagendarModal = openReagendarModal;
-window.closeModal = closeModal;
