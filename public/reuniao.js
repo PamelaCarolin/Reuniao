@@ -502,6 +502,7 @@ function rescheduleMeeting() {
         if (result.success) {
             alert('Reunião reagendada com sucesso!');
             document.getElementById('reschedule-form').style.display = 'none';
+            loadMeetings(); // Atualizar a lista após o reagendamento
         } else {
             alert(result.message || 'Erro ao reagendar a reunião. Por favor, tente novamente.');
         }
