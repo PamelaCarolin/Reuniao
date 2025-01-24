@@ -267,6 +267,23 @@ function filterMeetings() {
     });
 }
 
+function toggleReuniaoTipo() {
+    const tipoReuniao = document.getElementById('tipo-reuniao').value;
+    const clienteGroup = document.getElementById('cliente-group');
+    const funcionarioGroup = document.getElementById('funcionario-group');
+
+    if (tipoReuniao === 'externa') {
+        clienteGroup.style.display = 'block';
+        funcionarioGroup.style.display = 'none';
+    } else if (tipoReuniao === 'interna') {
+        clienteGroup.style.display = 'none';
+        funcionarioGroup.style.display = 'block';
+    } else {
+        clienteGroup.style.display = 'none';
+        funcionarioGroup.style.display = 'none';
+    }
+}
+
 function toggleCancelSortOrder() {
     cancelSortOrder = cancelSortOrder === 'desc' ? 'asc' : 'desc';
     loadMeetings();
