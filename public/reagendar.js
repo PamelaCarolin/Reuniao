@@ -1,10 +1,18 @@
 document.addEventListener('DOMContentLoaded', function() {
-    function waitForReagendarButtons() {
-        const buttons = document.querySelectorAll('.btn-reagendar');
+    function waitForTableLoad() {
+        const table = document.getElementById('historico-results');
+        
+        if (!table || table.children.length === 0) {
+            console.warn('Aguardando a tabela ser carregada...');
+            setTimeout(waitForTableLoad, 1000);
+            return;
+        }
 
+        const buttons = document.querySelectorAll('.btn-reagendar');
+        
         if (buttons.length === 0) {
-            console.warn('Nenhum botão de reagendamento encontrado. Aguardando a tabela ser carregada...');
-            setTimeout(waitForReagendarButtons, 1000);
+            console.warn('Nenhum botão de reagendamento encontrado. Aguardando...');
+            setTimeout(waitForTableLoad, 1000);
             return;
         }
 
@@ -22,11 +30,11 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Botões de reagendamento detectados.');
     }
 
-    waitForReagendarButtons();
+    waitForTableLoad();
 });
 
 /**
- * Abre o modal de reagendamento.
+ * Abre o modal para reagendamento.
  */
 function openReagendarModal(meetingId) {
     closeModal();
