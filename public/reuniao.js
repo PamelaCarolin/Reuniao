@@ -529,8 +529,7 @@ document.addEventListener('DOMContentLoaded', waitForTableLoad);
         });
     });
 
-    console.log('Botões de reagendamento detectados e eventos atribuídos.');
-}
+console.log('Botões de reagendamento detectados e eventos atribuídos.');
 
 // Chamar a função após o carregamento da página
 document.addEventListener('DOMContentLoaded', waitForTableLoad);
