@@ -125,6 +125,53 @@ h1, h2 {
     padding: 10px 20px;
 }
 
+/* Modal de Reagendamento */
+#reschedule-form {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    width: 400px;
+    max-width: 90%;
+    z-index: 1000;
+}
+
+#reschedule-form h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+#reschedule-form .input-group input {
+    width: calc(100% - 20px);
+}
+
+#reschedule-form .button {
+    width: 100%;
+}
+
+/* Fundo escurecido ao abrir o modal */
+#reschedule-form.active {
+    display: block;
+}
+
+#reschedule-form .close-button {
+    display: block;
+    background-color: #dc2626;
+    color: white;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    text-align: center;
+    margin-top: 10px;
+}
+
 /* Estilo das tabelas */
 .styled-table {
     width: 100%;
