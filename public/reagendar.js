@@ -1,23 +1,25 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const buttons = document.querySelectorAll('.btn-reagendar');
+    setTimeout(() => {
+        const buttons = document.querySelectorAll('.btn-reagendar');
 
-    if (buttons.length === 0) {
-        console.error('Nenhum botão de reagendamento encontrado.');
-        return;
-    }
+        if (buttons.length === 0) {
+            console.error('Nenhum botão de reagendamento encontrado.');
+            return;
+        }
 
-    buttons.forEach(button => {
-        button.addEventListener('click', function() {
-            const meetingId = this.getAttribute('data-id');
+        buttons.forEach(button => {
+            button.addEventListener('click', function() {
+                const meetingId = this.getAttribute('data-id');
 
-            if (!meetingId || meetingId.trim() === "") {
-                alert('Por favor, selecione uma reunião válida antes de reagendar.');
-                return;
-            }
+                if (!meetingId || meetingId.trim() === "") {
+                    alert('Por favor, selecione uma reunião válida antes de reagendar.');
+                    return;
+                }
 
-            openReagendarModal(meetingId);
+                openReagendarModal(meetingId);
+            });
         });
-    });
+    }, 1000); // Aguarda 1 segundo para garantir que o DOM esteja carregado
 });
 
 /**
@@ -108,7 +110,22 @@ function updateTable(meetingId, newDate, newTime) {
     }
 }
 
-// Torna as funções acessíveis globalmente para serem chamadas pelo HTML
+/**
+ * Abre o modal de reagendamento para os itens selecionados na tabela.
+ */
+function openSelectedReagendarModal() {
+    const selectedCheckboxes = document.querySelectorAll('input[name="selected-meeting"]:checked');
+    if (selectedCheckboxes.length === 0) {
+        alert('Por favor, selecione pelo menos uma reunião para reagendar.');
+        return;
+    }
+
+    const meetingId = selectedCheckboxes[0].value;  // Pegando o primeiro selecionado para reagendamento
+    openReagendarModal(meetingId);
+}
+
+// Torna as funções globais para serem chamadas pelo HTML
 window.openReagendarModal = openReagendarModal;
 window.closeModal = closeModal;
 window.submitReagendar = submitReagendar;
+window.openSelectedReagendarModal = openSelectedReagendarModal;
