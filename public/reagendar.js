@@ -1,9 +1,10 @@
 document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(() => {
+    function waitForReagendarButtons() {
         const buttons = document.querySelectorAll('.btn-reagendar');
 
         if (buttons.length === 0) {
-            console.warn('Nenhum botão de reagendamento encontrado. Aguardando a tabela ser carregada.');
+            console.warn('Nenhum botão de reagendamento encontrado. Aguardando a tabela ser carregada...');
+            setTimeout(waitForReagendarButtons, 1000); // Tenta novamente em 1 segundo
             return;
         }
 
@@ -19,7 +20,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 openReagendarModal(meetingId);
             });
         });
-    }, 1000);  // Aguarda 1 segundo para garantir que a tabela foi carregada
+
+        console.log('Botões de reagendamento prontos.');
+    }
+
+    waitForReagendarButtons();
 });
 
 /**
@@ -27,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
  * @param {string} meetingId - ID da reunião a ser reagendada.
  */
 function openReagendarModal(meetingId) {
-    closeModal(); // Fecha qualquer modal anterior antes de abrir um novo.
+    closeModal();
 
     const modalHtml = `
         <div id="reagendar-modal" class="modal">
@@ -58,74 +63,7 @@ function closeModal() {
 }
 
 /**
- * Envia os dados de reagendamento para o servidor e atualiza a tabela.
- * @param {string} meetingId - ID da reunião a ser reagendada.
+ * Torna as funções globais para uso no HTML.
  */
-async function submitReagendar(meetingId) {
-    const novaData = document.getElementById('reagendar-data').value;
-    const novoHorario = document.getElementById('reagendar-horario').value;
-
-    if (!novaData || !novoHorario || !meetingId || meetingId.trim() === "") {
-        alert('Preencha todos os campos corretamente.');
-        return;
-    }
-
-    try {
-        console.log(`Enviando reagendamento para ID: ${meetingId}, Data: ${novaData}, Horário: ${novoHorario}`);
-
-        const response = await fetch('/reagendar', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: parseInt(meetingId), newDate: `${novaData} ${novoHorario}` })
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-            alert('Reunião reagendada com sucesso!');
-            updateTable(meetingId, novaData, novoHorario);
-            closeModal();
-        } else if (result.suggestedTime) {
-            alert(`Horário indisponível. Sugerimos reagendar para: ${result.suggestedTime}`);
-        } else {
-            alert(result.error || 'Erro ao reagendar. Tente novamente.');
-        }
-    } catch (error) {
-        console.error('Erro ao reagendar reunião:', error);
-        alert('Ocorreu um erro ao tentar reagendar. Verifique a conexão.');
-    }
-}
-
-/**
- * Atualiza a tabela dinamicamente com os novos dados da reunião reagendada.
- * @param {string} meetingId - ID da reunião reagendada.
- * @param {string} newDate - Nova data reagendada.
- * @param {string} newTime - Novo horário reagendado.
- */
-function updateTable(meetingId, newDate, newTime) {
-    const row = document.querySelector(`tr[data-id='${meetingId}']`);
-    if (row) {
-        row.querySelector('.date-cell').innerText = newDate;
-        row.querySelector('.time-cell').innerText = newTime;
-    }
-}
-
-/**
- * Abre o modal de reagendamento para os itens selecionados na tabela.
- */
-function openSelectedReagendarModal() {
-    const selectedCheckboxes = document.querySelectorAll('input[name="selected-meeting"]:checked');
-    if (selectedCheckboxes.length === 0) {
-        alert('Por favor, selecione pelo menos uma reunião para reagendar.');
-        return;
-    }
-
-    const meetingId = selectedCheckboxes[0].value;  // Pegando o primeiro selecionado para reagendamento
-    openReagendarModal(meetingId);
-}
-
-// Torna as funções globais para serem chamadas pelo HTML
 window.openReagendarModal = openReagendarModal;
 window.closeModal = closeModal;
-window.submitReagendar = submitReagendar;
-window.openSelectedReagendarModal = openSelectedReagendarModal;
