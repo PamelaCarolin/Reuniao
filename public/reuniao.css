@@ -114,6 +114,7 @@ h1, h2 {
     padding: 8px 12px;
 }
 
+/* Layout de botões de ação */
 .actions {
     display: flex;
     justify-content: space-between;
@@ -122,7 +123,7 @@ h1, h2 {
 
 .actions .button {
     width: auto;
-    padding: 10px 20px;
+    padding: 15px 30px;
 }
 
 /* Estilo das tabelas */
@@ -168,47 +169,28 @@ h1, h2 {
     width: 50px;
 }
 
-/* Janela de confirmação */
-.confirmation-dialog {
+/* Modificar formulário */
+#modify-form {
     display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    border: 1px solid #ccc;
+    background: white;
     padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
     border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.confirmation-dialog.open {
-    display: block;
+/* Visualizar reuniões */
+#consult-form {
+    display: none;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.confirmation-content {
+/* Estilo de feedback */
+.message {
+    color: red;
+    font-weight: bold;
     text-align: center;
-}
-
-.confirmation-content p {
-    margin-bottom: 20px;
-}
-
-.confirmation-content button {
-    margin: 0 10px;
-    padding: 10px 20px;
-    background-color: #1e3a8a;
-    color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-.confirmation-content button.yes {
-    background-color: #dc2626;
-}
-
-.confirmation-content button:hover {
-    background-color: #333;
+    margin-top: 10px;
 }
