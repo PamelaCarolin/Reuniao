@@ -1,166 +1,109 @@
-document.addEventListener('DOMContentLoaded', function () {
-    let sortOrder = 'asc'; // Define a ordem de classificação inicial
+const db = require('./database'); // Importa o módulo de conexão com o banco de dados
+const { jsPDF } = require('jspdf'); // Biblioteca para manipular PDFs
+require('jspdf-autotable'); // Plugin para tabelas no jsPDF
 
-    // Carrega o histórico de reuniões ao iniciar
-    loadHistorico();
+module.exports = async (req, res) => {
+    const { dataInicial, dataFinal, orador, sala, format } = req.query;
 
-    // Função para carregar o histórico de reuniões com filtros aplicados
-    function loadHistorico() {
-        filterHistorico();
-    }
+    try {
+        console.log('Parâmetros recebidos:', { dataInicial, dataFinal, orador, sala });
 
-    // Função para aplicar filtros e buscar dados no histórico
-    function filterHistorico() {
-        const dataInicial = document.getElementById('data-inicial').value;
-        const dataFinal = document.getElementById('data-final').value;
-        const orador = document.getElementById('orador').value;
-        const sala = document.getElementById('sala').value;
+        // Define a base da consulta SQL
+        let query = `
+            SELECT to_char(date::date, 'YYYY-MM-DD') AS date, time, speaker, room, client
+            FROM historico_reunioes
+            WHERE 1=1
+        `;
+        const queryParams = [];
 
-        const params = new URLSearchParams({ dataInicial, dataFinal, orador, sala });
+        // Aplica os filtros dinamicamente
+        if (dataInicial) {
+            queryParams.push(dataInicial);
+            query += ` AND to_char(date::date, 'YYYY-MM-DD') >= $${queryParams.length}`; // Compara apenas a parte da data
+        }
+        if (dataFinal) {
+            queryParams.push(dataFinal);
+            query += ` AND to_char(date::date, 'YYYY-MM-DD') <= $${queryParams.length}`; // Compara apenas a parte da data
+        }
+        if (orador) {
+            queryParams.push(orador);
+            query += ` AND speaker ILIKE $${queryParams.length}`; // Filtro para o nome do orador (case-insensitive)
+        }
+        if (sala) {
+            queryParams.push(sala);
+            query += ` AND room = $${queryParams.length}`; // Filtro para a sala
+        }
 
-        fetch(`/consultar-historico?${params.toString()}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Erro ao consultar histórico.');
-                }
-                return response.json();
-            })
-            .then(reunioes => {
-                const historicoList = document.getElementById('historico-results');
-                historicoList.innerHTML = '';
+        console.log('Query gerada:', query);
+        console.log('Parâmetros da Query:', queryParams);
 
-                if (!reunioes.length) {
-                    document.getElementById('historico-results-table').style.display = 'none';
-                    alert('Nenhum registro encontrado.');
-                    return;
-                }
+        // Executa a consulta no banco de dados
+        const { rows } = await db.query(query, queryParams);
 
-                // Remove duplicatas antes de renderizar
-                const uniqueReunioes = [];
-                const uniqueSet = new Set();
+        if (!rows.length) {
+            console.log('Nenhum registro encontrado para os filtros aplicados.');
+            res.status(404).json({ error: 'Nenhum registro encontrado.' });
+            return;
+        }
 
-                reunioes.forEach(reuniao => {
-                    // Cria uma chave única para cada reunião
-                    const key = [
-                        reuniao.date,
-                        reuniao.time,
-                        reuniao.speaker,
-                        reuniao.room,
-                        reuniao.client,
-                    ].join('|');
+        console.log('Registros encontrados:', rows);
 
-                    if (!uniqueSet.has(key)) {
-                        uniqueSet.add(key); // Adiciona ao Set para evitar duplicatas
-                        uniqueReunioes.push(reuniao); // Adiciona à lista única
-                    }
-                });
+        // Retorna os registros filtrados em JSON
+        if (format !== 'pdf') {
+            res.status(200).json(rows);
+            return;
+        }
 
-                // Ordena as reuniões conforme a ordem selecionada
-                uniqueReunioes.sort((a, b) => {
-                    const dateA = new Date(`${a.date}T${a.time}`);
-                    const dateB = new Date(`${b.date}T${b.time}`);
-                    return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
-                });
+        // Geração de PDF
+        const doc = new jsPDF();
+        doc.setFontSize(16);
+        doc.text('Histórico de Reuniões', 105, 20, { align: 'center' });
 
-                // Preenche a tabela com os dados filtrados e únicos
-                uniqueReunioes.forEach(reuniao => {
-                    const row = document.createElement('tr');
+        // Agrupa os dados por data
+        const groupedData = rows.reduce((acc, row) => {
+            const formattedDate = new Date(row.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+            if (!acc[formattedDate]) acc[formattedDate] = [];
+            acc[formattedDate].push(row);
+            return acc;
+        }, {});
 
-                    const formattedDate = new Date(reuniao.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-                    const formattedTime = reuniao.time.slice(0, 5);
+        // Adiciona os dados organizados por dia no PDF
+        let startY = 30;
+        Object.entries(groupedData).forEach(([date, entries]) => {
+            doc.setFontSize(12);
+            doc.text(`Data: ${date}`, 10, startY);
 
-                    const cells = [
-                        formattedDate,
-                        formattedTime,
-                        reuniao.speaker,
-                        reuniao.room,
-                        reuniao.client
-                    ];
+            const tableData = entries.map(entry => [
+                entry.time.slice(0, 5), // Hora
+                entry.speaker, // Orador
+                entry.room, // Sala
+                entry.client, // Cliente
+            ]);
 
-                    cells.forEach(cellText => {
-                        const td = document.createElement('td');
-                        td.textContent = cellText;
-                        row.appendChild(td);
-                    });
-
-                    historicoList.appendChild(row);
-                });
-
-                // Exibe a tabela
-                document.getElementById('historico-results-table').style.display = 'table';
-            })
-            .catch(error => {
-                console.error('Erro:', error);
-                alert('Ocorreu um erro ao consultar o histórico de reuniões.');
+            doc.autoTable({
+                head: [['Hora', 'Orador', 'Sala', 'Cliente']],
+                body: tableData,
+                startY: startY + 5,
+                margin: { left: 10, right: 10 },
+                styles: { fontSize: 10 },
+                headStyles: { fillColor: [22, 160, 133] },
+                bodyStyles: { textColor: [50, 50, 50] },
             });
-    }
 
-    // Alterna a ordem de classificação e recarrega o histórico
-    function toggleSortOrder() {
-        sortOrder = sortOrder === 'desc' ? 'asc' : 'desc';
-        loadHistorico();
-    }
-
-    // Adiciona evento para o botão de pesquisa
-    const searchButton = document.getElementById('search-historico');
-    if (searchButton) {
-        searchButton.addEventListener('click', loadHistorico);
-    }
-
-    // Adiciona evento para o botão de download do PDF
-    const downloadPdfButton = document.getElementById('download-pdf');
-    if (downloadPdfButton) {
-        downloadPdfButton.addEventListener('click', downloadHistoricoPDF);
-    }
-
-    // Função para gerar e baixar o PDF com os dados filtrados
-    function downloadHistoricoPDF() {
-        // Coleta os dados únicos da tabela renderizada
-        const rows = Array.from(document.getElementById('historico-results').querySelectorAll('tr'));
-        const filteredData = rows.map(row => {
-            const cells = Array.from(row.children).map(cell => cell.textContent.trim());
-            return {
-                date: cells[0],   // Data
-                time: cells[1],   // Horário
-                speaker: cells[2], // Orador
-                room: cells[3],   // Sala
-                client: cells[4]  // Cliente/Funcionário
-            };
-        });
-
-        // Cria um parâmetro JSON com os dados únicos
-        const params = new URLSearchParams({ format: 'pdf' });
-        params.append('filteredData', JSON.stringify(filteredData));
-
-        // Redireciona para o backend para gerar o PDF com base nos dados filtrados
-        fetch(`/consultar-historico-pdf`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ filteredData }),
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Erro ao gerar o PDF.');
+            startY = doc.previousAutoTable.finalY + 10;
+            if (startY > 270) {
+                doc.addPage();
+                startY = 20;
             }
-            return response.blob();
-        })
-        .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'historico.pdf';
-            link.click();
-            window.URL.revokeObjectURL(url);
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            alert('Ocorreu um erro ao gerar o PDF.');
         });
-    }
 
-    // Adiciona evento para alternar a ordem de classificação
-    const sortButton = document.getElementById('sort-historico');
-    if (sortButton) {
-        sortButton.addEventListener('click', toggleSortOrder);
+        // Gera o PDF
+        const pdfBytes = doc.output('arraybuffer');
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename="historico_reunioes.pdf"');
+        res.send(Buffer.from(pdfBytes));
+    } catch (err) {
+        console.error('Erro ao consultar histórico de reuniões:', err.stack || err.message || err);
+        res.status(500).json({ error: 'Erro ao consultar histórico de reuniões.' });
     }
-});
+};
