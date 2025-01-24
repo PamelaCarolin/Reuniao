@@ -38,9 +38,11 @@
                 </div>
             </form>
         </div>
+
         <table id="historico-results-table" class="styled-table" style="display: none;">
             <thead>
                 <tr>
+                    <th>Selecionar</th>
                     <th>Data</th>
                     <th>Horário</th>
                     <th>Orador</th>
@@ -51,6 +53,7 @@
             </thead>
             <tbody id="historico-results">
                 <tr data-id="123">
+                    <td><input type="checkbox" name="selected-meeting" value="123"></td>
                     <td class="date-cell">24/01/2024</td>
                     <td class="time-cell">18:00</td>
                     <td>João Silva</td>
@@ -62,7 +65,12 @@
                 </tr>
             </tbody>
         </table>
+
+        <div class="button-group">
+            <button onclick="openSelectedReagendarModal()" class="button">Reagendar Selecionados</button>
+        </div>
     </div>
+
     <script src="consulta_reunioes.js"></script>
     <script src="reagendar.js"></script>
 </body>
