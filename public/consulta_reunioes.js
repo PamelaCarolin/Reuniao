@@ -6,15 +6,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Função para carregar o histórico de reuniões com filtros aplicados
     function loadHistorico() {
+        if (!document.getElementById('data-inicial') || !document.getElementById('data-final')) {
+            console.error('Elementos de data não encontrados.');
+            return;
+        }
         filterHistorico();
     }
 
     // Função para aplicar filtros e buscar dados no histórico
     function filterHistorico() {
-        const dataInicial = document.getElementById('data-inicial').value;
-        const dataFinal = document.getElementById('data-final').value;
-        const orador = document.getElementById('orador').value;
-        const sala = document.getElementById('sala').value;
+        const dataInicial = document.getElementById('data-inicial')?.value || '';
+        const dataFinal = document.getElementById('data-final')?.value || '';
+        const orador = document.getElementById('orador')?.value || '';
+        const sala = document.getElementById('sala')?.value || '';
 
         const params = new URLSearchParams({ dataInicial, dataFinal, orador, sala });
 
@@ -41,14 +45,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 reunioes.forEach(reuniao => {
                     // Cria uma chave única para cada reunião
-                    const key = [
-                        reuniao.date,
-                        reuniao.time,
-                        reuniao.speaker,
-                        reuniao.room,
-                        reuniao.client,
-                    ].join('|');
-
+                    const key = `${reuniao.date}|${reuniao.time}|${reuniao.speaker}|${reuniao.room}|${reuniao.client}`;
                     if (!uniqueSet.has(key)) {
                         uniqueSet.add(key); // Adiciona ao Set para evitar duplicatas
                         uniqueReunioes.push(reuniao); // Adiciona à lista única
@@ -115,7 +112,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Função para gerar e baixar o PDF com os dados filtrados
     function downloadHistoricoPDF() {
-        // Coleta os dados únicos da tabela renderizada
         const rows = Array.from(document.getElementById('historico-results').querySelectorAll('tr'));
         const filteredData = rows.map(row => {
             const cells = Array.from(row.children).map(cell => cell.textContent.trim());
@@ -132,7 +128,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const params = new URLSearchParams({ format: 'pdf' });
         params.append('filteredData', JSON.stringify(filteredData));
 
-        // Redireciona para o backend para gerar o PDF com base nos dados filtrados
         fetch(`/consultar-historico-pdf`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
