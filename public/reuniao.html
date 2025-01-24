@@ -5,10 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agendamento de Reunião</title>
     <link rel="stylesheet" href="reuniao.css">
-    <link rel="icon" type="image/x-icon" href="logo.ico"> <!-- Favicon atualizado -->
+    <link rel="icon" type="image/x-icon" href="logo.ico">
 </head>
 <body>
-    <!-- Menu de navegação -->
     <div class="menu">
         <button onclick="window.location.href='reuniao.html'" class="menu-button">Agendamento de Reunião</button>
         <button onclick="window.location.href='cozinha.html'" class="menu-button">Reserva da Cozinha</button>
@@ -45,7 +44,7 @@
                         <option value="RH">RH</option>
                         <option value="Departamento Pessoal">Departamento Pessoal</option>
                         <option value="Coordenadores">Coordenadores</option>
-                        <option value="Gerencia">Gerencia</option> <!-- Setor Gerencia adicionado -->
+                        <option value="Gerencia">Gerencia</option>
                         <option value="Contabil">Contabil</option>
                         <option value="Comercial">Comercial</option>
                     </select>
@@ -58,29 +57,14 @@
                         <option value="Teams">Teams</option>
                     </select>
                 </div>
-                <div class="input-group">
-                    <label for="tipo-reuniao">Tipo de Reunião</label>
-                    <select id="tipo-reuniao" required onchange="toggleReuniaoTipo()">
-                        <option value="">Selecione...</option>
-                        <option value="externa">Externa</option>
-                        <option value="interna">Interna</option>
-                    </select>
-                </div>
-                <div class="input-group" id="cliente-group" style="display:none;">
-                    <label for="cliente">Cliente</label>
-                    <input type="text" id="cliente">
-                </div>
-                <div class="input-group" id="funcionario-group" style="display:none;">
-                    <label for="funcionario">Funcionário</label>
-                    <input type="text" id="funcionario">
-                </div>
                 <button type="submit" class="button">Agendar Reunião</button>
             </form>
         </div>
 
         <div class="actions">
             <button onclick="toggleCancelForm()" class="button">Cancelar Reunião</button>
-            <button onclick="toggleConsultForm()" class="button">Consultar Reunião</button>
+            <button onclick="toggleModifyForm()" class="button">Modificar Reunião</button>
+            <button onclick="toggleConsultForm()" class="button">Visualizar Reuniões</button>
         </div>
 
         <!-- Formulário de Cancelamento -->
