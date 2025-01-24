@@ -160,8 +160,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
     // Adicionar lógica de modificação aqui futuramente
-}
-
 function rescheduleMeeting() {
     const id = document.getElementById('reschedule-id').value;
     const date = document.getElementById('reschedule-data').value;
