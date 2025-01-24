@@ -51,20 +51,30 @@
                     <th>Ações</th>
                 </tr>
             </thead>
-            <tbody id="historico-results">
-                <tr data-id="123">
-                    <td><input type="checkbox" name="selected-meeting" value="123"></td>
-                    <td class="date-cell">24/01/2024</td>
-                    <td class="time-cell">18:00</td>
-                    <td>João Silva</td>
-                    <td>Frente</td>
-                    <td>Cliente XYZ</td>
-                    <td>
-                        <button class="btn-reagendar" data-id="123">Reagendar</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+<table id="historico-results" class="styled-table">
+    <thead>
+        <tr>
+            <th>Data</th>
+            <th>Horário</th>
+            <th>Orador</th>
+            <th>Sala</th>
+            <th>Cliente/Funcionário</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr data-id="1">
+            <td>2024-11-11</td>
+            <td>18:00</td>
+            <td>teste PAM</td>
+            <td>TI</td>
+            <td>Cliente 1</td>
+            <td>
+                <button class="btn-reagendar" data-id="1">Reagendar</button>
+            </td>
+        </tr>
+    </tbody>
+</table>
 
         <div class="button-group">
             <button onclick="openSelectedReagendarModal()" class="button">Reagendar Selecionados</button>
