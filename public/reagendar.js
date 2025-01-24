@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const buttons = document.querySelectorAll('.btn-reagendar');
 
         if (buttons.length === 0) {
-            console.error('Nenhum botão de reagendamento encontrado.');
+            console.warn('Nenhum botão de reagendamento encontrado. Aguardando a tabela ser carregada.');
             return;
         }
 
@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 openReagendarModal(meetingId);
             });
         });
-    }, 1000); // Aguarda 1 segundo para garantir que o DOM esteja carregado
+    }, 1000);  // Aguarda 1 segundo para garantir que a tabela foi carregada
 });
 
 /**
