@@ -1,8 +1,19 @@
-function openReagendarModal() {
-    // Remover qualquer modal existente antes de adicionar um novo
-    fecharModal();
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.btn-reagendar').forEach(button => {
+        button.addEventListener('click', function() {
+            const meetingId = this.dataset.id; // Obtém o ID da reunião
+            abrirModalReagendamento(meetingId);
+        });
+    });
+});
 
-    // Criar o modal dinamicamente e adicioná-lo ao body
+/**
+ * Abre um modal para o usuário inserir uma nova data e horário para a reunião
+ * @param {string} meetingId - ID da reunião a ser reagendada
+ */
+function abrirModalReagendamento(meetingId) {
+    fecharModal(); // Fecha o modal anterior, se existir
+
     const modalHtml = `
         <div id="reagendar-modal" class="modal">
             <div class="modal-content">
@@ -11,7 +22,7 @@ function openReagendarModal() {
                 <input type="date" id="reagendar-data" required>
                 <label for="reagendar-horario">Novo Horário:</label>
                 <input type="time" id="reagendar-horario" required>
-                <button onclick="submitReagendar()">Confirmar</button>
+                <button onclick="submitReagendar('${meetingId}')">Confirmar</button>
                 <button onclick="fecharModal()">Cancelar</button>
             </div>
         </div>
@@ -32,35 +43,38 @@ function fecharModal() {
 }
 
 /**
- * Função para submeter os dados de reagendamento
+ * Envia os dados de reagendamento para o servidor
+ * @param {string} meetingId - ID da reunião a ser reagendada
  */
-async function submitReagendar() {
+async function submitReagendar(meetingId) {
     const novaData = document.getElementById('reagendar-data').value;
     const novoHorario = document.getElementById('reagendar-horario').value;
 
     if (!novaData || !novoHorario) {
-        alert('Preencha todos os campos para reagendar.');
+        alert('Por favor, preencha todos os campos.');
         return;
     }
 
     try {
-        const response = await fetch('/api/reunioes/reagendar', {
+        const response = await fetch('/reagendar', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                newDate: `${novaData} ${novoHorario}`
-            })
+            body: JSON.stringify({ id: meetingId, newDate: `${novaData} ${novoHorario}` })
         });
+
+        const result = await response.json();
 
         if (response.ok) {
             alert('Reunião reagendada com sucesso!');
             fecharModal();
             location.reload();
+        } else if (result.suggestedTime) {
+            alert(`Horário indisponível. Sugerimos reagendar para: ${result.suggestedTime}`);
         } else {
-            alert('Erro ao reagendar reunião. Tente novamente.');
+            alert(result.error || 'Erro ao reagendar. Tente novamente.');
         }
     } catch (error) {
-        console.error('Erro ao reagendar:', error);
-        alert('Ocorreu um erro ao tentar reagendar.');
+        console.error('Erro ao reagendar reunião:', error);
+        alert('Ocorreu um erro ao tentar reagendar. Verifique a conexão.');
     }
 }
