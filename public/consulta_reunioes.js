@@ -39,57 +39,112 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
 
-                // Remove duplicatas antes de renderizar
-                const uniqueReunioes = [];
-                const uniqueSet = new Set();
-
                 reunioes.forEach(reuniao => {
-                    // Cria uma chave única para cada reunião
-                    const key = `${reuniao.date}|${reuniao.time}|${reuniao.speaker}|${reuniao.room}|${reuniao.client}`;
-                    if (!uniqueSet.has(key)) {
-                        uniqueSet.add(key); // Adiciona ao Set para evitar duplicatas
-                        uniqueReunioes.push(reuniao); // Adiciona à lista única
-                    }
-                });
-
-                // Ordena as reuniões conforme a ordem selecionada
-                uniqueReunioes.sort((a, b) => {
-                    const dateA = new Date(`${a.date}T${a.time}`);
-                    const dateB = new Date(`${b.date}T${b.time}`);
-                    return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
-                });
-
-                // Preenche a tabela com os dados filtrados e únicos
-                uniqueReunioes.forEach(reuniao => {
                     const row = document.createElement('tr');
+                    row.setAttribute('data-id', reuniao.id);
 
                     const formattedDate = new Date(reuniao.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
                     const formattedTime = reuniao.time.slice(0, 5);
 
-                    const cells = [
-                        formattedDate,
-                        formattedTime,
-                        reuniao.speaker,
-                        reuniao.room,
-                        reuniao.client
-                    ];
-
-                    cells.forEach(cellText => {
-                        const td = document.createElement('td');
-                        td.textContent = cellText;
-                        row.appendChild(td);
-                    });
+                    row.innerHTML = `
+                        <td>${formattedDate}</td>
+                        <td>${formattedTime}</td>
+                        <td>${reuniao.speaker}</td>
+                        <td>${reuniao.room}</td>
+                        <td>${reuniao.client}</td>
+                        <td><button class="btn-reagendar" data-id="${reuniao.id}">Reagendar</button></td>
+                    `;
 
                     historicoList.appendChild(row);
                 });
 
-                // Exibe a tabela
+                attachReagendarEvent();
+
                 document.getElementById('historico-results-table').style.display = 'table';
             })
             .catch(error => {
                 console.error('Erro:', error);
                 alert('Ocorreu um erro ao consultar o histórico de reuniões.');
             });
+    }
+
+    // Função para adicionar eventos de clique aos botões de reagendamento
+    function attachReagendarEvent() {
+        const buttons = document.querySelectorAll('.btn-reagendar');
+        if (buttons.length === 0) {
+            console.warn('Nenhum botão de reagendamento encontrado.');
+            return;
+        }
+
+        buttons.forEach(button => {
+            button.addEventListener('click', function () {
+                const meetingId = this.getAttribute('data-id');
+                openReagendarModal(meetingId);
+            });
+        });
+
+        console.log('Botões de reagendamento detectados e eventos atribuídos.');
+    }
+
+    // Abre o modal de reagendamento para reuniões selecionadas
+    function openReagendarModal(meetingId) {
+        closeModal();
+
+        const modalHtml = `
+            <div id="reagendar-modal" class="modal">
+                <div class="modal-content">
+                    <h2>Reagendar Reunião</h2>
+                    <label for="reagendar-data">Nova Data:</label>
+                    <input type="date" id="reagendar-data" required>
+                    <label for="reagendar-horario">Novo Horário:</label>
+                    <input type="time" id="reagendar-horario" required>
+                    <button onclick="submitReagendar('${meetingId}')">Confirmar</button>
+                    <button onclick="closeModal()">Cancelar</button>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        document.getElementById('reagendar-modal').style.display = 'flex';
+    }
+
+    // Fecha o modal de reagendamento
+    function closeModal() {
+        const modal = document.getElementById('reagendar-modal');
+        if (modal) {
+            modal.remove();
+        }
+    }
+
+    // Submete os novos dados de reagendamento para o servidor
+    async function submitReagendar(meetingId) {
+        const novaData = document.getElementById('reagendar-data').value;
+        const novoHorario = document.getElementById('reagendar-horario').value;
+
+        if (!novaData || !novoHorario) {
+            alert('Por favor, preencha todos os campos.');
+            return;
+        }
+
+        try {
+            const response = await fetch('/agendar', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: meetingId, newDate: `${novaData} ${novoHorario}` })
+            });
+
+            if (response.ok) {
+                alert('Reunião reagendada com sucesso!');
+                closeModal();
+                loadHistorico();  // Atualiza a tabela após reagendar
+            } else {
+                const errorData = await response.json();
+                alert(`Erro ao reagendar: ${errorData.error || 'Tente novamente.'}`);
+            }
+        } catch (error) {
+            console.error('Erro ao reagendar reunião:', error);
+            alert('Erro ao tentar reagendar. Verifique a conexão.');
+        }
     }
 
     // Alterna a ordem de classificação e recarrega o histórico
@@ -99,63 +154,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Adiciona evento para o botão de pesquisa
-    const searchButton = document.getElementById('search-historico');
-    if (searchButton) {
-        searchButton.addEventListener('click', loadHistorico);
-    }
-
-    // Adiciona evento para o botão de download do PDF
-    const downloadPdfButton = document.getElementById('download-pdf');
-    if (downloadPdfButton) {
-        downloadPdfButton.addEventListener('click', downloadHistoricoPDF);
-    }
-
-    // Função para gerar e baixar o PDF com os dados filtrados
-    function downloadHistoricoPDF() {
-        const rows = Array.from(document.getElementById('historico-results').querySelectorAll('tr'));
-        const filteredData = rows.map(row => {
-            const cells = Array.from(row.children).map(cell => cell.textContent.trim());
-            return {
-                date: cells[0],   // Data
-                time: cells[1],   // Horário
-                speaker: cells[2], // Orador
-                room: cells[3],   // Sala
-                client: cells[4]  // Cliente/Funcionário
-            };
-        });
-
-        // Cria um parâmetro JSON com os dados únicos
-        const params = new URLSearchParams({ format: 'pdf' });
-        params.append('filteredData', JSON.stringify(filteredData));
-
-        fetch(`/consultar-historico-pdf`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ filteredData }),
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Erro ao gerar o PDF.');
-            }
-            return response.blob();
-        })
-        .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'historico.pdf';
-            link.click();
-            window.URL.revokeObjectURL(url);
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            alert('Ocorreu um erro ao gerar o PDF.');
-        });
-    }
+    document.getElementById('search-historico')?.addEventListener('click', loadHistorico);
 
     // Adiciona evento para alternar a ordem de classificação
-    const sortButton = document.getElementById('sort-historico');
-    if (sortButton) {
-        sortButton.addEventListener('click', toggleSortOrder);
-    }
+    document.getElementById('sort-historico')?.addEventListener('click', toggleSortOrder);
 });
