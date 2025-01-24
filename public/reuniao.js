@@ -550,7 +550,37 @@ document.addEventListener('DOMContentLoaded', waitForTableLoad);
 console.log('Botões de reagendamento detectados e eventos atribuídos.');
 
 // Chamar a função após o carregamento da página
-document.addEventListener('DOMContentLoaded', waitForTableLoad);
+/**
+ * Inicializa os eventos da página.
+ */
+document.addEventListener('DOMContentLoaded', function () {
+    initializeReagendarButtons();
+});
+
+/**
+ * Inicializa os botões de reagendamento e atribui eventos.
+ */
+function initializeReagendarButtons() {
+    const buttons = document.querySelectorAll('.btn-reagendar');
+
+    if (buttons.length === 0) {
+        console.warn('Nenhum botão de reagendamento encontrado.');
+        return;
+    }
+
+    buttons.forEach(button => {
+        button.addEventListener('click', function () {
+            const meetingId = this.getAttribute('data-id');
+            if (!meetingId) {
+                alert('Erro: ID da reunião não encontrado.');
+                return;
+            }
+            openReagendarModal(meetingId);
+        });
+    });
+
+    console.log('Botões de reagendamento detectados e eventos atribuídos.');
+}
 
 /**
  * Abre o modal para reagendamento.
@@ -627,7 +657,7 @@ async function submitReagendar(meetingId) {
  * @param {string} meetingId - ID da reunião removida.
  */
 function removeMeetingFromTable(meetingId) {
-    const row = document.querySelector(`#historico-results input[value="${meetingId}"]`).closest('tr');
+    const row = document.querySelector(`#meeting-list input[value="${meetingId}"]`).closest('tr');
     if (row) {
         row.remove();
     }
@@ -639,7 +669,7 @@ function removeMeetingFromTable(meetingId) {
  * @param {string} time - Novo horário da reunião.
  */
 function addMeetingToTable(date, time) {
-    const meetingList = document.getElementById('historico-results');
+    const meetingList = document.getElementById('meeting-list');
     const newRow = document.createElement('tr');
     newRow.innerHTML = `
         <td><input type="checkbox" name="selected-meeting" value="new-id"></td>
@@ -664,7 +694,6 @@ function openSelectedReagendarModal() {
         return;
     }
 
-    // Pegando o primeiro selecionado para reagendamento
     const meetingId = selectedCheckboxes[0].value;
 
     if (!meetingId) {
