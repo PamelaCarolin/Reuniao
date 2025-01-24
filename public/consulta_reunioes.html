@@ -46,11 +46,24 @@
                     <th>Orador</th>
                     <th>Sala</th>
                     <th>Cliente/Funcionário</th>
+                    <th>Ações</th>
                 </tr>
             </thead>
-            <tbody id="historico-results"></tbody>
+            <tbody id="historico-results">
+                <tr data-id="123">
+                    <td class="date-cell">24/01/2024</td>
+                    <td class="time-cell">18:00</td>
+                    <td>João Silva</td>
+                    <td>Frente</td>
+                    <td>Cliente XYZ</td>
+                    <td>
+                        <button class="btn-reagendar" data-id="123">Reagendar</button>
+                    </td>
+                </tr>
+            </tbody>
         </table>
     </div>
     <script src="consulta_reunioes.js"></script>
+    <script src="reagendar.js"></script>
 </body>
 </html>
