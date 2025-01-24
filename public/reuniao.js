@@ -579,7 +579,7 @@ async function submitReagendar(meetingId) {
     }
 
     try {
-        const response = await fetch('/reagendar', {
+        const response = await fetch('/agendar', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: meetingId, newDate: `${novaData} ${novoHorario}` })
@@ -591,7 +591,7 @@ async function submitReagendar(meetingId) {
             location.reload();
         } else {
             const errorData = await response.json();
-            alert(`Erro ao reagendar: ${errorData.message || 'Tente novamente.'}`);
+            alert(`Erro ao reagendar: ${errorData.error || 'Tente novamente.'}`);
         }
     } catch (error) {
         console.error('Erro ao reagendar reunião:', error);
