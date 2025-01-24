@@ -1,10 +1,9 @@
-// Aguarda o carregamento do DOM para adicionar eventos aos botões de reagendamento
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.btn-reagendar').forEach(button => {
         button.addEventListener('click', function() {
             const meetingId = this.dataset.id;
-            if (!meetingId) {
-                alert('Erro: ID da reunião não encontrado.');
+            if (!meetingId || meetingId === "undefined") {
+                alert('Por favor, selecione uma reunião válida antes de reagendar.');
                 return;
             }
             openReagendarModal(meetingId);
@@ -48,7 +47,7 @@ function closeModal() {
 }
 
 /**
- * Envia os dados de reagendamento para o servidor.
+ * Envia os dados de reagendamento para o servidor e atualiza a tabela.
  * @param {string} meetingId - ID da reunião a ser reagendada.
  */
 async function submitReagendar(meetingId) {
@@ -73,8 +72,8 @@ async function submitReagendar(meetingId) {
 
         if (response.ok) {
             alert('Reunião reagendada com sucesso!');
+            updateTable(meetingId, novaData, novoHorario);
             closeModal();
-            location.reload();
         } else if (result.suggestedTime) {
             alert(`Horário indisponível. Sugerimos reagendar para: ${result.suggestedTime}`);
         } else {
@@ -83,6 +82,20 @@ async function submitReagendar(meetingId) {
     } catch (error) {
         console.error('Erro ao reagendar reunião:', error);
         alert('Ocorreu um erro ao tentar reagendar. Verifique a conexão.');
+    }
+}
+
+/**
+ * Atualiza a tabela dinamicamente com os novos dados da reunião reagendada.
+ * @param {string} meetingId - ID da reunião reagendada.
+ * @param {string} newDate - Nova data reagendada.
+ * @param {string} newTime - Novo horário reagendado.
+ */
+function updateTable(meetingId, newDate, newTime) {
+    const row = document.querySelector(`tr[data-id='${meetingId}']`);
+    if (row) {
+        row.querySelector('.date-cell').innerText = newDate;
+        row.querySelector('.time-cell').innerText = newTime;
     }
 }
 
