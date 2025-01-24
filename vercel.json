@@ -13,7 +13,7 @@
     { "src": "/consultar-cozinha", "dest": "/api/consultar-cozinha.js" },
     { "src": "/cancelar-cozinha/(.*)", "dest": "/api/cancelar-cozinha.js?id=$1" },
     { "src": "/consultar-historico", "dest": "/api/consultar-historico.js" },
-    { "src": "/reagendar", "dest": "/api/reagendar.js" }, 
+    { "src": "/reagendar", "dest": "/public/reagendar.html" }, 
     { "src": "/consulta_reuniao", "dest": "/public/consulta_reuniao.html" },
     { "src": "/", "dest": "/public/reuniao.html" },
     { "src": "/(.*)", "dest": "/public/$1" }
