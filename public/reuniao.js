@@ -497,7 +497,7 @@ function closeCancelForm() {
 
 // Função para aguardar a carga da tabela antes de atribuir eventos aos botões de reagendamento
 function waitForTableLoad() {
-    const table = document.getElementById('historico-results');
+    const table = document.getElementById('meeting-list');
 
     if (!table || table.children.length === 0) {
         console.warn('Aguardando a tabela ser carregada...');
@@ -505,13 +505,18 @@ function waitForTableLoad() {
         return;
     }
 
-    const buttons = document.querySelectorAll('.btn-reagendar');
-
-    if (buttons.length === 0) {
-        console.warn('Nenhum botão de reagendamento encontrado. Aguardando...');
+    const checkboxes = document.querySelectorAll('#meeting-list input[type="checkbox"]');
+    if (checkboxes.length === 0) {
+        console.warn('Nenhuma reunião encontrada para reagendamento.');
         setTimeout(waitForTableLoad, 1000);
         return;
     }
+
+    console.log('Tabela carregada com sucesso.');
+}
+
+// Inicia a verificação após carregar a página
+document.addEventListener('DOMContentLoaded', waitForTableLoad);
 
     buttons.forEach(button => {
         button.addEventListener('click', function() {
