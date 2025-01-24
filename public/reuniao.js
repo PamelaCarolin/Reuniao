@@ -496,26 +496,44 @@ function closeCancelForm() {
 }
 
 // Função para aguardar a carga da tabela antes de atribuir eventos aos botões de reagendamento
-function waitForTableLoad() {
+function waitForTableLoad(attempts = 0) {
     const table = document.getElementById('meeting-list');
 
     if (!table || table.children.length === 0) {
+        if (attempts > 20) {
+            console.error('Erro: Tabela não foi carregada após várias tentativas.');
+            return;
+        }
         console.warn('Aguardando a tabela ser carregada...');
-        setTimeout(waitForTableLoad, 1000);
-        return;
-    }
-
-    const checkboxes = document.querySelectorAll('#meeting-list input[type="checkbox"]');
-    if (checkboxes.length === 0) {
-        console.warn('Nenhuma reunião encontrada para reagendamento.');
-        setTimeout(waitForTableLoad, 1000);
+        setTimeout(() => waitForTableLoad(attempts + 1), 1000);
         return;
     }
 
     console.log('Tabela carregada com sucesso.');
+
+    // Certifique-se de que os botões estão corretamente selecionados após a tabela carregar
+    const buttons = document.querySelectorAll('.btn-reagendar');
+    if (buttons.length === 0) {
+        console.warn('Nenhum botão de reagendamento encontrado. Aguardando...');
+        setTimeout(() => waitForTableLoad(attempts + 1), 1000);
+        return;
+    }
+
+    buttons.forEach(button => {
+        button.addEventListener('click', function() {
+            const meetingId = this.getAttribute('data-id');
+            if (!meetingId) {
+                alert('Erro: ID da reunião não encontrado.');
+                return;
+            }
+            openReagendarModal(meetingId);
+        });
+    });
+
+    console.log('Botões de reagendamento detectados e eventos atribuídos.');
 }
 
-// Inicia a verificação após carregar a página
+// Iniciar a verificação após o carregamento da página
 document.addEventListener('DOMContentLoaded', waitForTableLoad);
 
     buttons.forEach(button => {
