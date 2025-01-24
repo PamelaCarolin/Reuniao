@@ -45,7 +45,7 @@
                         <option value="RH">RH</option>
                         <option value="Departamento Pessoal">Departamento Pessoal</option>
                         <option value="Coordenadores">Coordenadores</option>
-                        <option value="Gerencia">Gerencia</option>
+                        <option value="Gerencia">Gerencia</option> <!-- Setor Gerencia adicionado -->
                         <option value="Contabil">Contabil</option>
                         <option value="Comercial">Comercial</option>
                     </select>
@@ -85,7 +85,7 @@
 
         <!-- Formulário de Cancelamento -->
         <div id="cancel-form" class="form-container" style="display: none;">
-            <h2>Cancelar/Reagendar Reunião</h2>
+            <h2>Cancelar Reunião</h2>
             <div class="input-group">
                 <label for="filtro-data">Filtrar por Data</label>
                 <input type="date" id="filtro-data">
@@ -97,7 +97,6 @@
             <button type="button" class="button" onclick="filterMeetings()">Filtrar</button>
             <ul id="meeting-list"></ul>
             <button onclick="cancelSelectedMeetings()" class="button">Cancelar Selecionados</button>
-            <button onclick="openSelectedReagendarModal()" class="button">Reagendar Selecionados</button>
             <button onclick="closeCancelForm()" class="button">Fechar</button>
         </div>
 
@@ -112,6 +111,23 @@
                 <div class="input-group">
                     <label for="consulta-cliente">Cliente</label>
                     <input type="text" id="consulta-cliente">
+                </div>
+                <div class="input-group">
+                    <label for="consulta-orador">Orador</label>
+                    <input type="text" id="consulta-orador">
+                </div>
+                <div class="input-group">
+                    <label for="consulta-sala">Sala</label>
+                    <select id="consulta-sala">
+                        <option value="">Todas</option>
+                        <option value="Fundo">Fundo</option>
+                        <option value="Frente">Frente</option>
+                        <option value="Teams">Teams</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="consulta-setor">Setor</label>
+                    <input type="text" id="consulta-setor">
                 </div>
                 <button type="button" onclick="consultMeetings()" class="button">Pesquisar</button>
                 <button type="button" onclick="downloadPDF()" class="button">Baixar PDF</button>
