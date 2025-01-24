@@ -58,7 +58,6 @@ h1, h2 {
 /* Formulário */
 .form-container {
     margin-top: 20px;
-    display: none;
 }
 
 .input-group {
@@ -115,11 +114,18 @@ h1, h2 {
     padding: 8px 12px;
 }
 
-/* Estilização para as tabelas */
-.table-container {
+.actions {
+    display: flex;
+    justify-content: space-between;
     margin-top: 20px;
 }
 
+.actions .button {
+    width: auto;
+    padding: 10px 20px;
+}
+
+/* Estilo das tabelas */
 .styled-table {
     width: 100%;
     border-collapse: collapse;
@@ -160,16 +166,6 @@ h1, h2 {
 .styled-table td:first-child {
     text-align: center;
     width: 50px;
-}
-
-/* Estilo específico para os formulários de Cancelamento, Modificação e Visualização */
-#cancel-form, #modify-form, #consult-form {
-    background-color: white;
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
-    max-width: 100%;
-    margin-top: 20px;
 }
 
 /* Janela de confirmação */
