@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agendamento de Reunião</title>
     <link rel="stylesheet" href="reuniao.css">
-    <link rel="icon" type="image/x-icon" href="logo.ico"> <!-- Favicon atualizado -->
+    <link rel="icon" type="image/x-icon" href="logo.ico">
 </head>
 <body>
     <!-- Menu de navegação -->
@@ -85,7 +85,7 @@
 
         <!-- Formulário de Cancelamento -->
         <div id="cancel-form" class="form-container" style="display: none;">
-            <h2>Cancelar Reunião</h2>
+            <h2>Cancelar/Reagendar Reunião</h2>
             <div class="input-group">
                 <label for="filtro-data">Filtrar por Data</label>
                 <input type="date" id="filtro-data">
@@ -97,7 +97,7 @@
             <button type="button" class="button" onclick="filterMeetings()">Filtrar</button>
             <ul id="meeting-list"></ul>
             <button onclick="cancelSelectedMeetings()" class="button">Cancelar Selecionados</button>
-            <button onclick="openReagendarModal()" class="button">Reagendar Selecionados</button>
+            <button onclick="openSelectedReagendarModal()" class="button">Reagendar Selecionados</button>
             <button onclick="closeCancelForm()" class="button">Fechar</button>
         </div>
 
