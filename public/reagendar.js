@@ -1,5 +1,22 @@
-function openReagendarModal(meetingId) {
-    fecharModal(); // Fecha o modal anterior, se existir
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.btn-reagendar').forEach(button => {
+        button.addEventListener('click', function() {
+            const meetingId = this.dataset.id;
+            if (!meetingId) {
+                alert('Erro: ID da reunião não encontrado.');
+                return;
+            }
+            abrirModalReagendamento(meetingId);
+        });
+    });
+});
+
+/**
+ * Abre um modal para o usuário inserir uma nova data e horário para a reunião
+ * @param {string} meetingId - ID da reunião a ser reagendada
+ */
+function abrirModalReagendamento(meetingId) {
+    fecharModal(); // Fecha qualquer modal anterior antes de abrir um novo
 
     const modalHtml = `
         <div id="reagendar-modal" class="modal">
@@ -19,6 +36,9 @@ function openReagendarModal(meetingId) {
     document.getElementById('reagendar-modal').style.display = 'flex';
 }
 
+/**
+ * Fecha o modal de reagendamento
+ */
 function fecharModal() {
     const modal = document.getElementById('reagendar-modal');
     if (modal) {
@@ -26,20 +46,26 @@ function fecharModal() {
     }
 }
 
+/**
+ * Envia os dados de reagendamento para o servidor
+ * @param {string} meetingId - ID da reunião a ser reagendada
+ */
 async function submitReagendar(meetingId) {
     const novaData = document.getElementById('reagendar-data').value;
     const novoHorario = document.getElementById('reagendar-horario').value;
 
-    if (!novaData || !novoHorario) {
-        alert('Por favor, preencha todos os campos.');
+    if (!novaData || !novoHorario || !meetingId) {
+        alert('Preencha todos os campos corretamente.');
         return;
     }
 
     try {
+        console.log(`Enviando reagendamento para ID: ${meetingId}, Data: ${novaData}, Horário: ${novoHorario}`);
+
         const response = await fetch('/reagendar', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: meetingId, newDate: `${novaData} ${novoHorario}` })
+            body: JSON.stringify({ id: parseInt(meetingId), newDate: `${novaData} ${novoHorario}` })
         });
 
         const result = await response.json();
