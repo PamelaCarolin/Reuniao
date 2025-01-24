@@ -6,20 +6,25 @@ module.exports = async (req, res) => {
     }
 
     const { id, newDate } = req.body;
+
+    if (!id || isNaN(parseInt(id)) || !newDate) {
+        return res.status(400).json({ error: 'ID da reunião e nova data são obrigatórios e devem ser válidos.' });
+    }
+
     const clientDB = await db.connect();
 
     try {
         await clientDB.query('BEGIN');
 
-        // Extrair a data e hora da string recebida
         const [date, time] = newDate.split(' ');
 
-        // Verificar se o horário é válido
+        // Verifica se o horário é válido
         if (!isValidTime(time)) {
-            return res.status(400).json({ error: 'Horário inválido.' });
+            await clientDB.query('ROLLBACK');
+            return res.status(400).json({ error: 'Horário inválido. Utilize o formato HH:MM.' });
         }
 
-        // Verificar conflito de horários
+        // Verificar conflito de horários com outras reuniões
         const conflictQuery = `
             SELECT * FROM meetings 
             WHERE date = $1 
@@ -29,15 +34,17 @@ module.exports = async (req, res) => {
         const { rows } = await clientDB.query(conflictQuery, [date, time, id]);
 
         if (rows.length > 0) {
-            // Sugestão de um novo horário
+            await clientDB.query('ROLLBACK');
+
+            // Sugere um novo horário disponível
             const suggestedTime = await suggestNewTime(date, time, clientDB);
             return res.status(400).json({
-                error: 'Horário já ocupado.',
+                error: 'Horário já ocupado. Por favor, escolha outro horário.',
                 suggestedTime: suggestedTime,
             });
         }
 
-        // Atualizar a reunião
+        // Atualizar a reunião no banco de dados
         const updateQuery = `
             UPDATE meetings 
             SET date = $1, time = $2 
@@ -54,17 +61,18 @@ module.exports = async (req, res) => {
 
         await clientDB.query('COMMIT');
         res.json({ success: true, message: 'Reunião reagendada com sucesso!' });
+
     } catch (error) {
         await clientDB.query('ROLLBACK');
         console.error('Erro ao reagendar reunião:', error);
-        res.status(500).json({ error: 'Erro ao reagendar reunião' });
+        res.status(500).json({ error: 'Erro ao reagendar reunião.' });
     } finally {
         clientDB.release();
     }
 };
 
 /**
- * Verifica se o horário fornecido é válido no formato HH:MM
+ * Verifica se o horário fornecido é válido no formato HH:MM.
  */
 function isValidTime(time) {
     const regex = /^([01]\d|2[0-3]):([0-5]\d)$/;
@@ -72,7 +80,7 @@ function isValidTime(time) {
 }
 
 /**
- * Sugere um novo horário baseado na disponibilidade
+ * Sugere um novo horário baseado na disponibilidade.
  */
 async function suggestNewTime(date, time, clientDB) {
     const query = `
@@ -97,7 +105,7 @@ async function suggestNewTime(date, time, clientDB) {
 }
 
 /**
- * Adiciona minutos a um horário no formato HH:MM
+ * Adiciona minutos a um horário no formato HH:MM.
  */
 function addMinutes(time, minutes) {
     const [hour, minute] = time.split(':').map(Number);
