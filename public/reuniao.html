@@ -67,6 +67,23 @@
             <button onclick="toggleRescheduleForm()" class="button">Reagendar Reunião</button>
         </div>
 
+        <!-- Formulário de Cancelamento -->
+        <div id="cancel-form" class="form-container" style="display: none;">
+            <h2>Cancelar Reunião</h2>
+            <div class="input-group">
+                <label for="filtro-data">Filtrar por Data</label>
+                <input type="date" id="filtro-data">
+            </div>
+            <div class="input-group">
+                <label for="filtro-cliente">Filtrar por Cliente</label>
+                <input type="text" id="filtro-cliente">
+            </div>
+            <button type="button" class="button" onclick="filterMeetings()">Filtrar</button>
+            <ul id="meeting-list"></ul>
+            <button onclick="cancelSelectedMeetings()" class="button">Cancelar Selecionados</button>
+            <button onclick="closeCancelForm()" class="button">Fechar</button>
+        </div>
+
         <!-- Formulário de Reagendamento -->
         <div id="reschedule-form" class="form-container" style="display: none;">
             <h2>Reagendar Reunião</h2>
@@ -90,6 +107,23 @@
             <button type="button" class="button" onclick="toggleRescheduleForm()">Fechar</button>
         </div>
 
+        <!-- Formulário de Consulta -->
+        <div id="consult-form" class="form-container" style="display: none;">
+            <h2>Consultar Reunião</h2>
+            <form>
+                <div class="input-group">
+                    <label for="consulta-data">Data</label>
+                    <input type="date" id="consulta-data">
+                </div>
+                <div class="input-group">
+                    <label for="consulta-cliente">Cliente</label>
+                    <input type="text" id="consulta-cliente">
+                </div>
+                <button type="button" onclick="consultMeetings()" class="button">Filtrar</button>
+            </form>
+            <ul id="consult-results"></ul>
+            <button onclick="toggleConsultForm()" class="button">Fechar</button>
+        </div>
     </div>
 
     <script src="reuniao.js"></script>
