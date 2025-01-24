@@ -474,6 +474,60 @@ function cancelMeeting(id) {
     });
 }
 
+function rescheduleMeeting() {
+    const id = document.getElementById('reschedule-id').value;
+    const date = document.getElementById('reschedule-data').value;
+    const time = document.getElementById('reschedule-horario').value;
+    const duration = document.getElementById('reschedule-duracao').value;
+
+    if (!id || !date || !time || !duration) {
+        alert("Por favor, preencha todos os campos para reagendar.");
+        return;
+    }
+
+    if (isPastTime(date, time)) {
+        alert("Não é possível reagendar para um horário que já passou.");
+        return;
+    }
+
+    fetch('/agendar', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ id, date, time, duration })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            alert('Reunião reagendada com sucesso!');
+            document.getElementById('reschedule-form').style.display = 'none';
+        } else {
+            alert(result.message || 'Erro ao reagendar a reunião. Por favor, tente novamente.');
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao reagendar reunião:', error);
+        alert('Ocorreu um erro ao reagendar a reunião.');
+    });
+}
+
+// Função para abrir a modal de reagendamento com dados preenchidos
+function openRescheduleModal(id, date, time, duration) {
+    document.getElementById('reschedule-id').value = id;
+    document.getElementById('reschedule-data').value = date;
+    document.getElementById('reschedule-horario').value = time;
+    document.getElementById('reschedule-duracao').value = duration;
+
+    document.getElementById('reschedule-form').style.display = 'block';
+}
+
+// Função para fechar a modal de reagendamento
+function toggleRescheduleForm() {
+    const form = document.getElementById('reschedule-form');
+    form.style.display = form.style.display === 'block' ? 'none' : 'block';
+}
+
 function closeCancelForm() {
     document.getElementById('cancel-form').style.display = 'none';
 }
