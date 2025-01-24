@@ -587,8 +587,9 @@ async function submitReagendar(meetingId) {
 
         if (response.ok) {
             alert('Reunião reagendada com sucesso!');
+            removeMeetingFromTable(meetingId);
+            addMeetingToTable(novaData, novoHorario);
             closeModal();
-            location.reload();
         } else {
             const errorData = await response.json();
             alert(`Erro ao reagendar: ${errorData.error || 'Tente novamente.'}`);
@@ -597,6 +598,37 @@ async function submitReagendar(meetingId) {
         console.error('Erro ao reagendar reunião:', error);
         alert('Erro ao tentar reagendar. Verifique a conexão.');
     }
+}
+
+/**
+ * Remove a reunião reagendada da tabela.
+ * @param {string} meetingId - ID da reunião removida.
+ */
+function removeMeetingFromTable(meetingId) {
+    const row = document.querySelector(`#historico-results input[value="${meetingId}"]`).closest('tr');
+    if (row) {
+        row.remove();
+    }
+}
+
+/**
+ * Adiciona a nova reunião reagendada na tabela.
+ * @param {string} date - Nova data da reunião.
+ * @param {string} time - Novo horário da reunião.
+ */
+function addMeetingToTable(date, time) {
+    const meetingList = document.getElementById('historico-results');
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+        <td><input type="checkbox" name="selected-meeting" value="new-id"></td>
+        <td class="date-cell">${date}</td>
+        <td class="time-cell">${time}</td>
+        <td>Atualizado</td>
+        <td>Sala</td>
+        <td>Cliente</td>
+        <td><button class="btn-reagendar" data-id="new-id">Reagendar</button></td>
+    `;
+    meetingList.appendChild(newRow);
 }
 
 /**
@@ -626,4 +658,3 @@ window.openReagendarModal = openReagendarModal;
 window.closeModal = closeModal;
 window.submitReagendar = submitReagendar;
 window.openSelectedReagendarModal = openSelectedReagendarModal;
-
