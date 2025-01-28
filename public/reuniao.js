@@ -32,65 +32,78 @@ document.addEventListener('DOMContentLoaded', function() {
         return date && time && duration && sector && speaker && room && clientOrEmployee;
     }
 
-    // Função de agendamento de reunião
-    document.getElementById('meeting-form').addEventListener('submit', function(event) {
-        event.preventDefault();
+// 🔹 **Correção da Função de Agendamento**
+document.getElementById('meeting-form').addEventListener('submit', function(event) {
+    event.preventDefault();
 
-        const date = document.getElementById('data').value;
-        const time = document.getElementById('horario').value;
-        const duration = document.getElementById('duracao').value;
-        const sector = document.getElementById('setor').value;
-        const speaker = document.getElementById('nome-orador').value;
-        const room = document.getElementById('sala').value;
-        const tipoReuniao = document.getElementById('tipo-reuniao').value;
-        const cliente = document.getElementById('cliente').value;
-        const funcionario = document.getElementById('funcionario').value;
+    const date = document.getElementById('data').value;
+    const time = document.getElementById('horario').value;
+    const duration = document.getElementById('duracao').value;
+    const sector = document.getElementById('setor').value;
+    const speaker = document.getElementById('nome-orador').value;
+    const room = document.getElementById('sala').value;
+    const tipoReuniao = document.getElementById('tipo-reuniao').value;
+    const cliente = document.getElementById('cliente').value;
+    const funcionario = document.getElementById('funcionario').value;
 
-        const clientOrEmployee = tipoReuniao === 'externa' ? cliente : funcionario;
+    const clientOrEmployee = tipoReuniao === 'externa' ? cliente : funcionario;
 
-        if (isPastTime(date, time)) {
-            alert("Não é possível agendar uma reunião para um horário que já passou.");
-            return;
+    if (!date || !time || !duration || !sector || !speaker || !room || !clientOrEmployee) {
+        alert("Por favor, preencha todos os campos corretamente.");
+        return;
+    }
+
+    // 🔹 **Verifica se há conflitos antes de agendar**
+    fetch('/conflito', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ date, time, duration, room })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.conflict) {
+            suggestNewTime(result.conflict, duration);
+        } else {
+            // Se não houver conflito, procede com o agendamento
+            agendarReuniao(date, time, duration, sector, speaker, room, clientOrEmployee);
         }
-
-        if (!validateInput(date, time, duration, sector, speaker, room, clientOrEmployee)) {
-            alert("Por favor, preencha todos os campos corretamente.");
-            return;
-        }
-
-        // Requisição para o backend
-        fetch('/agendar', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ date, time, duration, sector, speaker, room, client: clientOrEmployee })
-        })
-        .then(response => response.json())
-        .then(result => {
-            if (result.success) {
-                alert(result.message);
-                document.getElementById('meeting-form').reset(); // Redefine o formulário
-                toggleReuniaoTipo(); // Atualiza a visibilidade dos campos
-
-                // Perguntar se deseja baixar o arquivo .ics
-                if (confirm('Deseja adicionar esta reunião ao seu calendário?')) {
-                    criarICSArquivo(date, time, duration, speaker, clientOrEmployee, room);
-                }
-            } else if (result.conflict) {
-                const conflict = result.conflict;
-                const conflictEndTime = new Date(`1970-01-01T${conflict.endTime}`).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-
-                alert(`Conflito detectado com a seguinte reunião:\nData: ${conflict.date}\nHorário de início: ${conflict.time}\nTérmino: ${conflictEndTime}\nOrador: ${conflict.speaker}\nSala: ${conflict.room}\nCliente/Funcionário: ${conflict.client}`);
-            } else {
-                alert(result.message || 'Erro ao agendar a reunião. Por favor, tente novamente.');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Ocorreu um erro ao agendar a reunião. Por favor, tente novamente.');
-        });
+    })
+    .catch(error => {
+        console.error('Erro ao verificar conflito:', error);
+        alert('Erro ao verificar conflito. Por favor, tente novamente.');
     });
+});
+
+// 🔹 **Corrigida função para enviar o agendamento corretamente**
+function agendarReuniao(date, time, duration, sector, speaker, room, client) {
+    fetch('/agendar', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ date, time, duration, sector, speaker, room, client })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            alert('Reunião agendada com sucesso!');
+            document.getElementById('meeting-form').reset(); // Redefine o formulário
+
+            // Perguntar se deseja baixar o arquivo .ics
+            if (confirm('Deseja adicionar esta reunião ao seu calendário?')) {
+                criarICSArquivo(date, time, duration, speaker, client, room);
+            }
+        } else {
+            alert(result.message || 'Erro ao agendar a reunião. Por favor, tente novamente.');
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Ocorreu um erro ao agendar a reunião. Por favor, tente novamente.');
+    });
+}
 
     // Função para criar um arquivo .ics sem organizador
     function criarICSArquivo(date, time, duration, speaker, clientOrEmployee, room) {
@@ -168,10 +181,6 @@ END:VCALENDAR
 // Outras funcionalidades para cancelar e consultar reuniões...
 
 function loadMeetings() {
-    filterMeetings();
-}
-
-function filterMeetings() {
     const filterDate = document.getElementById('filtro-data').value;
     const filterClient = document.getElementById('filtro-cliente').value;
 
@@ -185,10 +194,14 @@ function filterMeetings() {
             return;
         }
 
+        meetings.forEach(meeting => {
+            meeting.date = new Date(meeting.date.split('/').reverse().join('-')).toISOString().split('T')[0];
+        });
+
         meetings.sort((a, b) => {
             const dateA = new Date(`${a.date}T${a.time}`);
             const dateB = new Date(`${b.date}T${b.time}`);
-            return cancelSortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+            return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
         });
 
         const meetingList = document.getElementById('meeting-list');
@@ -201,19 +214,19 @@ function filterMeetings() {
         const thead = document.createElement('thead');
         const headerRow = document.createElement('tr');
 
-        const headers = ['Data', 'Horário', 'Orador', 'Sala', 'Cliente/Funcionário', 'Selecionar'];
+        const headers = ['ID', 'Data', 'Horário', 'Orador', 'Sala', 'Cliente/Funcionário', 'Selecionar'];
         headers.forEach((headerText, index) => {
             const th = document.createElement('th');
             th.textContent = headerText;
             th.style.border = '1px solid black';
             th.style.padding = '8px';
             th.style.textAlign = 'left';
-            th.style.cursor = 'pointer';
 
-            if (index === 0) {
+            if (index === 1) { // Índice 1 -> Coluna "Data"
                 const arrow = document.createElement('span');
-                arrow.textContent = cancelSortOrder === 'desc' ? ' ▼' : ' ▲';
+                arrow.textContent = sortOrder === 'desc' ? ' ▼' : ' ▲';
                 th.appendChild(arrow);
+                th.style.cursor = 'pointer';
                 th.addEventListener('click', () => toggleCancelSortOrder());
             }
 
@@ -231,6 +244,7 @@ function filterMeetings() {
             const formattedTime = meeting.time.slice(0, 5);
 
             const cells = [
+                meeting.id,
                 formattedDate,
                 formattedTime,
                 meeting.speaker,
@@ -262,8 +276,8 @@ function filterMeetings() {
         meetingList.appendChild(table);
     })
     .catch(error => {
-        console.error('Error:', error);
-        alert('Ocorreu um erro ao consultar as reuniões. Por favor, tente novamente.');
+        console.error('Erro:', error);
+        alert('Ocorreu um erro ao consultar as reuniões.');
     });
 }
 
@@ -371,6 +385,7 @@ function consultMeetings() {
     });
 }
 
+
 function downloadPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -432,6 +447,52 @@ function toggleCancelForm() {
     if (cancelForm.style.display === 'block') {
         loadMeetings();
     }
+}
+
+// Alterna exibição do formulário de reagendamento
+function toggleReagendarForm() {
+    const reagendarForm = document.getElementById('reagendar-form');
+    reagendarForm.style.display = reagendarForm.style.display === 'block' ? 'none' : 'block';
+}
+
+// Função para enviar solicitação de reagendamento
+function submitReagendar() {
+    const id = document.getElementById('reagendar-id').value.trim();
+    const newDate = document.getElementById('reagendar-data').value.trim();
+    const newTime = document.getElementById('reagendar-horario').value.trim();
+    const newDuration = document.getElementById('reagendar-duracao').value.trim();
+    const newRoom = document.getElementById('reagendar-sala').value.trim();
+
+    if (!id) {
+        alert('O campo ID é obrigatório.');
+        return;
+    }
+
+    // Cria um objeto apenas com os campos preenchidos
+    const updatedFields = { id };
+    if (newDate) updatedFields.newDate = newDate;
+    if (newTime) updatedFields.newTime = newTime;
+    if (newDuration) updatedFields.newDuration = newDuration;
+    if (newRoom) updatedFields.newRoom = newRoom;
+
+    fetch('/reagendar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedFields)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            alert('Reunião reagendada com sucesso!');
+            toggleReagendarForm();
+        } else {
+            alert(result.message || 'Erro ao reagendar a reunião.');
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Ocorreu um erro ao reagendar a reunião.');
+    });
 }
 
 function toggleConsultForm() {
