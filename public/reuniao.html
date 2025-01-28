@@ -81,6 +81,7 @@
         <div class="actions">
             <button onclick="toggleCancelForm()" class="button">Cancelar Reunião</button>
             <button onclick="toggleConsultForm()" class="button">Consultar Reunião</button>
+            <button onclick="toggleReagendarForm()" class="button">Reagendar Reunião</button>
         </div>
 
         <!-- Formulário de Cancelamento -->
@@ -94,12 +95,42 @@
                 <label for="filtro-cliente">Filtrar por Cliente</label>
                 <input type="text" id="filtro-cliente">
             </div>
-            <button type="button" class="button" onclick="filterMeetings()">Filtrar</button>
             <ul id="meeting-list"></ul>
             <button onclick="cancelSelectedMeetings()" class="button">Cancelar Selecionados</button>
             <button onclick="closeCancelForm()" class="button">Fechar</button>
         </div>
 
+<!-- Formulário de Reagendamento -->
+<div id="reagendar-form" class="form-container" style="display: none;">
+    <h2>Reagendar Reunião</h2>
+    <div class="input-group">
+        <label for="reagendar-id">ID da Reunião</label>
+        <input type="text" id="reagendar-id" placeholder="Digite o ID da reunião" required>
+    </div>
+    <div class="input-group">
+        <label for="reagendar-data">Nova Data</label>
+        <input type="date" id="reagendar-data">
+    </div>
+    <div class="input-group">
+        <label for="reagendar-horario">Novo Horário</label>
+        <input type="time" id="reagendar-horario">
+    </div>
+    <div class="input-group">
+        <label for="reagendar-duracao">Nova Duração (min)</label>
+        <input type="number" id="reagendar-duracao" min="30" max="280" step="30">
+    </div>
+    <div class="input-group">
+        <label for="reagendar-sala">Nova Sala</label>
+        <select id="reagendar-sala">
+            <option value="">-- Manter sala atual --</option>
+            <option value="Fundo">Fundo</option>
+            <option value="Frente">Frente</option>
+            <option value="Teams">Teams</option>
+        </select>
+    </div>
+    <button onclick="submitReagendar()" class="button">Reagendar</button>
+    <button onclick="toggleReagendarForm()" class="button">Fechar</button>
+</div>
         <!-- Formulário de Consulta -->
         <div id="consult-form" class="form-container" style="display: none;">
             <h2>Consultar Reunião</h2>
@@ -132,11 +163,11 @@
                 <button type="button" onclick="consultMeetings()" class="button">Pesquisar</button>
                 <button type="button" onclick="downloadPDF()" class="button">Baixar PDF</button>
             </form>
-            <ul id="consult-results"></ul>
+            <div id="consult-results"></div>
             <button onclick="toggleConsultForm()" class="button">Fechar</button>
         </div>
     </div>
-
+    <script src="sugestao.js"></script>
     <script src="reuniao.js"></script>
 </body>
 </html>
