@@ -1,70 +1,43 @@
 const db = require('./database');
 
 module.exports = async (req, res) => {
-    const { date, client, room, sector, status, sortBy, order } = req.query;
-    let query = `SELECT id, date, time, duration, sector, speaker, room, client FROM meetings WHERE 1=1`;
-    const queryParams = [];
-
-    // Filtros opcionais
-    if (date) {
-        query += ` AND date = $${queryParams.length + 1}`;
-        queryParams.push(date);
-    }
-
-    if (client) {
-        query += ` AND client ILIKE $${queryParams.length + 1}`;
-        queryParams.push(`%${client}%`);
-    }
-
-    if (room) {
-        query += ` AND room = $${queryParams.length + 1}`;
-        queryParams.push(room);
-    }
-
-    if (sector) {
-        query += ` AND sector ILIKE $${queryParams.length + 1}`;
-        queryParams.push(`%${sector}%`);
-    }
-
-    if (status) {
-        query += ` AND status = $${queryParams.length + 1}`;
-        queryParams.push(status);
-    }
-
-    // Ordenação dos resultados
-    if (sortBy && order) {
-        const validColumns = ['date', 'time', 'speaker', 'room'];
-        if (validColumns.includes(sortBy)) {
-            query += ` ORDER BY ${sortBy} ${order.toUpperCase() === 'DESC' ? 'DESC' : 'ASC'}`;
-        }
-    } else {
-        query += ` ORDER BY date ASC, time ASC`; // Ordenação padrão por data e hora
-    }
-
     try {
-        const { rows } = await db.query(query, queryParams);
+        // Captura os parâmetros de consulta enviados pela URL
+        const { date, client, speaker, room, sector } = req.query;
 
-        // Formata a data no padrão DD/MM/YYYY
-        const formattedRows = rows.map(meeting => {
-            if (!(meeting.date instanceof Date)) {
-                meeting.date = new Date(meeting.date);
-            }
+        let query = `SELECT id, date, time, duration, sector, speaker, room, client FROM meetings WHERE 1=1`;
+        const values = [];
 
-            const day = String(meeting.date.getDate()).padStart(2, '0');
-            const month = String(meeting.date.getMonth() + 1).padStart(2, '0');
-            const year = meeting.date.getFullYear();
-            meeting.date = `${day}/${month}/${year}`;
-
-            return meeting;
-        });
-
-        if (formattedRows.length === 0) {
-            return res.status(404).json({ message: 'Nenhuma reunião encontrada para os critérios fornecidos.' });
+        if (date) {
+            query += ` AND date = $${values.length + 1}`;
+            values.push(date);
+        }
+        if (client) {
+            query += ` AND LOWER(client) LIKE LOWER($${values.length + 1})`;
+            values.push(`%${client}%`);
+        }
+        if (speaker) {
+            query += ` AND LOWER(speaker) LIKE LOWER($${values.length + 1})`;
+            values.push(`%${speaker}%`);
+        }
+        if (room) {
+            query += ` AND room = $${values.length + 1}`;
+            values.push(room);
+        }
+        if (sector) {
+            query += ` AND LOWER(sector) LIKE LOWER($${values.length + 1})`;
+            values.push(`%${sector}%`);
         }
 
-        res.json(formattedRows);
-    } catch (err) {
-        console.error('Erro ao consultar reuniões:', err.message);
-        res.status(500).json({ error: 'Erro interno ao processar a consulta de reuniões.' });
+        query += ` ORDER BY date, time`;
+
+        // Executa a consulta no banco de dados
+        const { rows } = await db.query(query, values);
+
+        // Retorna os resultados em formato JSON
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error('Erro ao consultar reuniões:', error);
+        res.status(500).json({ error: 'Erro ao consultar reuniões. Por favor, tente novamente mais tarde.' });
     }
 };
