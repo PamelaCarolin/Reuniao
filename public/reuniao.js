@@ -20,10 +20,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Aqui você pode adicionar outros códigos necessários
-
-});
-
     // Função para verificar se o horário da reunião já passou
     function isPastTime(date, time) {
         const now = new Date();
@@ -36,11 +32,10 @@ document.addEventListener('DOMContentLoaded', function() {
         return date && time && duration && sector && speaker && room && clientOrEmployee;
     }
 
-// Função de agendamento de reunião
+// 🔹 **Correção da Função de Agendamento**
 document.getElementById('meeting-form').addEventListener('submit', function(event) {
     event.preventDefault();
 
-    // Captura os valores dos campos do formulário
     const date = document.getElementById('data').value;
     const time = document.getElementById('horario').value;
     const duration = document.getElementById('duracao').value;
@@ -51,16 +46,14 @@ document.getElementById('meeting-form').addEventListener('submit', function(even
     const cliente = document.getElementById('cliente').value;
     const funcionario = document.getElementById('funcionario').value;
 
-    // Define cliente ou funcionário baseado no tipo de reunião
     const clientOrEmployee = tipoReuniao === 'externa' ? cliente : funcionario;
 
-    // Verifica se todos os campos obrigatórios estão preenchidos
     if (!date || !time || !duration || !sector || !speaker || !room || !clientOrEmployee) {
         alert("Por favor, preencha todos os campos corretamente.");
         return;
     }
 
-    // **Verifica se há conflitos antes de agendar**
+    // 🔹 **Verifica se há conflitos antes de agendar**
     fetch('/conflito', {
         method: 'POST',
         headers: {
@@ -68,20 +61,18 @@ document.getElementById('meeting-form').addEventListener('submit', function(even
         },
         body: JSON.stringify({ date, time, duration, room })
     })
-    .then(response => {
-        if (!response.ok) throw new Error('Erro ao acessar o endpoint de conflito');
-        return response.json();
-    })
+    .then(response => response.json())
     .then(result => {
         if (result.conflict) {
-            suggestNewTime(result.conflict); // Chama a função de sugestão em caso de conflito
+            suggestNewTime(result.conflict, duration);
         } else {
-            console.log('Nenhum conflito encontrado.');
-            // Código para inserir a reunião caso não haja conflito
+            // Se não houver conflito, procede com o agendamento
+            agendarReuniao(date, time, duration, sector, speaker, room, clientOrEmployee);
         }
     })
     .catch(error => {
         console.error('Erro ao verificar conflito:', error);
+        alert('Erro ao verificar conflito. Por favor, tente novamente.');
     });
 });
 
@@ -183,28 +174,9 @@ END:VCALENDAR
         downloadPdfBtn.addEventListener('click', downloadPDF);
     }
 
-   // Defina a função fora do DOMContentLoaded para torná-la acessível globalmente
-function toggleReuniaoTipo() {
-    const tipoReuniao = document.getElementById('tipo-reuniao').value;
-    const clienteGroup = document.getElementById('cliente-group');
-    const funcionarioGroup = document.getElementById('funcionario-group');
-
-    if (tipoReuniao === 'externa') {
-        clienteGroup.style.display = 'block';
-        funcionarioGroup.style.display = 'none';
-    } else if (tipoReuniao === 'interna') {
-        clienteGroup.style.display = 'none';
-        funcionarioGroup.style.display = 'block';
-    } else {
-        clienteGroup.style.display = 'none';
-        funcionarioGroup.style.display = 'none';
-    }
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    toggleReuniaoTipo(); // Executa inicialmente para definir o estado
+    // Inicializa a página definindo o estado inicial dos campos
+    toggleReuniaoTipo();
 });
-
 
 // Outras funcionalidades para cancelar e consultar reuniões...
 
@@ -386,6 +358,7 @@ function consultMeetings() {
             const formattedTime = meeting.time.slice(0, 5);
 
             const cells = [
+                meeting.id,
                 formattedDate,
                 formattedTime,
                 meeting.speaker,
