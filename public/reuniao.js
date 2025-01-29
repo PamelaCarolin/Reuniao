@@ -56,6 +56,7 @@ document.getElementById('meeting-form').addEventListener('submit', function(even
         alert("Por favor, preencha todos os campos corretamente.");
         return;
     }
+});
 
     // 🔹 **Verifica se há conflitos antes de agendar**
     fetch('/conflito', {
@@ -176,9 +177,28 @@ END:VCALENDAR
         downloadPdfBtn.addEventListener('click', downloadPDF);
     }
 
-    // Inicializa a página definindo o estado inicial dos campos
-    toggleReuniaoTipo();
+   // Defina a função fora do DOMContentLoaded para torná-la acessível globalmente
+function toggleReuniaoTipo() {
+    const tipoReuniao = document.getElementById('tipo-reuniao').value;
+    const clienteGroup = document.getElementById('cliente-group');
+    const funcionarioGroup = document.getElementById('funcionario-group');
+
+    if (tipoReuniao === 'externa') {
+        clienteGroup.style.display = 'block';
+        funcionarioGroup.style.display = 'none';
+    } else if (tipoReuniao === 'interna') {
+        clienteGroup.style.display = 'none';
+        funcionarioGroup.style.display = 'block';
+    } else {
+        clienteGroup.style.display = 'none';
+        funcionarioGroup.style.display = 'none';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    toggleReuniaoTipo(); // Executa inicialmente para definir o estado
 });
+
 
 // Outras funcionalidades para cancelar e consultar reuniões...
 
