@@ -10,7 +10,8 @@ module.exports = async (req, res) => {
         // Se a reunião for na sala "Teams", ignorar a verificação de conflitos
         if (room.toLowerCase() !== 'teams') {
             const conflictQuery = `
-                SELECT * FROM meetings 
+                SELECT id, date, time, duration, sector, speaker, room, client 
+                FROM meetings 
                 WHERE date = $1 AND room = $2 AND 
                 (
                     ($3::time BETWEEN time AND time + interval '1 minute' * duration) OR 
@@ -29,6 +30,7 @@ module.exports = async (req, res) => {
                 return res.status(400).json({
                     success: false,
                     conflict: {
+                        id: conflict.id,
                         date: conflict.date,
                         time: conflict.time,
                         endTime: conflictEndTime,
@@ -40,24 +42,26 @@ module.exports = async (req, res) => {
             }
         }
 
-        // Inserção da reunião na tabela principal
+        // Inserção da reunião na tabela principal com retorno do ID gerado
         const insertQuery = `
             INSERT INTO meetings (date, time, duration, sector, speaker, room, client) 
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            VALUES ($1, $2, $3, $4, $5, $6, $7) 
+            RETURNING id
         `;
         const insertValues = [date, time, duration, sector, speaker, room, client];
-        await clientDB.query(insertQuery, insertValues);
+        const result = await clientDB.query(insertQuery, insertValues);
+        const meetingId = result.rows[0].id;
 
-        // Copiar reunião para o histórico
+        // Copiar reunião para o histórico com ID
         const historyQuery = `
-            INSERT INTO historico_reunioes (date, time, duration, sector, speaker, room, client, status) 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, 'agendada')
+            INSERT INTO historico_reunioes (id, date, time, duration, sector, speaker, room, client, status) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'agendada')
         `;
-        const historyValues = [date, time, duration, sector, speaker, room, client];
+        const historyValues = [meetingId, date, time, duration, sector, speaker, room, client];
         await clientDB.query(historyQuery, historyValues);
 
         await clientDB.query('COMMIT');
-        res.json({ success: true, message: 'Reunião agendada com sucesso!' });
+        res.json({ success: true, message: 'Reunião agendada com sucesso!', id: meetingId });
 
     } catch (err) {
         await clientDB.query('ROLLBACK');
