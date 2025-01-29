@@ -20,6 +20,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Aqui você pode adicionar outros códigos necessários
+
+});
+
     // Função para verificar se o horário da reunião já passou
     function isPastTime(date, time) {
         const now = new Date();
