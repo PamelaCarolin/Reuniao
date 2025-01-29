@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return date && time && duration && sector && speaker && room && clientOrEmployee;
     }
 
-// 🔹 **Correção da Função de Agendamento**
+// Função de agendamento de reunião
 document.getElementById('meeting-form').addEventListener('submit', function(event) {
     event.preventDefault();
 
@@ -60,7 +60,7 @@ document.getElementById('meeting-form').addEventListener('submit', function(even
         return;
     }
 
-    // 🔹 **Verifica se há conflitos antes de agendar**
+    // **Verifica se há conflitos antes de agendar**
     fetch('/conflito', {
         method: 'POST',
         headers: {
@@ -77,7 +77,7 @@ document.getElementById('meeting-form').addEventListener('submit', function(even
             suggestNewTime(result.conflict); // Chama a função de sugestão em caso de conflito
         } else {
             console.log('Nenhum conflito encontrado.');
-            // Aqui você pode adicionar o código para inserir a reunião, já que não houve conflito
+            // Código para inserir a reunião caso não haja conflito
         }
     })
     .catch(error => {
