@@ -29,13 +29,25 @@ module.exports = async (req, res) => {
             values.push(`%${sector}%`);
         }
 
-        query += ` ORDER BY date, time`;
+        query += ` ORDER BY id ASC`; // Agora ordena pelo ID para melhor organização
 
         // Executa a consulta no banco de dados
         const { rows } = await db.query(query, values);
 
+        // Garante que a resposta inclua os dados formatados corretamente
+        const formattedRows = rows.map(meeting => ({
+            id: meeting.id,  // Agora ID está garantido na resposta
+            date: meeting.date,
+            time: meeting.time,
+            duration: meeting.duration,
+            sector: meeting.sector,
+            speaker: meeting.speaker,
+            room: meeting.room,
+            client: meeting.client
+        }));
+
         // Retorna os resultados em formato JSON
-        res.status(200).json(rows);
+        res.status(200).json(formattedRows);
     } catch (error) {
         console.error('Erro ao consultar reuniões:', error);
         res.status(500).json({ error: 'Erro ao consultar reuniões. Por favor, tente novamente mais tarde.' });
