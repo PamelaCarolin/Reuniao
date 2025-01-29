@@ -15,7 +15,8 @@ module.exports = async (req, res) => {
                 WHERE date = $1 AND room = $2 AND 
                 (
                     ($3::time BETWEEN time AND time + interval '1 minute' * duration) OR 
-                    ($3::time + interval '1 minute' * $4 BETWEEN time AND time + interval '1 minute' * duration)
+                    ($3::time + interval '1 minute' * $4 BETWEEN time AND time + interval '1 minute' * duration) OR
+                    (time BETWEEN $3::time AND $3::time + interval '1 minute' * $4)
                 )
             `;
             const conflictValues = [date, room, time, duration];
@@ -27,6 +28,7 @@ module.exports = async (req, res) => {
                 const conflict = rows[0];
                 const conflictEndTime = new Date(new Date(`1970-01-01T${conflict.time}`).getTime() + conflict.duration * 60000)
                     .toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
                 return res.status(400).json({
                     success: false,
                     conflict: {
@@ -54,7 +56,7 @@ module.exports = async (req, res) => {
 
         // Copiar reunião para o histórico com ID
         const historyQuery = `
-            INSERT INTO historico_reunioes (id, date, time, duration, sector, speaker, room, client, status) 
+            INSERT INTO historico_reunioes (meeting_id, date, time, duration, sector, speaker, room, client, status) 
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'agendada')
         `;
         const historyValues = [meetingId, date, time, duration, sector, speaker, room, client];
@@ -66,7 +68,7 @@ module.exports = async (req, res) => {
     } catch (err) {
         await clientDB.query('ROLLBACK');
         console.error('Erro ao agendar reunião:', err);
-        res.status(500).json({ error: 'Erro ao agendar reunião' });
+        res.status(500).json({ error: 'Erro ao agendar reunião. Por favor, tente novamente.' });
     } finally {
         clientDB.release();
     }
