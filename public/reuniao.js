@@ -358,7 +358,6 @@ function consultMeetings() {
             const formattedTime = meeting.time.slice(0, 5);
 
             const cells = [
-                meeting.id,
                 formattedDate,
                 formattedTime,
                 meeting.speaker,
