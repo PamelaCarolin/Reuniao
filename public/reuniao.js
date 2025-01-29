@@ -55,25 +55,23 @@ document.getElementById('meeting-form').addEventListener('submit', function(even
 
     // 🔹 **Verifica se há conflitos antes de agendar**
     fetch('/conflito', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ date, time, duration, room })
-    })
-    .then(response => response.json())
-    .then(result => {
-        if (result.conflict) {
-            suggestNewTime(result.conflict, duration);
-        } else {
-            // Se não houver conflito, procede com o agendamento
-            agendarReuniao(date, time, duration, sector, speaker, room, clientOrEmployee);
-        }
-    })
-    .catch(error => {
-        console.error('Erro ao verificar conflito:', error);
-        alert('Erro ao verificar conflito. Por favor, tente novamente.');
-    });
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ date, time, duration, room })
+})
+.then(response => {
+    if (!response.ok) throw new Error('Erro ao acessar o endpoint de conflito');
+    return response.json();
+})
+.then(result => {
+    if (result.conflict) {
+        suggestNewTime(result.conflict);
+    } else {
+        console.log('Nenhum conflito encontrado.');
+    }
+})
+.catch(error => {
+    console.error('Erro ao verificar conflito:', error);
 });
 
 // 🔹 **Corrigida função para enviar o agendamento corretamente**
