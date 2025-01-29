@@ -409,6 +409,15 @@ function downloadPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
+const id = document.getElementById('consulta-id').value.trim(); // Obtém o ID
+const date = document.getElementById('consulta-data').value;
+const client = document.getElementById('consulta-cliente').value;
+const speaker = document.getElementById('consulta-orador').value;
+const room = document.getElementById('consulta-sala').value;
+const sector = document.getElementById('consulta-setor').value;
+
+const params = new URLSearchParams({ id, date, client, speaker, room, sector });
+
     const date = document.getElementById('consulta-data').value;
     const client = document.getElementById('consulta-cliente').value;
     const speaker = document.getElementById('consulta-orador').value;
