@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
 document.getElementById('meeting-form').addEventListener('submit', function(event) {
     event.preventDefault();
 
+    // Captura os valores dos campos do formulário
     const date = document.getElementById('data').value;
     const time = document.getElementById('horario').value;
     const duration = document.getElementById('duracao').value;
@@ -50,13 +51,14 @@ document.getElementById('meeting-form').addEventListener('submit', function(even
     const cliente = document.getElementById('cliente').value;
     const funcionario = document.getElementById('funcionario').value;
 
+    // Define cliente ou funcionário baseado no tipo de reunião
     const clientOrEmployee = tipoReuniao === 'externa' ? cliente : funcionario;
 
+    // Verifica se todos os campos obrigatórios estão preenchidos
     if (!date || !time || !duration || !sector || !speaker || !room || !clientOrEmployee) {
         alert("Por favor, preencha todos os campos corretamente.");
         return;
     }
-});
 
     // 🔹 **Verifica se há conflitos antes de agendar**
     fetch('/conflito', {
@@ -75,11 +77,13 @@ document.getElementById('meeting-form').addEventListener('submit', function(even
             suggestNewTime(result.conflict); // Chama a função de sugestão em caso de conflito
         } else {
             console.log('Nenhum conflito encontrado.');
+            // Aqui você pode adicionar o código para inserir a reunião, já que não houve conflito
         }
     })
     .catch(error => {
         console.error('Erro ao verificar conflito:', error);
     });
+});
 
 // 🔹 **Corrigida função para enviar o agendamento corretamente**
 function agendarReuniao(date, time, duration, sector, speaker, room, client) {
