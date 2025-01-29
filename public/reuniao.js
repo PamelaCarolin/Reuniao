@@ -308,20 +308,56 @@ function consultMeetings() {
             return;
         }
 
-        const table = document.getElementById('consult-results-table');
-        const tbody = document.getElementById('consult-results');
+        meetings.forEach(meeting => {
+            meeting.date = new Date(meeting.date.split('/').reverse().join('-')).toISOString().split('T')[0];
+        });
 
-        tbody.innerHTML = ''; // Limpa resultados anteriores
-        table.style.display = 'table'; // Exibe a tabela
+        meetings.sort((a, b) => {
+            const dateA = new Date(`${a.date}T${a.time}`);
+            const dateB = new Date(`${b.date}T${b.time}`);
+            return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+        });
+
+        const results = document.getElementById('consult-results');
+        results.innerHTML = '';
+
+        const table = document.createElement('table');
+        table.style.width = '100%';
+        table.style.borderCollapse = 'collapse';
+
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+
+        const headers = ['Data', 'Horário', 'Orador', 'Sala', 'Cliente/Funcionário'];
+        headers.forEach((headerText, index) => {
+            const th = document.createElement('th');
+            th.textContent = headerText;
+            th.style.border = '1px solid black';
+            th.style.padding = '8px';
+            th.style.textAlign = 'left';
+            th.style.cursor = 'pointer';
+
+            if (index === 0) {
+                const arrow = document.createElement('span');
+                arrow.textContent = sortOrder === 'desc' ? ' ▼' : ' ▲';
+                th.appendChild(arrow);
+                th.addEventListener('click', () => toggleSortOrder());
+            }
+
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
 
         meetings.forEach(meeting => {
             const row = document.createElement('tr');
 
-            const formattedDate = new Date(meeting.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+            const formattedDate = new Date(meeting.date.split('/').reverse().join('-')).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
             const formattedTime = meeting.time.slice(0, 5);
 
             const cells = [
-                meeting.id,  // Adicionando a coluna ID
                 formattedDate,
                 formattedTime,
                 meeting.speaker,
@@ -339,25 +375,20 @@ function consultMeetings() {
 
             tbody.appendChild(row);
         });
+
+        table.appendChild(tbody);
+        results.appendChild(table);
     })
     .catch(error => {
-        console.error('Erro ao consultar reuniões:', error);
+        console.error('Error:', error);
         alert('Ocorreu um erro ao consultar as reuniões. Por favor, tente novamente.');
     });
 }
 
+
 function downloadPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-
-const id = document.getElementById('consulta-id').value.trim(); // Obtém o ID
-const date = document.getElementById('consulta-data').value;
-const client = document.getElementById('consulta-cliente').value;
-const speaker = document.getElementById('consulta-orador').value;
-const room = document.getElementById('consulta-sala').value;
-const sector = document.getElementById('consulta-setor').value;
-
-const params = new URLSearchParams({ id, date, client, speaker, room, sector });
 
     const date = document.getElementById('consulta-data').value;
     const client = document.getElementById('consulta-cliente').value;
