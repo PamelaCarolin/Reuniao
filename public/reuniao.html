@@ -95,7 +95,21 @@
                 <label for="filtro-cliente">Filtrar por Cliente</label>
                 <input type="text" id="filtro-cliente">
             </div>
-            <ul id="meeting-list"></ul>
+            <table id="meeting-list" class="styled-table">
+                <thead>
+                    <tr>
+                        <th>ID</th> <!-- Nova coluna -->
+                        <th>Data</th>
+                        <th>Horário</th>
+                        <th>Orador</th>
+                        <th>Sala</th>
+                        <th>Cliente/Funcionário</th>
+                        <th>Selecionar</th>
+                    </tr>
+                </thead>
+                <tbody id="meeting-list-body"></tbody>
+            </table>
+            
             <button onclick="cancelSelectedMeetings()" class="button">Cancelar Selecionados</button>
             <button onclick="closeCancelForm()" class="button">Fechar</button>
         </div>
