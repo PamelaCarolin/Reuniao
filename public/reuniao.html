@@ -98,32 +98,17 @@
             <table id="meeting-list" class="styled-table">
                 <thead>
                     <tr>
-                        <th style="border: 1px solid black; padding: 8px; text-align: left; cursor: pointer;">
-                            ID <span>▲</span>
-                        </th>
-                        <th style="border: 1px solid black; padding: 8px; text-align: left; cursor: pointer;">
-                            Data
-                        </th>
-                        <th style="border: 1px solid black; padding: 8px; text-align: left; cursor: pointer;">
-                            Horário
-                        </th>
-                        <th style="border: 1px solid black; padding: 8px; text-align: left; cursor: pointer;">
-                            Orador
-                        </th>
-                        <th style="border: 1px solid black; padding: 8px; text-align: left; cursor: pointer;">
-                            Sala
-                        </th>
-                        <th style="border: 1px solid black; padding: 8px; text-align: left; cursor: pointer;">
-                            Cliente/Funcionário
-                        </th>
-                        <th style="border: 1px solid black; padding: 8px; text-align: left; cursor: pointer;">
-                            Selecionar
-                        </th>
+                        <th>ID</th>
+                        <th>Data</th>
+                        <th>Horário</th>
+                        <th>Orador</th>
+                        <th>Sala</th>
+                        <th>Cliente/Funcionário</th>
+                        <th>Selecionar</th>
                     </tr>
                 </thead>
                 <tbody id="meeting-list-body"></tbody>
             </table>
-            
             
             <button onclick="cancelSelectedMeetings()" class="button">Cancelar Selecionados</button>
             <button onclick="closeCancelForm()" class="button">Fechar</button>
@@ -161,41 +146,56 @@
     <button onclick="toggleReagendarForm()" class="button">Fechar</button>
 </div>
         <!-- Formulário de Consulta -->
-        <div id="consult-form" class="form-container" style="display: none;">
-            <h2>Consultar Reunião</h2>
-            <form>
-                <div class="input-group">
-                    <label for="consulta-data">Data</label>
-                    <input type="date" id="consulta-data">
-                </div>
-                <div class="input-group">
-                    <label for="consulta-cliente">Cliente</label>
-                    <input type="text" id="consulta-cliente">
-                </div>
-                <div class="input-group">
-                    <label for="consulta-orador">Orador</label>
-                    <input type="text" id="consulta-orador">
-                </div>
-                <div class="input-group">
-                    <label for="consulta-sala">Sala</label>
-                    <select id="consulta-sala">
-                        <option value="">Todas</option>
-                        <option value="Fundo">Fundo</option>
-                        <option value="Frente">Frente</option>
-                        <option value="Teams">Teams</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label for="consulta-setor">Setor</label>
-                    <input type="text" id="consulta-setor">
-                </div>
-                <button type="button" onclick="consultMeetings()" class="button">Pesquisar</button>
-                <button type="button" onclick="downloadPDF()" class="button">Baixar PDF</button>
-            </form>
-            <div id="consult-results"></div>
-            <button onclick="toggleConsultForm()" class="button">Fechar</button>
+        <!-- Formulário de Consulta -->
+<div id="consult-form" class="form-container" style="display: none;">
+    <h2>Consultar Reunião</h2>
+    <form>
+        <div class="input-group">
+            <label for="consulta-data">Data</label>
+            <input type="date" id="consulta-data">
         </div>
-    </div>
+        <div class="input-group">
+            <label for="consulta-cliente">Cliente</label>
+            <input type="text" id="consulta-cliente">
+        </div>
+        <div class="input-group">
+            <label for="consulta-orador">Orador</label>
+            <input type="text" id="consulta-orador">
+        </div>
+        <div class="input-group">
+            <label for="consulta-sala">Sala</label>
+            <select id="consulta-sala">
+                <option value="">Todas</option>
+                <option value="Fundo">Fundo</option>
+                <option value="Frente">Frente</option>
+                <option value="Teams">Teams</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="consulta-setor">Setor</label>
+            <input type="text" id="consulta-setor">
+        </div>
+        <button type="button" onclick="consultMeetings()" class="button">Pesquisar</button>
+        <button type="button" onclick="downloadPDF()" class="button">Baixar PDF</button>
+    </form>
+
+    <!-- Tabela de resultados ajustada -->
+    <table id="consult-results-table" class="styled-table" style="display: none;">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Data</th>
+                <th>Cliente</th>
+                <th>Orador</th>
+                <th>Cliente/Funcionário</th>
+                <th>Selecionar</th>
+            </tr>
+        </thead>
+        <tbody id="consult-results"></tbody>
+    </table>
+
+    <button onclick="toggleConsultForm()" class="button">Fechar</button>
+</div>
     <script src="sugestao.js"></script>
     <script src="reuniao.js"></script>
 </body>
