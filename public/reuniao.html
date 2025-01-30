@@ -161,46 +161,57 @@
     <button onclick="toggleReagendarForm()" class="button">Fechar</button>
 </div>
         <!-- Formulário de Consulta -->
-        <div id="consult-form" class="form-container" style="display: none;">
-            <h2>Consultar Reunião</h2>
-            <form>
+        <!-- Formulário de Consulta -->
+<div id="consult-form" class="form-container" style="display: none;">
+    <h2>Consultar Reunião</h2>
+    <form>
+        <div class="input-group">
+            <label for="consulta-data">Data</label>
+            <input type="date" id="consulta-data">
+        </div>
+        <div class="input-group">
+            <label for="consulta-cliente">Cliente</label>
+            <input type="text" id="consulta-cliente">
+        </div>
+        <div class="input-group">
+            <label for="consulta-orador">Orador</label>
+            <input type="text" id="consulta-orador">
+        </div>
+        <div class="input-group">
+            <label for="consulta-sala">Sala</label>
+            <select id="consulta-sala">
+                <option value="">Todas</option>
+                <option value="Fundo">Fundo</option>
+                <option value="Frente">Frente</option>
+                <option value="Teams">Teams</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="consulta-setor">Setor</label>
+            <input type="text" id="consulta-setor">
+        </div>
+        <button type="button" onclick="consultMeetings()" class="button">Pesquisar</button>
+        <button type="button" onclick="downloadPDF()" class="button">Baixar PDF</button>
+    </form>
 
-                <div class="input-group">
-                    <label for="consulta-data">ID</label>
-                    <input type="date" id="consulta-data">
-                </div>
+    <!-- Tabela de resultados da consulta com a ordem desejada -->
+    <table id="consult-results-table" class="styled-table" style="display: none;">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Data</th>
+                <th>Horário</th>
+                <th>Orador</th>
+                <th>Cliente/Funcionário</th>
+                <th>Selecionar</th>
+            </tr>
+        </thead>
+        <tbody id="consult-results"></tbody>
+    </table>
 
-                <div class="input-group">
-                    <label for="consulta-data">Data</label>
-                    <input type="date" id="consulta-data">
-                </div>
-                <div class="input-group">
-                    <label for="consulta-cliente">Cliente</label>
-                    <input type="text" id="consulta-cliente">
-                </div>
-                <div class="input-group">
-                    <label for="consulta-orador">Orador</label>
-                    <input type="text" id="consulta-orador">
-                </div>
+    <button onclick="toggleConsultForm()" class="button">Fechar</button>
+</div>
 
-                <div class="input-group">
-                    <label for="consulta-orador">Cliente/Funcionario</label>
-                    <input type="text" id="consulta-orador">
-                </div>
-
-                <div class="input-group">
-                    <label for="consulta-sala">Sala</label>
-                    <select id="consulta-sala">
-                        <option value="">Todas</option>
-                        <option value="Fundo">Fundo</option>
-                        <option value="Frente">Frente</option>
-                        <option value="Teams">Teams</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label for="consulta-setor">Setor</label>
-                    <input type="text" id="consulta-setor">
-                </div>
                 <button type="button" onclick="consultMeetings()" class="button">Pesquisar</button>
                 <button type="button" onclick="downloadPDF()" class="button">Baixar PDF</button>
             </form>
