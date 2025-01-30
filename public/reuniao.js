@@ -266,7 +266,6 @@ function consultMeetings() {
     const filterRoom = document.getElementById('consulta-sala')?.value || '';
     const filterSector = document.getElementById('consulta-setor')?.value || '';
 
-    // Cria os parâmetros da requisição
     const params = new URLSearchParams({
         id: filterId,
         date: filterDate,
@@ -282,7 +281,6 @@ function consultMeetings() {
             const tbody = document.querySelector('#consult-results tbody');
             tbody.innerHTML = '';
 
-            // Preenche os resultados
             meetings.forEach(meeting => {
                 const row = document.createElement('tr');
 
@@ -308,18 +306,9 @@ function consultMeetings() {
                 clientTd.textContent = meeting.client;
                 row.appendChild(clientTd);
 
-                // Checkbox de seleção
-                const selectTd = document.createElement('td');
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.value = meeting.id;
-                selectTd.appendChild(checkbox);
-                row.appendChild(selectTd);
-
                 tbody.appendChild(row);
             });
 
-            // Exibe a tabela
             document.getElementById('consult-results').style.display = 'table';
         })
         .catch(error => {
