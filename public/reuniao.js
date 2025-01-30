@@ -186,56 +186,55 @@ function loadMeetings() {
 
     const params = new URLSearchParams({ date: filterDate, client: filterClient });
 
-    fetch(`/consultar?${params.toString()}`)
+    fetch('/consultar?params')
     .then(response => response.json())
     .then(meetings => {
-        if (!Array.isArray(meetings)) {
-            console.error('Erro: resposta inesperada ao consultar reuniões');
-            return;
-        }
-
         meetings.forEach(meeting => {
-            meeting.date = new Date(meeting.date.split('/').reverse().join('-')).toISOString().split('T')[0];
+            const row = document.createElement('tr');
+
+            const formattedDate = new Date(meeting.date.split('/').reverse().join('-')).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+            const formattedTime = meeting.time.slice(0, 5);
+
+            const idTd = document.createElement('td');
+            idTd.textContent = meeting.id;
+            idTd.style.border = '1px solid black';
+            idTd.style.padding = '8px';
+            row.appendChild(idTd);
+
+            const cells = [
+                formattedDate,
+                formattedTime,
+                meeting.speaker,
+                meeting.room,
+                meeting.client
+            ];
+
+            cells.forEach(cellText => {
+                const td = document.createElement('td');
+                td.textContent = cellText;
+                td.style.border = '1px solid black';
+                td.style.padding = '8px';
+                row.appendChild(td);
+            });
+
+            const selectTd = document.createElement('td');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = meeting.id;
+            selectTd.appendChild(checkbox);
+            selectTd.style.border = '1px solid black';
+            selectTd.style.padding = '8px';
+            row.appendChild(selectTd);
+
+            tbody.appendChild(row);
         });
 
-        meetings.sort((a, b) => {
-            const dateA = new Date(`${a.date}T${a.time}`);
-            const dateB = new Date(`${b.date}T${b.time}`);
-            return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
-        });
-
-        const meetingList = document.getElementById('meeting-list');
-        meetingList.innerHTML = '';
-
-        const table = document.createElement('table');
-        table.style.width = '100%';
-        table.style.borderCollapse = 'collapse';
-
-        const thead = document.createElement('thead');
-        const headerRow = document.createElement('tr');
-
-        const headers = ['ID', 'Data', 'Horário', 'Orador', 'Sala', 'Cliente/Funcionário', 'Selecionar'];
-        headers.forEach((headerText, index) => {
-            const th = document.createElement('th');
-            th.textContent = headerText;
-            th.style.border = '1px solid black';
-            th.style.padding = '8px';
-            th.style.textAlign = 'left';
-
-            if (index === 1) { // Índice 1 -> Coluna "Data"
-                const arrow = document.createElement('span');
-                arrow.textContent = sortOrder === 'desc' ? ' ▼' : ' ▲';
-                th.appendChild(arrow);
-                th.style.cursor = 'pointer';
-                th.addEventListener('click', () => toggleCancelSortOrder());
-            }
-
-            headerRow.appendChild(th);
-        });
-        thead.appendChild(headerRow);
-        table.appendChild(thead);
-
-        const tbody = document.createElement('tbody');
+        table.appendChild(tbody);
+        meetingList.appendChild(table);
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Ocorreu um erro ao consultar as reuniões.');
 
         meetings.forEach(meeting => {
             const row = document.createElement('tr');
