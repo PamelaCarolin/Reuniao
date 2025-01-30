@@ -259,12 +259,12 @@ function toggleSortOrder() {
 }
 
 function consultMeetings() {
-    const filterId = document.getElementById('consulta-id').value;
-    const date = document.getElementById('consulta-data').value;
-    const client = document.getElementById('consulta-cliente').value;
-    const speaker = document.getElementById('consulta-orador').value;
-    const room = document.getElementById('consulta-sala').value;
-    const sector = document.getElementById('consulta-setor').value;
+    const filterId = document.getElementById('consulta-id')?.value || '';
+    const filterDate = document.getElementById('consulta-data')?.value || '';
+    const filterClient = document.getElementById('consulta-cliente')?.value || '';
+    const filterSpeaker = document.getElementById('consulta-orador')?.value || '';
+    const filterRoom = document.getElementById('consulta-sala')?.value || '';
+    const filterSector = document.getElementById('consulta-setor')?.value || '';
 
     const params = new URLSearchParams({
         id: filterId,        
