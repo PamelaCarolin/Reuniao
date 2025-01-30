@@ -181,10 +181,21 @@ END:VCALENDAR
 // Outras funcionalidades para cancelar e consultar reuniões...
 
 function loadMeetings() {
-    const filterDate = document.getElementById('filtro-data').value;
-    const filterClient = document.getElementById('filtro-cliente').value;
+    // Captura os valores dos campos de filtro
+    const filterDate = document.getElementById('consulta-data').value;
+    const filterClient = document.getElementById('consulta-cliente').value;
+    const filterSpeaker = document.getElementById('consulta-orador').value;
+    const filterRoom = document.getElementById('consulta-sala').value;
+    const filterSector = document.getElementById('consulta-setor').value;
 
-    const params = new URLSearchParams({ date: filterDate, client: filterClient });
+    // Cria os parâmetros da URL com base nos filtros
+    const params = new URLSearchParams({
+        date: filterDate,
+        client: filterClient,
+        speaker: filterSpeaker,
+        room: filterRoom,
+        sector: filterSector
+    });
 
     fetch(`/consultar?${params.toString()}`)
         .then(response => response.json())
