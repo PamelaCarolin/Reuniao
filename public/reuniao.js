@@ -266,8 +266,9 @@ function consultMeetings() {
     const filterRoom = document.getElementById('consulta-sala')?.value || '';
     const filterSector = document.getElementById('consulta-setor')?.value || '';
 
+    // Cria os parâmetros da requisição
     const params = new URLSearchParams({
-        id: filterId,        
+        id: filterId,
         date: filterDate,
         client: filterClient,
         speaker: filterSpeaker,
@@ -278,10 +279,10 @@ function consultMeetings() {
     fetch(`/consultar?${params.toString()}`)
         .then(response => response.json())
         .then(meetings => {
-            // Limpa e preenche os resultados na tabela
-            const tbody = document.getElementById('consult-results');
+            const tbody = document.querySelector('#consult-results tbody');
             tbody.innerHTML = '';
 
+            // Preenche os resultados
             meetings.forEach(meeting => {
                 const row = document.createElement('tr');
 
@@ -307,6 +308,7 @@ function consultMeetings() {
                 clientTd.textContent = meeting.client;
                 row.appendChild(clientTd);
 
+                // Checkbox de seleção
                 const selectTd = document.createElement('td');
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
@@ -317,7 +319,8 @@ function consultMeetings() {
                 tbody.appendChild(row);
             });
 
-          //  document.getElementById('consult-results-table').style.display = 'table';
+            // Exibe a tabela
+            document.getElementById('consult-results').style.display = 'table';
         })
         .catch(error => {
             console.error('Erro ao consultar reuniões:', error);
