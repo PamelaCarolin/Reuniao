@@ -317,7 +317,7 @@ function consultMeetings() {
                 tbody.appendChild(row);
             });
 
-            document.getElementById('consult-results-table').style.display = 'table';
+          //  document.getElementById('consult-results-table').style.display = 'table';
         })
         .catch(error => {
             console.error('Erro ao consultar reuniões:', error);
