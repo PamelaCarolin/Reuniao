@@ -449,24 +449,22 @@ function cancelSelectedMeetings() {
 
 function cancelMeeting(id) {
     fetch('/cancelar', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ id: meetingId })
-})
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ id })
+    })
     .then(response => response.json())
     .then(result => {
-        if (result.success) {
-            alert('Reunião cancelada com sucesso!');
-        } else {
-            alert('Erro ao cancelar reunião: ' + result.error);
-        }
+        alert(result.message);
+        loadMeetings();
     })
     .catch(error => {
-        console.error('Erro ao fazer a requisição:', error);
-        alert('Erro ao cancelar reunião.');
+        console.error('Error:', error);
+        alert('Ocorreu um erro ao cancelar a reunião. Por favor, tente novamente.');
     });
+}
 
 function closeCancelForm() {
     document.getElementById('cancel-form').style.display = 'none';
