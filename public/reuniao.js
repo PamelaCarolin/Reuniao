@@ -186,99 +186,56 @@ function loadMeetings() {
 
     const params = new URLSearchParams({ date: filterDate, client: filterClient });
 
-    fetch('/consultar?params')
-    .then(response => response.json())
-    .then(meetings => {
-        meetings.forEach(meeting => {
-            const row = document.createElement('tr');
+    fetch(`/consultar?${params.toString()}`)
+        .then(response => response.json())
+        .then(meetings => {
+            meetings.forEach(meeting => {
+                const row = document.createElement('tr');
 
-            const formattedDate = new Date(meeting.date.split('/').reverse().join('-')).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-            const formattedTime = meeting.time.slice(0, 5);
+                const formattedDate = new Date(meeting.date.split('/').reverse().join('-'))
+                    .toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+                const formattedTime = meeting.time.slice(0, 5);
 
-            const idTd = document.createElement('td');
-            idTd.textContent = meeting.id;
-            idTd.style.border = '1px solid black';
-            idTd.style.padding = '8px';
-            row.appendChild(idTd);
+                const idTd = document.createElement('td');
+                idTd.textContent = meeting.id;
+                idTd.style.border = '1px solid black';
+                idTd.style.padding = '8px';
+                row.appendChild(idTd);
 
-            const cells = [
-                formattedDate,
-                formattedTime,
-                meeting.speaker,
-                meeting.room,
-                meeting.client
-            ];
+                const cells = [
+                    formattedDate,
+                    formattedTime,
+                    meeting.speaker,
+                    meeting.room,
+                    meeting.client
+                ];
 
-            cells.forEach(cellText => {
-                const td = document.createElement('td');
-                td.textContent = cellText;
-                td.style.border = '1px solid black';
-                td.style.padding = '8px';
-                row.appendChild(td);
+                cells.forEach(cellText => {
+                    const td = document.createElement('td');
+                    td.textContent = cellText;
+                    td.style.border = '1px solid black';
+                    td.style.padding = '8px';
+                    row.appendChild(td);
+                });
+
+                const selectTd = document.createElement('td');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = meeting.id;
+                selectTd.appendChild(checkbox);
+                selectTd.style.border = '1px solid black';
+                selectTd.style.padding = '8px';
+                row.appendChild(selectTd);
+
+                document.getElementById('meeting-list-body').appendChild(row);
             });
-
-            const selectTd = document.createElement('td');
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.value = meeting.id;
-            selectTd.appendChild(checkbox);
-            selectTd.style.border = '1px solid black';
-            selectTd.style.padding = '8px';
-            row.appendChild(selectTd);
-
-            tbody.appendChild(row);
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Ocorreu um erro ao consultar as reuniões.');
         });
-
-        table.appendChild(tbody);
-        meetingList.appendChild(table);
-    })
-    .catch(error => {
-        console.error('Erro:', error);
-        alert('Ocorreu um erro ao consultar as reuniões.');
-
-        meetings.forEach(meeting => {
-            const row = document.createElement('tr');
-
-            const formattedDate = new Date(meeting.date.split('/').reverse().join('-')).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-            const formattedTime = meeting.time.slice(0, 5);
-
-            const cells = [
-                meeting.id,
-                formattedDate,
-                formattedTime,
-                meeting.speaker,
-                meeting.room,
-                meeting.client
-            ];
-
-            cells.forEach(cellText => {
-                const td = document.createElement('td');
-                td.textContent = cellText;
-                td.style.border = '1px solid black';
-                td.style.padding = '8px';
-                row.appendChild(td);
-            });
-
-            const selectTd = document.createElement('td');
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.value = meeting.id;
-            selectTd.appendChild(checkbox);
-            selectTd.style.border = '1px solid black';
-            selectTd.style.padding = '8px';
-            row.appendChild(selectTd);
-
-            tbody.appendChild(row);
-        });
-
-        table.appendChild(tbody);
-        meetingList.appendChild(table);
-    })
-    .catch(error => {
-        console.error('Erro:', error);
-        alert('Ocorreu um erro ao consultar as reuniões.');
-    });
 }
+
 
 function toggleCancelSortOrder() {
     cancelSortOrder = cancelSortOrder === 'desc' ? 'asc' : 'desc';
