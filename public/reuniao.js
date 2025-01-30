@@ -266,94 +266,64 @@ function consultMeetings() {
     const room = document.getElementById('consulta-sala').value;
     const sector = document.getElementById('consulta-setor').value;
 
-    const params = new URLSearchParams({ date, client, speaker, room, sector });
+    const params = new URLSearchParams({
+        id: filterId,        
+        date: filterDate,
+        client: filterClient,
+        speaker: filterSpeaker,
+        room: filterRoom,
+        sector: filterSector
+    });
 
     fetch(`/consultar?${params.toString()}`)
-    .then(response => response.json())
-    .then(meetings => {
-        if (!Array.isArray(meetings)) {
-            console.error('Erro: resposta inesperada ao consultar reuniões');
-            return;
-        }
+        .then(response => response.json())
+        .then(meetings => {
+            // Limpa e preenche os resultados na tabela
+            const tbody = document.getElementById('consult-results');
+            tbody.innerHTML = '';
 
-        meetings.forEach(meeting => {
-            meeting.date = new Date(meeting.date.split('/').reverse().join('-')).toISOString().split('T')[0];
-        });
+            meetings.forEach(meeting => {
+                const row = document.createElement('tr');
 
-        meetings.sort((a, b) => {
-            const dateA = new Date(`${a.date}T${a.time}`);
-            const dateB = new Date(`${b.date}T${b.time}`);
-            return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
-        });
+                const idTd = document.createElement('td');
+                idTd.textContent = meeting.id;
+                row.appendChild(idTd);
 
-        const results = document.getElementById('consult-results');
-        results.innerHTML = '';
+                const formattedDate = new Date(meeting.date.split('/').reverse().join('-'))
+                    .toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+                const dateTd = document.createElement('td');
+                dateTd.textContent = formattedDate;
+                row.appendChild(dateTd);
 
-        const table = document.createElement('table');
-        table.style.width = '100%';
-        table.style.borderCollapse = 'collapse';
+                const timeTd = document.createElement('td');
+                timeTd.textContent = meeting.time.slice(0, 5);
+                row.appendChild(timeTd);
 
-        const thead = document.createElement('thead');
-        const headerRow = document.createElement('tr');
+                const speakerTd = document.createElement('td');
+                speakerTd.textContent = meeting.speaker;
+                row.appendChild(speakerTd);
 
-        const headers = ['Data', 'Horário', 'Orador', 'Sala', 'Cliente/Funcionário'];
-        headers.forEach((headerText, index) => {
-            const th = document.createElement('th');
-            th.textContent = headerText;
-            th.style.border = '1px solid black';
-            th.style.padding = '8px';
-            th.style.textAlign = 'left';
-            th.style.cursor = 'pointer';
+                const clientTd = document.createElement('td');
+                clientTd.textContent = meeting.client;
+                row.appendChild(clientTd);
 
-            if (index === 0) {
-                const arrow = document.createElement('span');
-                arrow.textContent = sortOrder === 'desc' ? ' ▼' : ' ▲';
-                th.appendChild(arrow);
-                th.addEventListener('click', () => toggleSortOrder());
-            }
+                const selectTd = document.createElement('td');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = meeting.id;
+                selectTd.appendChild(checkbox);
+                row.appendChild(selectTd);
 
-            headerRow.appendChild(th);
-        });
-        thead.appendChild(headerRow);
-        table.appendChild(thead);
-
-        const tbody = document.createElement('tbody');
-
-        meetings.forEach(meeting => {
-            const row = document.createElement('tr');
-
-            const formattedDate = new Date(meeting.date.split('/').reverse().join('-')).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-            const formattedTime = meeting.time.slice(0, 5);
-
-            const cells = [
-                meeting.id,
-                formattedDate,
-                formattedTime,
-                meeting.speaker,
-                meeting.room,
-                meeting.client
-            ];
-
-            cells.forEach(cellText => {
-                const td = document.createElement('td');
-                td.textContent = cellText;
-                td.style.border = '1px solid black';
-                td.style.padding = '8px';
-                row.appendChild(td);
+                tbody.appendChild(row);
             });
 
-            tbody.appendChild(row);
+            document.getElementById('consult-results-table').style.display = 'table';
+        })
+        .catch(error => {
+            console.error('Erro ao consultar reuniões:', error);
+            alert('Ocorreu um erro ao consultar as reuniões.');
         });
-
-        table.appendChild(tbody);
-        results.appendChild(table);
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Ocorreu um erro ao consultar as reuniões. Por favor, tente novamente.');
-    });
 }
-
 
 function downloadPDF() {
     const { jsPDF } = window.jspdf;
