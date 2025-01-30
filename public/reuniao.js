@@ -259,6 +259,7 @@ function toggleSortOrder() {
 }
 
 function consultMeetings() {
+    const filterId = document.getElementById('consulta-id').value;
     const date = document.getElementById('consulta-data').value;
     const client = document.getElementById('consulta-cliente').value;
     const speaker = document.getElementById('consulta-orador').value;
