@@ -10,7 +10,8 @@ module.exports = async (req, res) => {
 
         // Define a base da consulta SQL
         let query = `
-            SELECT to_char(date::date, 'YYYY-MM-DD') AS date, time, speaker, room, client
+            SELECT to_char(date::date, 'YYYY-MM-DD') AS date, time, speaker, room,
+                   COALESCE(client, employee) AS client_or_employee
             FROM historico_reunioes
             WHERE 1=1
         `;
@@ -19,19 +20,19 @@ module.exports = async (req, res) => {
         // Aplica os filtros dinamicamente
         if (dataInicial) {
             queryParams.push(dataInicial);
-            query += ` AND to_char(date::date, 'YYYY-MM-DD') >= $${queryParams.length}`; // Compara apenas a parte da data
+            query += ` AND to_char(date::date, 'YYYY-MM-DD') >= $${queryParams.length}`;
         }
         if (dataFinal) {
             queryParams.push(dataFinal);
-            query += ` AND to_char(date::date, 'YYYY-MM-DD') <= $${queryParams.length}`; // Compara apenas a parte da data
+            query += ` AND to_char(date::date, 'YYYY-MM-DD') <= $${queryParams.length}`;
         }
         if (orador) {
             queryParams.push(orador);
-            query += ` AND speaker ILIKE $${queryParams.length}`; // Filtro para o nome do orador (case-insensitive)
+            query += ` AND speaker ILIKE $${queryParams.length}`;
         }
         if (sala) {
             queryParams.push(sala);
-            query += ` AND room = $${queryParams.length}`; // Filtro para a sala
+            query += ` AND room = $${queryParams.length}`;
         }
 
         console.log('Query gerada:', query);
@@ -77,11 +78,11 @@ module.exports = async (req, res) => {
                 entry.time.slice(0, 5), // Hora
                 entry.speaker, // Orador
                 entry.room, // Sala
-                entry.client, // Cliente
+                entry.client_or_employee // Cliente ou Funcionário
             ]);
 
             doc.autoTable({
-                head: [['Hora', 'Orador', 'Sala', 'Cliente']],
+                head: [['Hora', 'Orador', 'Sala', 'Cliente/Funcionário']],
                 body: tableData,
                 startY: startY + 5,
                 margin: { left: 10, right: 10 },
