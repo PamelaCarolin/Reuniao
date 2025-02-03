@@ -15,7 +15,7 @@
     { "src": "/consultar-historico", "dest": "/api/consultar-historico.js" },
     { "src": "/reagendar", "dest": "/api/reagendar.js" },
     { "src": "/conflito", "dest": "/api/conflito.js" },
-    { "src": "/consulta_reuniao", "dest": "/public/consulta_reuniao.html" },
+    { "src": "/consulta_reuniao", "dest": "/public/consulta_reunioes.html" },
     { "src": "/", "dest": "/public/reuniao.html" },
     { "src": "/(.*)", "dest": "/public/$1" }
   ]
