@@ -1,109 +1,124 @@
-const db = require('./database'); // Importa o módulo de conexão com o banco de dados
-const { jsPDF } = require('jspdf'); // Biblioteca para manipular PDFs
-require('jspdf-autotable'); // Plugin para tabelas no jsPDF
+document.addEventListener('DOMContentLoaded', () => {
+    // Evento para o botão de pesquisa
+    document.getElementById('btn-pesquisar').addEventListener('click', () => {
+        consultarReunioes();
+    });
 
-module.exports = async (req, res) => {
-    const { dataInicial, dataFinal, orador, sala, format } = req.query;
+    // Evento para o botão de download de PDF
+    document.getElementById('btn-baixar-pdf').addEventListener('click', () => {
+        baixarPDF();
+    });
+});
 
-    try {
-        console.log('Parâmetros recebidos:', { dataInicial, dataFinal, orador, sala });
+// Função para consultar reuniões e atualizar a tabela de resultados
+function consultarReunioes() {
+    // Captura os filtros inseridos pelo usuário
+    const dataInicial = document.getElementById('data-inicial').value;
+    const dataFinal = document.getElementById('data-final').value;
+    const orador = document.getElementById('filtro-orador').value;
+    const sala = document.getElementById('filtro-sala').value;
 
-        // Define a base da consulta SQL
-        let query = `
-            SELECT to_char(date::date, 'YYYY-MM-DD') AS date, time, speaker, room, client
-            FROM historico_reunioes
-            WHERE 1=1
-        `;
-        const queryParams = [];
+    // Monta os parâmetros da URL
+    const params = new URLSearchParams({
+        dataInicial,
+        dataFinal,
+        orador,
+        sala,
+        format: 'json'
+    });
 
-        // Aplica os filtros dinamicamente
-        if (dataInicial) {
-            queryParams.push(dataInicial);
-            query += ` AND to_char(date::date, 'YYYY-MM-DD') >= $${queryParams.length}`; // Compara apenas a parte da data
-        }
-        if (dataFinal) {
-            queryParams.push(dataFinal);
-            query += ` AND to_char(date::date, 'YYYY-MM-DD') <= $${queryParams.length}`; // Compara apenas a parte da data
-        }
-        if (orador) {
-            queryParams.push(orador);
-            query += ` AND speaker ILIKE $${queryParams.length}`; // Filtro para o nome do orador (case-insensitive)
-        }
-        if (sala) {
-            queryParams.push(sala);
-            query += ` AND room = $${queryParams.length}`; // Filtro para a sala
-        }
-
-        console.log('Query gerada:', query);
-        console.log('Parâmetros da Query:', queryParams);
-
-        // Executa a consulta no banco de dados
-        const { rows } = await db.query(query, queryParams);
-
-        if (!rows.length) {
-            console.log('Nenhum registro encontrado para os filtros aplicados.');
-            res.status(404).json({ error: 'Nenhum registro encontrado.' });
-            return;
-        }
-
-        console.log('Registros encontrados:', rows);
-
-        // Retorna os registros filtrados em JSON
-        if (format !== 'pdf') {
-            res.status(200).json(rows);
-            return;
-        }
-
-        // Geração de PDF
-        const doc = new jsPDF();
-        doc.setFontSize(16);
-        doc.text('Histórico de Reuniões', 105, 20, { align: 'center' });
-
-        // Agrupa os dados por data
-        const groupedData = rows.reduce((acc, row) => {
-            const formattedDate = new Date(row.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-            if (!acc[formattedDate]) acc[formattedDate] = [];
-            acc[formattedDate].push(row);
-            return acc;
-        }, {});
-
-        // Adiciona os dados organizados por dia no PDF
-        let startY = 30;
-        Object.entries(groupedData).forEach(([date, entries]) => {
-            doc.setFontSize(12);
-            doc.text(`Data: ${date}`, 10, startY);
-
-            const tableData = entries.map(entry => [
-                entry.time.slice(0, 5), // Hora
-                entry.speaker, // Orador
-                entry.room, // Sala
-                entry.client, // Cliente
-            ]);
-
-            doc.autoTable({
-                head: [['Hora', 'Orador', 'Sala', 'Cliente']],
-                body: tableData,
-                startY: startY + 5,
-                margin: { left: 10, right: 10 },
-                styles: { fontSize: 10 },
-                headStyles: { fillColor: [22, 160, 133] },
-                bodyStyles: { textColor: [50, 50, 50] },
-            });
-
-            startY = doc.previousAutoTable.finalY + 10;
-            if (startY > 270) {
-                doc.addPage();
-                startY = 20;
+    // Faz a requisição para a API
+    fetch(`/consultar-reunioes?${params.toString()}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erro ao consultar reuniões.');
             }
+            return response.json();
+        })
+        .then(data => {
+            atualizarTabelaResultados(data);
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao consultar reuniões.');
+        });
+}
+
+// Função para atualizar a tabela com os resultados
+function atualizarTabelaResultados(reunioes) {
+    const tbody = document.getElementById('resultados-tabela').querySelector('tbody');
+    tbody.innerHTML = ''; // Limpa os resultados anteriores
+
+    if (reunioes.length === 0) {
+        const row = document.createElement('tr');
+        const cell = document.createElement('td');
+        cell.colSpan = 4;
+        cell.textContent = 'Nenhuma reunião encontrada.';
+        cell.style.textAlign = 'center';
+        row.appendChild(cell);
+        tbody.appendChild(row);
+        return;
+    }
+
+    reunioes.forEach(reuniao => {
+        const row = document.createElement('tr');
+
+        // Adiciona as células à linha
+        const cells = [
+            new Date(reuniao.date).toLocaleDateString('pt-BR'),
+            reuniao.time.slice(0, 5),
+            reuniao.speaker,
+            reuniao.room
+        ];
+
+        cells.forEach(cellText => {
+            const cell = document.createElement('td');
+            cell.textContent = cellText;
+            row.appendChild(cell);
         });
 
-        // Gera o PDF
-        const pdfBytes = doc.output('arraybuffer');
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'attachment; filename="historico_reunioes.pdf"');
-        res.send(Buffer.from(pdfBytes));
-    } catch (err) {
-        console.error('Erro ao consultar histórico de reuniões:', err.stack || err.message || err);
-        res.status(500).json({ error: 'Erro ao consultar histórico de reuniões.' });
-    }
-};
+        tbody.appendChild(row);
+    });
+}
+
+// Função para baixar o PDF com os filtros aplicados
+function baixarPDF() {
+    // Captura os filtros inseridos pelo usuário
+    const dataInicial = document.getElementById('data-inicial').value;
+    const dataFinal = document.getElementById('data-final').value;
+    const orador = document.getElementById('filtro-orador').value;
+    const sala = document.getElementById('filtro-sala').value;
+
+    // Monta os parâmetros da URL
+    const params = new URLSearchParams({
+        dataInicial,
+        dataFinal,
+        orador,
+        sala,
+        format: 'pdf'
+    });
+
+    // Faz a requisição para download do PDF
+    fetch(`/consultar-reunioes?${params.toString()}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erro ao gerar o PDF.');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            // Cria um link temporário para download do PDF
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'historico_reunioes.pdf';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        })
+        .catch(error => {
+            console.error('Erro ao baixar PDF:', error);
+            alert('Erro ao baixar o PDF.');
+        });
+}
