@@ -1,5 +1,5 @@
 const db = require('./database');
-const ExcelJS = require('exceljs'); // Biblioteca para gerar Excel
+const ExcelJS = require('exceljs');
 
 module.exports = async (req, res) => {
     try {
@@ -15,7 +15,6 @@ module.exports = async (req, res) => {
             return res.status(400).json({ error: 'Data final inválida.' });
         }
 
-        // Define a base da consulta SQL
         let query = `
             SELECT date, time, speaker, room, COALESCE(client, employee) AS client_or_employee
             FROM historico_reunioes
@@ -23,7 +22,6 @@ module.exports = async (req, res) => {
         `;
         const queryParams = [];
 
-        // Aplica os filtros dinamicamente
         if (dataInicial) {
             queryParams.push(dataInicial);
             query += ` AND date >= $${queryParams.length}::date`;
@@ -57,11 +55,9 @@ module.exports = async (req, res) => {
             return res.status(200).json(rows);
         }
 
-        // Geração de Excel
         const workbook = new ExcelJS.Workbook();
         const sheet = workbook.addWorksheet('Histórico de Reuniões');
 
-        // Define o cabeçalho
         sheet.columns = [
             { header: 'Data', key: 'date', width: 15 },
             { header: 'Horário', key: 'time', width: 10 },
@@ -70,7 +66,6 @@ module.exports = async (req, res) => {
             { header: 'Cliente/Funcionário', key: 'client_or_employee', width: 30 }
         ];
 
-        // Adiciona as linhas com os dados
         rows.forEach(row => {
             sheet.addRow({
                 date: new Date(row.date).toLocaleDateString('pt-BR'),
@@ -81,7 +76,6 @@ module.exports = async (req, res) => {
             });
         });
 
-        // Define o nome do arquivo
         const buffer = await workbook.xlsx.writeBuffer();
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', 'attachment; filename="historico_reunioes.xlsx"');
@@ -89,6 +83,6 @@ module.exports = async (req, res) => {
 
     } catch (err) {
         console.error('Erro ao consultar histórico de reuniões:', err);
-        res.status(500).json({ error: 'Erro ao consultar histórico de reuniões. Por favor, tente novamente mais tarde.' });
+        res.status(500).json({ error: 'Erro interno. Verifique os logs do servidor para mais detalhes.' });
     }
 };
