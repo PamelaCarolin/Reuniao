@@ -13,13 +13,18 @@ function consultarReunioes() {
 
     fetch(`/consultar-historico?${params.toString()}`)
         .then(response => {
-            if (!response.ok) throw new Error('Erro ao consultar reuniões.');
+            if (!response.ok) {
+                return response.json().then(errorData => {
+                    console.error('Erro na resposta da API:', errorData);
+                    throw new Error(errorData.error || 'Erro ao consultar reuniões.');
+                });
+            }
             return response.json();
         })
         .then(data => atualizarTabelaResultados(data))
         .catch(error => {
             console.error('Erro:', error);
-            alert('Erro ao consultar reuniões.');
+            alert(`Erro ao consultar reuniões: ${error.message}`);
         });
 }
 
