@@ -1,38 +1,23 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Evento para o botão de pesquisa
-    document.getElementById('btn-pesquisar').addEventListener('click', () => {
-        consultarReunioes();
-    });
+    document.getElementById('search-historico').addEventListener('click', consultarReunioes);
 
     // Evento para o botão de download de PDF
-    document.getElementById('btn-baixar-pdf').addEventListener('click', () => {
-        baixarPDF();
-    });
+    document.getElementById('download-pdf').addEventListener('click', baixarPDF);
 });
 
-// Função para consultar reuniões e atualizar a tabela de resultados
+// Função para consultar reuniões
 function consultarReunioes() {
-    // Captura os filtros inseridos pelo usuário
     const dataInicial = document.getElementById('data-inicial').value;
     const dataFinal = document.getElementById('data-final').value;
-    const orador = document.getElementById('filtro-orador').value;
-    const sala = document.getElementById('filtro-sala').value;
+    const orador = document.getElementById('orador').value;
+    const sala = document.getElementById('sala').value;
 
-    // Monta os parâmetros da URL
-    const params = new URLSearchParams({
-        dataInicial,
-        dataFinal,
-        orador,
-        sala,
-        format: 'json'
-    });
+    const params = new URLSearchParams({ dataInicial, dataFinal, orador, sala, format: 'json' });
 
-    // Faz a requisição para a API
     fetch(`/consultar-reunioes?${params.toString()}`)
         .then(response => {
-            if (!response.ok) {
-                throw new Error('Erro ao consultar reuniões.');
-            }
+            if (!response.ok) throw new Error('Erro ao consultar reuniões.');
             return response.json();
         })
         .then(data => {
@@ -44,15 +29,15 @@ function consultarReunioes() {
         });
 }
 
-// Função para atualizar a tabela com os resultados
+// Função para atualizar a tabela de resultados
 function atualizarTabelaResultados(reunioes) {
-    const tbody = document.getElementById('resultados-tabela').querySelector('tbody');
-    tbody.innerHTML = ''; // Limpa os resultados anteriores
+    const tbody = document.getElementById('historico-results');
+    tbody.innerHTML = '';
 
     if (reunioes.length === 0) {
         const row = document.createElement('tr');
         const cell = document.createElement('td');
-        cell.colSpan = 4;
+        cell.colSpan = 5;
         cell.textContent = 'Nenhuma reunião encontrada.';
         cell.style.textAlign = 'center';
         row.appendChild(cell);
@@ -63,12 +48,12 @@ function atualizarTabelaResultados(reunioes) {
     reunioes.forEach(reuniao => {
         const row = document.createElement('tr');
 
-        // Adiciona as células à linha
         const cells = [
             new Date(reuniao.date).toLocaleDateString('pt-BR'),
             reuniao.time.slice(0, 5),
             reuniao.speaker,
-            reuniao.room
+            reuniao.room,
+            reuniao.client
         ];
 
         cells.forEach(cellText => {
@@ -79,35 +64,25 @@ function atualizarTabelaResultados(reunioes) {
 
         tbody.appendChild(row);
     });
+
+    document.getElementById('historico-results-table').style.display = 'table';
 }
 
-// Função para baixar o PDF com os filtros aplicados
+// Função para baixar o PDF
 function baixarPDF() {
-    // Captura os filtros inseridos pelo usuário
     const dataInicial = document.getElementById('data-inicial').value;
     const dataFinal = document.getElementById('data-final').value;
-    const orador = document.getElementById('filtro-orador').value;
-    const sala = document.getElementById('filtro-sala').value;
+    const orador = document.getElementById('orador').value;
+    const sala = document.getElementById('sala').value;
 
-    // Monta os parâmetros da URL
-    const params = new URLSearchParams({
-        dataInicial,
-        dataFinal,
-        orador,
-        sala,
-        format: 'pdf'
-    });
+    const params = new URLSearchParams({ dataInicial, dataFinal, orador, sala, format: 'pdf' });
 
-    // Faz a requisição para download do PDF
     fetch(`/consultar-reunioes?${params.toString()}`)
         .then(response => {
-            if (!response.ok) {
-                throw new Error('Erro ao gerar o PDF.');
-            }
+            if (!response.ok) throw new Error('Erro ao gerar o PDF.');
             return response.blob();
         })
         .then(blob => {
-            // Cria um link temporário para download do PDF
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
