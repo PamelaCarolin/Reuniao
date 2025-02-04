@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
 
         // Define a base da consulta SQL
         let query = `
-            SELECT to_char(date::date, 'YYYY-MM-DD') AS date, time, speaker, room,
+            SELECT date + interval '1 day' AS date, time, speaker, room,
                    COALESCE(client, employee) AS client_or_employee
             FROM historico_reunioes
             WHERE 1=1
@@ -29,11 +29,11 @@ module.exports = async (req, res) => {
         // Aplica os filtros dinamicamente
         if (dataInicial) {
             queryParams.push(dataInicial);
-            query += ` AND to_char(date::date, 'YYYY-MM-DD') >= $${queryParams.length}`;
+            query += ` AND date >= $${queryParams.length}::date`;
         }
         if (dataFinal) {
             queryParams.push(dataFinal);
-            query += ` AND to_char(date::date, 'YYYY-MM-DD') <= $${queryParams.length}`;
+            query += ` AND date <= $${queryParams.length}::date`;
         }
         if (orador) {
             queryParams.push(`%${orador}%`);
@@ -69,7 +69,11 @@ module.exports = async (req, res) => {
 
         // Agrupa os dados por data
         const groupedData = rows.reduce((acc, row) => {
-            const formattedDate = new Date(row.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+            // Corrige a data incrementando +1 dia para exibição correta
+            const correctedDate = new Date(row.date);
+            correctedDate.setDate(correctedDate.getDate());
+
+            const formattedDate = correctedDate.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
             if (!acc[formattedDate]) acc[formattedDate] = [];
             acc[formattedDate].push(row);
             return acc;
