@@ -3,10 +3,19 @@ const { jsPDF } = require('jspdf'); // Biblioteca para manipular PDFs
 require('jspdf-autotable'); // Plugin para tabelas no jsPDF
 
 module.exports = async (req, res) => {
-    const { dataInicial, dataFinal, orador, sala, format } = req.query;
-
     try {
+        const { dataInicial, dataFinal, orador, sala, format } = req.query;
+
         console.log('Parâmetros recebidos:', { dataInicial, dataFinal, orador, sala });
+
+        // Valida os parâmetros
+        if (dataInicial && isNaN(Date.parse(dataInicial))) {
+            return res.status(400).json({ error: 'Data inicial inválida.' });
+        }
+
+        if (dataFinal && isNaN(Date.parse(dataFinal))) {
+            return res.status(400).json({ error: 'Data final inválida.' });
+        }
 
         // Define a base da consulta SQL
         let query = `
@@ -27,7 +36,7 @@ module.exports = async (req, res) => {
             query += ` AND to_char(date::date, 'YYYY-MM-DD') <= $${queryParams.length}`;
         }
         if (orador) {
-            queryParams.push(orador);
+            queryParams.push(`%${orador}%`);
             query += ` AND speaker ILIKE $${queryParams.length}`;
         }
         if (sala) {
@@ -43,16 +52,14 @@ module.exports = async (req, res) => {
 
         if (!rows.length) {
             console.log('Nenhum registro encontrado para os filtros aplicados.');
-            res.status(404).json({ error: 'Nenhum registro encontrado.' });
-            return;
+            return res.status(404).json({ error: 'Nenhum registro encontrado.' });
         }
 
         console.log('Registros encontrados:', rows);
 
-        // Retorna os registros filtrados em JSON
+        // Retorna os registros filtrados em JSON se o formato não for PDF
         if (format !== 'pdf') {
-            res.status(200).json(rows);
-            return;
+            return res.status(200).json(rows);
         }
 
         // Geração de PDF
@@ -98,13 +105,13 @@ module.exports = async (req, res) => {
             }
         });
 
-        // Gera o PDF
+        // Gera o PDF e retorna ao cliente
         const pdfBytes = doc.output('arraybuffer');
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'attachment; filename="historico_reunioes.pdf"');
         res.send(Buffer.from(pdfBytes));
     } catch (err) {
-        console.error('Erro ao consultar histórico de reuniões:', err.stack || err.message || err);
-        res.status(500).json({ error: 'Erro ao consultar histórico de reuniões.' });
+        console.error('Erro ao consultar histórico de reuniões:', err);
+        res.status(500).json({ error: 'Erro ao consultar histórico de reuniões. Por favor, tente novamente mais tarde.' });
     }
 };
