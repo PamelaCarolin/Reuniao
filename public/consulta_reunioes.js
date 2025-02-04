@@ -1,12 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Evento para o botão de pesquisa
     document.getElementById('search-historico').addEventListener('click', consultarReunioes);
-
-    // Evento para o botão de download de PDF
-    document.getElementById('download-pdf').addEventListener('click', baixarPDF);
+    document.getElementById('download-pdf').addEventListener('click', baixarExcel);
 });
 
-// Função para consultar reuniões
 function consultarReunioes() {
     const dataInicial = document.getElementById('data-inicial').value;
     const dataFinal = document.getElementById('data-final').value;
@@ -15,21 +11,18 @@ function consultarReunioes() {
 
     const params = new URLSearchParams({ dataInicial, dataFinal, orador, sala, format: 'json' });
 
-    fetch(`/consultar-reunioes?${params.toString()}`)
+    fetch(`/consultar-historico?${params.toString()}`)
         .then(response => {
             if (!response.ok) throw new Error('Erro ao consultar reuniões.');
             return response.json();
         })
-        .then(data => {
-            atualizarTabelaResultados(data);
-        })
+        .then(data => atualizarTabelaResultados(data))
         .catch(error => {
             console.error('Erro:', error);
             alert('Erro ao consultar reuniões.');
         });
 }
 
-// Função para atualizar a tabela de resultados
 function atualizarTabelaResultados(reunioes) {
     const tbody = document.getElementById('historico-results');
     tbody.innerHTML = '';
@@ -53,7 +46,7 @@ function atualizarTabelaResultados(reunioes) {
             reuniao.time.slice(0, 5),
             reuniao.speaker,
             reuniao.room,
-            reuniao.client
+            reuniao.client_or_employee
         ];
 
         cells.forEach(cellText => {
@@ -68,32 +61,31 @@ function atualizarTabelaResultados(reunioes) {
     document.getElementById('historico-results-table').style.display = 'table';
 }
 
-// Função para baixar o PDF
-function baixarPDF() {
+function baixarExcel() {
     const dataInicial = document.getElementById('data-inicial').value;
     const dataFinal = document.getElementById('data-final').value;
     const orador = document.getElementById('orador').value;
     const sala = document.getElementById('sala').value;
 
-    const params = new URLSearchParams({ dataInicial, dataFinal, orador, sala, format: 'pdf' });
+    const params = new URLSearchParams({ dataInicial, dataFinal, orador, sala, format: 'excel' });
 
-    fetch(`/consultar-reunioes?${params.toString()}`)
+    fetch(`/consultar-historico?${params.toString()}`)
         .then(response => {
-            if (!response.ok) throw new Error('Erro ao gerar o PDF.');
+            if (!response.ok) throw new Error('Erro ao gerar o Excel.');
             return response.blob();
         })
         .then(blob => {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'historico_reunioes.pdf';
+            a.download = 'historico_reunioes.xlsx';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
         })
         .catch(error => {
-            console.error('Erro ao baixar PDF:', error);
-            alert('Erro ao baixar o PDF.');
+            console.error('Erro ao baixar Excel:', error);
+            alert('Erro ao baixar o Excel.');
         });
 }
