@@ -302,6 +302,10 @@ function consultMeetings() {
                 speakerTd.textContent = meeting.speaker;
                 row.appendChild(speakerTd);
 
+                const roomTd = document.createElement('td');  // Nova coluna para a sala
+                roomTd.textContent = meeting.room;
+                row.appendChild(roomTd);
+
                 const clientTd = document.createElement('td');
                 clientTd.textContent = meeting.client;
                 row.appendChild(clientTd);
